@@ -1,0 +1,183 @@
+/* AgriHire Navbar - Browser Style */
+.navbar {
+  background: #ffffff; /* exact soft grey tone */
+  color: #243424;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  padding: 0;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.08); /* subtle divider */
+}
+
+
+/* Browser URL bar */
+.browser-bar {
+  background: #2a2a2a;
+  padding: 8px 16px;
+  border-bottom: 1px solid #333;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.connection-dot {
+  width: 8px;
+  height: 8px;
+  background: #ff3b30;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.connection-text {
+  color: #ff3b30;
+  font-weight: 500;
+}
+
+.connection-url {
+  color: #888;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 12px;
+  flex: 1;
+}
+
+.navbar-container {
+  padding: 26px 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;          /* FULL WIDTH */
+  max-width: 1400px;   /* more breathing space */
+  margin: 0 auto;
+}
+
+
+/* Logo */
+.navbar-logo {
+  font-size: 32px;
+  font-weight: 800;
+  color: #2f6f3e;   /* deep agriculture green */
+  letter-spacing: 0.5px;
+  text-decoration: none;
+  display: flex;
+  margin-right: 40px;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-text {
+  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Navigation Links */
+.nav-links {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+.nav-link {
+  color: #111827; 
+  text-decoration: none;
+  font-size: 19px;
+  font-weight: 500;
+  padding: 8px 0;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #4CAF50;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #4CAF50;
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Auth Buttons */
+.auth-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.login-btn, .signup-btn {
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  font-family: inherit;
+}
+
+.login-btn {
+  background: transparent;
+  color: #4CAF50;
+  border: 1.5px solid #4CAF50;
+}
+
+.login-btn:hover {
+  background: rgba(76, 175, 80, 0.1);
+  transform: translateY(-1px);
+}
+
+.signup-btn {
+  background: #4CAF50;
+  color: white;
+  border: 1.5px solid #4CAF50;
+}
+
+.signup-btn:hover {
+  background: #388E3C;
+  border-color: #388E3C;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* Animation for connection dot */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-links {
+    gap: 20px;
+  }
+  
+  .navbar-container {
+    padding: 16px 20px;
+  }
+  
+  .login-btn, .signup-btn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+}

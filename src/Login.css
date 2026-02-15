@@ -1,0 +1,83 @@
+/* PAGE */
+.ff-form-page {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #eef9f1, #f6fbf7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* CARD */
+.ff-form-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 460px;
+  padding: 45px 40px;
+  border-radius: 26px;
+  box-shadow: 0 25px 55px rgba(31, 122, 58, 0.15);
+  border-left: 8px solid #1f7a3a;
+}
+
+/* HEADINGS */
+.ff-form-card h2 {
+  font-size: 32px;
+  color: #1f7a3a;
+  margin-bottom: 8px;
+}
+
+.ff-subtitle {
+  color: #4d6b59;
+  margin-bottom: 30px;
+}
+
+/* INPUT GROUP */
+.ff-input-group {
+  margin-bottom: 22px;
+}
+
+.ff-input-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #355f46;
+}
+
+.ff-input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1.5px solid #cfe3d6;
+  font-size: 15px;
+  outline: none;
+}
+
+.ff-input-group input:focus {
+  border-color: #1f7a3a;
+  box-shadow: 0 0 0 3px rgba(31, 122, 58, 0.15);
+}
+
+/* BUTTON */
+.ff-submit-btn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 14px;
+  border-radius: 30px;
+  border: none;
+  background: #1f7a3a;
+  color: rgb(241, 241, 241);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ff-submit-btn:hover {
+  background: #185f2d;
+}
+
+/* RESPONSIVE */
+@media (max-width: 480px) {
+  .ff-form-card {
+    padding: 35px 25px;
+  }
+}

@@ -1,0 +1,357 @@
+/* Hero Section Styles */
+.hero-section {
+  background: linear-gradient(135deg, #f8fff8 0%, #e8f5e8 100%);
+  padding: 5rem 1.5rem;
+  min-height: 85vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(#c8e6c9 1px, transparent 1px),
+    radial-gradient(#a5d6a7 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+  opacity: 0.3;
+  z-index: 0;
+}
+.hero-image{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-content {
+  animation: fadeInUp 0.8s ease-out;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: #1b5e20;
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.5px;
+}
+
+.farm-force-text {
+  color: #2e7d32;
+  position: relative;
+  display: inline-block;
+}
+
+.farm-force-text::after {
+  content: '';
+  position: absolute;
+  bottom: 5px;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background-color: #a5d6a7;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+.hero-subtitle {
+  font-size: 1.5rem;
+  color: #388e3c;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+.hero-description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #424242;
+  margin-bottom: 2.5rem;
+  max-width: 90%;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.btn-primary, .btn-secondary {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+  color: white;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(46, 125, 50, 0.3);
+  background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+}
+
+.btn-secondary {
+  background-color: white;
+  color: #2e7d32;
+  border: 2px solid #2e7d32;
+}
+
+.btn-secondary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(46, 125, 50, 0.2);
+  background-color: #f1f8e9;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat h3 {
+  font-size: 2.5rem;
+  color: #1b5e20;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.stat p {
+  color: #616161;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* .hero-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeInRight 0.8s ease-out 0.2s both;
+}
+
+.image-placeholder {
+  width: 400px;
+  height: 400px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-radius: 30px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(76, 175, 80, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+} */
+
+.hero-image-container {
+  width:100%;
+max-width:420px;
+  height: 420px;
+
+  border-radius: 30px;
+  overflow: hidden;
+  position: relative;
+
+  
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+.hero-image-container::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: rgba(255,255,255,0.25); /* change opacity here */
+}
+
+
+
+.farm-icon {
+  font-size: 10rem;
+  animation: float 6s ease-in-out infinite;
+  z-index: 2;
+}
+
+.field-grid {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40%;
+  background: linear-gradient(to top, #81c784, #a5d6a7);
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 2px;
+  padding: 10px;
+}
+
+.field-grid::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 20px,
+    #558b2f 20px,
+    #558b2f 40px
+  );
+}
+
+.sun {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, #ffeb3b, #ffc107);
+  border-radius: 50%;
+  box-shadow: 0 0 30px #ffeb3b;
+  animation: pulse 4s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    text-align: center;
+  }
+  
+  .hero-title {
+    font-size: 2.8rem;
+  }
+  
+  .hero-description {
+    max-width: 100%;
+  }
+  
+  .hero-buttons {
+    justify-content: center;
+  }
+  
+  .hero-stats {
+    justify-content: center;
+  }
+  
+  .image-placeholder {
+    width: 350px;
+    height: 350px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 3rem 1rem;
+    min-height: auto;
+  }
+  
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+  
+  .hero-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .hero-stats {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .image-placeholder {
+    width: 280px;
+    height: 280px;
+  }
+  
+  .farm-icon {
+    font-size: 7rem;
+  }
+}
