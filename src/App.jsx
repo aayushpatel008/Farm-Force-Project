@@ -1,19 +1,29 @@
+import { Routes, Route } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import "./App.css";
+
+/* ---------- Components ---------- */
+import Navbar from "./components/Navbar/navbar";
+import Hero from "./components/Hero/hero";
+import Footer from "./components/Footer/Footer";
+import Features from "./components/Feature/Feature";
+import HowItWorks from "./components/HowItWorks/HowItWorks";
+import Benefits from "./components/Benefits/Benefits";
+
 import { useState } from 'react'
-import Navbar from './navbar'
-import Hero from './hero'
-import About from './about'
-import Login from "./Login";
-import Footer from './Footer'
-import FarmForceSignup from './signup'
-import { Routes,Route } from "react-router-dom";
-import './App.css'
-import Features from './Feature';
-import HowItWorks from './Howitworks';
-import Benefits from './Benefits';
-import Worker from "./worker";
-import Jobprovider from "./jobprovider";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+
+/* ---------- Pages ---------- */
+import Login from "./Pages/Login/Login";
+import FarmForceSignup from "./Pages/Signup/Signup";
+import Worker from "./Pages/Worker/worker";
+
+/* ---------- Job Provider Pages ---------- */
+import JobpDashboard from "./Pages/Jobprovider/jobpDashboard";
+import Jobposting from './Pages/Jobprovider/jobposting';
+import Attendance from "./Pages/Jobprovider/attendance";
+// Worker
+import WorkerProfile from "./Pages/Worker/Profile/profile";
 
 
 function App() {
@@ -58,7 +68,10 @@ function App() {
         {/* Login*/}
         <Route path='/Login' element={<Login />}/>
         <Route path="/worker" element={<Worker />} />
-        <Route path="/jobprovider" element={<Jobprovider/>}/>
+        <Route path="/jobprovider/jobpDashboard" element={<JobpDashboard />} />
+        <Route path="/jobprovider/jobposting" element={<Jobposting/>}/>
+        <Route path='/jobprovider/attendance' element={<Attendance/>}/>
+        <Route path='/Worker/Profile/profile' element={<WorkerProfile/>}/>
 
     </Routes>
     

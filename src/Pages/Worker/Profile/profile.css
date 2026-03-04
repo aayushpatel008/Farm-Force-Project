@@ -1,0 +1,802 @@
+/* =====================================================
+   profile.css — FarmForce Worker Profile Page
+   Green Theme — matches Worker Dashboard
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ─────────────────────────────────────────
+   CSS VARIABLES
+   One place to change all colours/sizes
+   ───────────────────────────────────────── */
+:root {
+  --green-darkest: #0d3d28;   /* very dark green — used in banner bg */
+  --green-dark:    #155c3a;   /* dark green — used in buttons        */
+  --green-mid:     #1e7d4f;   /* medium green — main accent           */
+  --green-soft:    #4eba7c;   /* lighter green — progress bar, tags   */
+  --green-pale:    #a8dfc0;   /* pale green — borders                 */
+  --green-mist:    #d6f0e2;   /* very light green — card borders      */
+  --green-frost:   #edf8f2;   /* near-white green — input background  */
+  --bg-main:       #f0f7f3;   /* page background                      */
+  --white:         #ffffff;
+  --text-dark:     #0d2b1d;   /* headings                             */
+  --text-mid:      #1e5c3a;   /* body text inside cards               */
+  --text-soft:     #3d7a5a;   /* secondary text                       */
+  --text-muted:    #7aaa90;   /* labels, hints                        */
+  --red:           #e84545;   /* required star, remove buttons        */
+  --shadow:        0 8px 32px rgba(13, 61, 40, 0.09);
+  --radius-xl:     26px;      /* large card corners                   */
+  --radius-lg:     18px;      /* medium card corners                  */
+  --radius-md:     12px;      /* input corners                        */
+  --radius-pill:   50px;      /* fully rounded (badges, tabs)         */
+}
+
+/* ─────────────────────────────────────────
+   RESET — remove default browser spacing
+   ───────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; }
+
+/* ─────────────────────────────────────────
+   PAGE LAYOUT
+   Sidebar on left, main content on right
+   ───────────────────────────────────────── */
+.wp-container {
+  display: flex;          /* side-by-side layout */
+  min-height: 100vh;
+  background: var(--bg-main);
+}
+
+.wp-main {
+  flex: 1;                        /* take all remaining width */
+  margin-left: 250px;             /* leave space for sidebar */
+  padding: 2rem 2.5rem 3rem;
+  overflow-y: auto;
+}
+
+/* ─────────────────────────────────────────
+   HERO CARD
+   The big card at the top with avatar,
+   name, bio and quick stats
+   ───────────────────────────────────────── */
+.wp-hero-card {
+  position: relative;             /* needed so bg stripe can sit behind */
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--green-mist);
+  overflow: hidden;               /* hides bg stripe that bleeds out */
+  margin-bottom: 1.8rem;
+  animation: fadeUp 0.5s ease both;
+}
+
+/* Green banner stripe at the top of the hero card */
+.wp-hero-bg {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 110px;
+  background: linear-gradient(135deg, var(--green-darkest), var(--green-dark));
+}
+
+/* Row that holds avatar + info + stats */
+.wp-hero-content {
+  position: relative;             /* sits above the bg stripe */
+  display: flex;
+  align-items: flex-end;
+  gap: 2rem;
+  padding: 1.2rem 2.5rem 2rem;
+  flex-wrap: wrap;                /* stacks on small screens */
+}
+
+/* ── Avatar ── */
+.wp-avatar-wrap {
+  position: relative;
+  margin-top: 28px;               /* pushes avatar to overlap the banner */
+  flex-shrink: 0;
+}
+
+.wp-avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;             /* circle */
+  background: linear-gradient(135deg, var(--green-mid), var(--green-darkest));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid white;        /* white ring around avatar */
+  box-shadow: 0 8px 24px rgba(13, 61, 40, 0.25);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease;
+}
+
+.wp-avatar:hover { transform: scale(1.04); }
+
+/* Photo when uploaded */
+.wp-avatar-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Initials shown when no photo */
+.wp-avatar-initials {
+  font-family: 'Sora', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+}
+
+/* "Change" overlay shown on hover when editing */
+.wp-avatar-overlay {
+  position: absolute;
+  inset: 0;                       /* covers full avatar */
+  background: rgba(13, 61, 40, 0.65);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.1rem;
+  opacity: 0;                     /* hidden by default */
+  transition: opacity 0.2s ease;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 1.4;
+}
+
+.wp-avatar:hover .wp-avatar-overlay { opacity: 1; } /* show on hover */
+
+/* Green dot in corner = "online" indicator */
+.wp-online-dot {
+  position: absolute;
+  bottom: 6px; right: 6px;
+  width: 16px; height: 16px;
+  background: #27c271;
+  border-radius: 50%;
+  border: 3px solid white;
+}
+
+/* ── Name / Role / Bio ── */
+.wp-hero-info {
+  flex: 1;
+  min-width: 220px;
+  padding-top: 70px;              /* push below the green banner */
+}
+
+.wp-hero-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.3rem;
+}
+
+.wp-hero-name {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  letter-spacing: -0.03em;
+}
+
+.wp-verified-badge {
+  background: #dcf7eb;
+  color: #0d6e3e;
+  border: 1px solid var(--green-pale);
+  padding: 0.2rem 0.75rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.wp-hero-role     { font-size: 0.88rem; color: var(--green-mid); font-weight: 600; margin-bottom: 0.2rem; }
+.wp-hero-location { font-size: 0.83rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+.wp-hero-bio      { font-size: 0.88rem; color: var(--text-soft); line-height: 1.55; max-width: 480px; }
+
+/* ── Stats (right side of hero) ── */
+.wp-hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding-top: 70px;
+  flex-shrink: 0;
+}
+
+.wp-hero-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.wp-hero-stat-num {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-dark);
+}
+
+.wp-hero-stat-lbl {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Thin vertical line between stats */
+.wp-hero-stat-divider {
+  width: 1.5px;
+  height: 36px;
+  background: var(--green-mist);
+}
+
+/* ─────────────────────────────────────────
+   TABS
+   Two pill-shaped tab buttons
+   ───────────────────────────────────────── */
+.wp-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.8rem;
+  background: var(--white);
+  border: 1.5px solid var(--green-mist);
+  border-radius: var(--radius-pill);
+  padding: 0.4rem;
+  width: fit-content;             /* only as wide as needed */
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.5s ease 0.1s both;
+}
+
+.wp-tab-btn {
+  padding: 0.6rem 1.6rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.wp-tab-btn:hover { color: var(--green-mid); }
+
+/* Active tab gets a filled green background */
+.wp-tab-btn.active {
+  background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+  color: white;
+  box-shadow: 0 4px 14px rgba(30, 125, 79, 0.35);
+}
+
+/* ─────────────────────────────────────────
+   TAB CONTENT
+   ───────────────────────────────────────── */
+.wp-tab-content {
+  animation: fadeUp 0.4s ease both;
+}
+
+/* Row with section title + action buttons */
+.wp-section-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.wp-section-heading {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  padding-left: 1rem;
+  border-left: 4px solid var(--green-soft); /* coloured left bar */
+}
+
+.wp-section-sub {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+/* ─────────────────────────────────────────
+   EDIT / SAVE / DISCARD BUTTONS
+   ───────────────────────────────────────── */
+.wp-edit-btn {
+  background: var(--green-frost);
+  border: 1.5px solid var(--green-mist);
+  color: var(--green-dark);
+  padding: 0.55rem 1.4rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wp-edit-btn:hover {
+  background: var(--green-mist);
+  transform: translateY(-1px);
+}
+
+.wp-edit-actions { display: flex; gap: 0.7rem; }
+
+.wp-save-btn {
+  background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+  color: white;
+  border: none;
+  padding: 0.55rem 1.4rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(30, 125, 79, 0.35);
+  transition: all 0.2s ease;
+}
+
+.wp-save-btn:hover { transform: translateY(-2px); }
+
+.wp-discard-btn {
+  background: #fff0f0;
+  border: 1.5px solid #f5cfcb;
+  color: #b83e3e;
+  padding: 0.55rem 1.2rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.wp-discard-btn:hover { background: #ffe4e2; }
+
+/* ─────────────────────────────────────────
+   PROFILE GRID & CARDS
+   Two-column grid; some cards span full width
+   ───────────────────────────────────────── */
+.wp-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;  /* two equal columns */
+  gap: 1.5rem;
+}
+
+.wp-card {
+  background: var(--white);
+  border-radius: var(--radius-xl);
+  padding: 1.8rem 2rem;
+  border: 1.5px solid var(--green-mist);
+  box-shadow: var(--shadow);
+  animation: fadeUp 0.5s ease both;
+}
+
+/* Full-width card spans both columns */
+.wp-card-full { grid-column: 1 / -1; }
+
+/* Card heading row */
+.wp-card-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 1.3rem;
+  padding-bottom: 0.7rem;
+  border-bottom: 1.5px solid var(--green-mist);
+}
+
+/* ─────────────────────────────────────────
+   FIELD GRID
+   2-column grid inside each card
+   ───────────────────────────────────────── */
+.wp-field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem 1.5rem;
+}
+
+.wp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Full-width field inside the 2-col field grid */
+.wp-field-full { grid-column: 1 / -1; }
+
+/* Field label (small caps above the value or input) */
+.wp-field label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Read-only text value */
+.wp-value {
+  font-size: 0.93rem;
+  color: var(--text-mid);
+  font-weight: 500;
+  padding: 0.55rem 0;
+  border-bottom: 1px dashed var(--green-mist); /* subtle underline */
+  min-height: 36px;
+}
+
+.wp-empty { color: var(--text-muted); font-style: italic; }
+
+/* Bio text shown in read-only mode */
+.wp-bio-text {
+  font-size: 0.93rem;
+  color: var(--text-soft);
+  line-height: 1.65;
+}
+
+/* ─────────────────────────────────────────
+   INPUTS (text, date, select, textarea)
+   Shared style for all form fields
+   ───────────────────────────────────────── */
+.wp-input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: 1.5px solid var(--green-mist);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  font-family: 'DM Sans', sans-serif;
+  background: var(--green-frost);     /* very light green bg */
+  transition: all 0.2s ease;
+}
+
+.wp-input:focus {
+  outline: none;
+  border-color: var(--green-soft);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(78, 186, 124, 0.15); /* green glow */
+}
+
+.wp-input::placeholder { color: var(--text-muted); }
+
+/* Textarea gets resizable height */
+.wp-textarea { resize: vertical; min-height: 110px; line-height: 1.55; }
+
+/* Select: hide default arrow, add custom SVG arrow */
+.wp-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%237aaa90' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+/* ─────────────────────────────────────────
+   PROFILE COMPLETION BAR
+   ───────────────────────────────────────── */
+.wp-completion-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+}
+
+/* The grey track */
+.wp-completion-bar-track {
+  flex: 1;
+  height: 10px;
+  background: var(--green-frost);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  border: 1px solid var(--green-mist);
+}
+
+/* The filled portion — width is set inline in JSX */
+.wp-completion-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-mid), var(--green-soft));
+  border-radius: var(--radius-pill);
+  animation: barGrow 1.2s ease 0.4s both; /* animates from 0 to actual width */
+}
+
+@keyframes barGrow { from { width: 0 !important; } }
+
+.wp-completion-pct {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--green-mid);
+  width: 48px;
+}
+
+/* Checklist badges */
+.wp-completion-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.wp-comp-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--green-frost);
+  color: var(--text-muted);
+  border: 1px solid var(--green-mist);
+}
+
+/* Completed items get a green tint */
+.wp-comp-item.done {
+  background: #dcf7eb;
+  color: #0d6e3e;
+  border-color: var(--green-pale);
+}
+
+/* ─────────────────────────────────────────
+   JOB UPLOAD FORM
+   ───────────────────────────────────────── */
+.wp-upload-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Required star */
+.wp-req { color: var(--red); margin-left: 3px; }
+
+/* Optional label */
+.wp-optional { color: var(--text-muted); font-size: 0.8rem; font-weight: 400; margin-left: 6px; }
+
+/* Salary: $ sign overlaid on input */
+.wp-salary-wrap { position: relative; }
+
+.wp-currency {
+  position: absolute;
+  left: 1rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.wp-salary-input { padding-left: 2rem; } /* push text right of $ */
+
+/* ─────────────────────────────────────────
+   SKILLS TAG INPUT
+   ───────────────────────────────────────── */
+.wp-skills-box {
+  border: 1.5px solid var(--green-mist);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.2rem;
+  background: var(--green-frost);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Row of skill tags */
+.wp-skills-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  min-height: 30px;
+}
+
+.wp-skills-placeholder {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Individual skill tag */
+.wp-skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: white;
+  color: var(--text-mid);
+  border: 1.5px solid var(--green-pale);
+  padding: 0.3rem 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* × button inside each tag */
+.wp-skill-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.wp-skill-remove:hover { color: var(--red); }
+
+/* Input + Add button row */
+.wp-skill-input-row {
+  display: flex;
+  gap: 0.7rem;
+}
+
+.wp-skill-input { flex: 1; background: white; }
+
+.wp-add-skill-btn {
+  background: linear-gradient(135deg, var(--green-mid), var(--green-dark));
+  color: white;
+  border: none;
+  padding: 0.6rem 1.3rem;
+  border-radius: var(--radius-md);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(30, 125, 79, 0.3);
+}
+
+.wp-add-skill-btn:hover { transform: translateY(-1px); }
+
+.wp-hint { font-size: 0.78rem; color: var(--text-muted); font-style: italic; }
+
+/* ─────────────────────────────────────────
+   PHOTO UPLOAD ZONE
+   ───────────────────────────────────────── */
+.wp-upload-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 2.5rem;
+  border: 2px dashed var(--green-pale);    /* dashed border = drop zone */
+  border-radius: var(--radius-lg);
+  background: var(--green-frost);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+}
+
+.wp-upload-zone:hover {
+  border-color: var(--green-soft);
+  background: #e4f6ed;
+}
+
+.wp-upload-icon { font-size: 2.2rem; }
+.wp-upload-text { font-size: 0.95rem; font-weight: 600; color: var(--text-mid); }
+.wp-upload-zone small { font-size: 0.78rem; color: var(--text-muted); }
+
+/* Grid of uploaded photo thumbnails */
+.wp-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.wp-photo-item {
+  position: relative;
+  aspect-ratio: 1;               /* perfect square */
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1.5px solid var(--green-mist);
+}
+
+.wp-photo-item img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Red × button to remove a photo */
+.wp-photo-remove {
+  position: absolute;
+  top: 5px; right: 5px;
+  width: 22px; height: 22px;
+  background: rgba(232, 69, 69, 0.9);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wp-photo-remove:hover { background: #c82333; }
+
+/* ─────────────────────────────────────────
+   FORM SUBMIT BUTTONS
+   ───────────────────────────────────────── */
+.wp-form-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 0.5rem;
+}
+
+/* Main submit — green gradient */
+.wp-submit-btn {
+  flex: 1;
+  padding: 0.9rem 1.5rem;
+  background: linear-gradient(135deg, var(--green-mid), var(--green-darkest));
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(30, 125, 79, 0.35);
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.wp-submit-btn:hover { transform: translateY(-2px); }
+
+/* Cancel — subtle outline */
+.wp-cancel-btn {
+  padding: 0.9rem 2rem;
+  background: var(--white);
+  border: 1.5px solid var(--green-mist);
+  color: var(--text-muted);
+  border-radius: var(--radius-lg);
+  font-size: 0.93rem;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.wp-cancel-btn:hover { background: var(--green-frost); color: var(--text-mid); }
+
+/* ─────────────────────────────────────────
+   FADE-UP ENTRANCE ANIMATION
+   Used on hero, tabs, cards
+   ───────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─────────────────────────────────────────
+   RESPONSIVE — smaller screens
+   ───────────────────────────────────────── */
+
+/* Tablets: stack profile cards to 1 column */
+@media (max-width: 1100px) {
+  .wp-profile-grid { grid-template-columns: 1fr; }
+  .wp-card-full { grid-column: auto; }
+}
+
+/* Small tablets: stack hero row, field grids */
+@media (max-width: 900px) {
+  .wp-hero-content { flex-direction: column; align-items: flex-start; }
+  .wp-hero-stats   { padding-top: 0; }
+  .wp-hero-info    { padding-top: 0; }
+  .wp-field-grid   { grid-template-columns: 1fr; }
+  .wp-field-full   { grid-column: auto; }
+}
+
+/* Mobile: remove sidebar margin, tighten padding */
+@media (max-width: 768px) {
+  .wp-main        { margin-left: 0; padding: 1.2rem; }
+  .wp-hero-name   { font-size: 1.5rem; }
+  .wp-tabs        { width: 100%; flex-direction: column; border-radius: var(--radius-xl); }
+  .wp-form-actions { flex-direction: column; }
+  .wp-cancel-btn  { width: 100%; }
+}
+
+@media (max-width: 480px) {
+  .wp-skill-input-row { flex-direction: column; }
+}

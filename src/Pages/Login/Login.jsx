@@ -17,7 +17,7 @@ function Login() {
     e.preventDefault();
     try{
           const res = await axios.post(
-        "http://localhost:5000/login", // ← also fix endpoint
+        "http://localhost:5000/api/auth/login", // ← also fix endpoint
           { email, password },
           {
           withCredentials: true,
@@ -27,14 +27,20 @@ function Login() {
         }
         
       );
-      console.log("FULL RESPONSE:", res);
+      // console.log("LOGIN DATA:", res.data);
+
+        // ✅ STORE USER ID HERE
+      localStorage.setItem("userId", res.data._id);
+
+    // Optional: store role if needed
+      localStorage.setItem("role", res.data.role);
  
       if(res.data.role=="worker"){
         navigate("/worker",{state:{name:res.data.name}})
         
       }
       else {
-        navigate("/jobprovider",{state:{name:res.data.name}})
+        navigate("/jobprovider/jobpDashboard")
       }
     }
     catch(error){
@@ -52,9 +58,12 @@ function Login() {
 
   return (
     <div className="ff-form-page">
+      <div className="ff-brand">
+      <h1>FarmForce</h1>
+        </div>
       <div className="ff-form-card">
-        <h2>Login to FarmForce</h2>
-        <p className="ff-subtitle">Access your FarmForce account</p>
+        <h2>Welcome to Farmforce</h2>
+        <p className="ff-subtitle">Enter your email and password to access your account</p>
 
         <form onSubmit={handleSubmit}>
           <div className="ff-input-group">

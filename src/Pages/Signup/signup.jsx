@@ -5,9 +5,6 @@ import axios from "axios";
 import { toast } from 'react-toastify';
 
 
-
-
-
 const FarmForceSignup = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -82,7 +79,7 @@ const FarmForceSignup = () => {
         try {
 
           const response = await axios.post(
-              "http://localhost:5000/signup",
+              "http://localhost:5000/api/auth/signup",
               formData,
               {
                 withCredentials: true,
@@ -115,7 +112,7 @@ const FarmForceSignup = () => {
           role: 'worker'
         });
         setIsSubmitted(false);
-      }, 100000);
+      }, 10000);
     } else {
       setErrors(validationErrors);
     }

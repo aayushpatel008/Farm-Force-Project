@@ -1,0 +1,143 @@
+/* ===============================
+   FARMFORCE - SOLID GREEN THEME
+================================= */
+
+.ff-form-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #2f6f3e;   /* Solid green */
+  font-family: "Inter", sans-serif;
+  padding: 20px;
+}
+
+/* Brand */
+.ff-brand h1 {
+  font-size: 44px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+
+/* Card */
+.ff-form-card {
+  width: 100%;
+  max-width: 500px;
+  background: #ffffff;
+  padding: 50px;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+}
+
+/* Heading */
+.ff-form-card h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1f7a3d;
+  margin-bottom: 8px;
+}
+
+.ff-subtitle {
+  font-size: 14px;
+  color: #5f6f65;
+  margin-bottom: 30px;
+}
+
+/* Inputs */
+.ff-input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.ff-input-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f7a3d;
+  margin-bottom: 6px;
+}
+
+.ff-input-group input {
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid #cfded5;
+  font-size: 14px;
+  outline: none;
+  transition: 0.3s ease;
+  background: #f8fcf9;
+}
+
+.ff-input-group input:focus {
+  border-color: #2e8b57;
+  box-shadow: 0 0 0 3px rgba(46, 139, 87, 0.15);
+  background: #ffffff;
+}
+
+/* Forgot */
+.ff-forgot-password {
+  text-align: right;
+  margin-bottom: 25px;
+}
+
+.ff-forgot-password a {
+  color: #2e8b57;
+  font-size: 13px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ff-forgot-password a:hover {
+  text-decoration: underline;
+}
+
+/* Button */
+.ff-submit-btn {
+  width: 100%;
+  padding: 15px;
+  border-radius: 35px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #2e8b57;
+  color: #ffffff;
+  transition: 0.3s ease;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.ff-submit-btn:hover {
+  background: #256f47;
+  transform: translateY(-2px);
+}
+
+/* Signup */
+.ff-signup-text {
+  text-align: center;
+  margin-top: 25px;
+  font-size: 14px;
+  color: #4a5d52;
+}
+
+.ff-signup-text a {
+  color: #2e8b57;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ff-signup-text a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .ff-form-card {
+    padding: 35px 25px;
+  }
+
+  .ff-brand h1 {
+    font-size: 34px;
+  }
+}
