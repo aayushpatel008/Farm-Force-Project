@@ -17,14 +17,9 @@
   --jp-text-sub: #4a6b4e;
 }
 
-/* =========================================================
-   ALL STYLES SCOPED UNDER .jobposting-page
-   This prevents bleeding into Dashboard or any other page
-   ========================================================= */
-
 .jobposting-page {
-  margin-left: 260px;
-  width: calc(100% - 260px);
+  margin-left: 72px;
+  width: calc(100% - 72px);
   min-height: 100vh;
   padding: 32px 36px;
   background: var(--jp-green-bg);
@@ -32,6 +27,13 @@
   flex-direction: column;
   gap: 28px;
   font-family: "DM Sans", sans-serif;
+  transition: margin-left 0.25s ease, width 0.25s ease;
+}
+
+.dashboard-page:has(.Side-bar.expanded) .jobposting-page,
+:has(.Side-bar.expanded) .jobposting-page {
+  margin-left: 240px;
+  width: calc(100% - 240px);
 }
 
 /* ===== HEADER ===== */
@@ -557,4 +559,442 @@
 @keyframes jp-fadeUp {
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== JOB DETAIL MODAL ===== */
+.jp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 61, 34, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: jp-fadeUp 0.2s ease both;
+}
+
+.jp-modal {
+  background: var(--jp-white);
+  border-radius: 28px;
+  padding: 36px;
+  width: 620px;
+  max-width: 95vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  overflow-x: hidden; /* ← prevents horizontal scroll */
+  box-shadow: 0 24px 60px rgba(26, 61, 34, 0.2);
+  border: 1px solid var(--jp-green-border);
+  position: relative;
+  animation: jp-fadeUp 0.3s ease both;
+}
+
+.jp-modal-close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  background: var(--jp-green-pale);
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--jp-green-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.jp-modal-close:hover { background: #c5e0c8; }
+
+.jp-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--jp-green-pale);
+}
+
+.jp-modal-title strong {
+  display: block;
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  color: var(--jp-green-dark);
+}
+
+.jp-modal-title span {
+  font-size: 13px;
+  color: var(--jp-green-muted);
+  margin-top: 3px;
+  display: block;
+}
+
+.jp-modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.jp-modal-field {
+  background: var(--jp-green-card);
+  border: 1px solid var(--jp-green-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+
+.jp-modal-field label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--jp-green-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.jp-modal-field p {
+  font-size: 14px;
+  color: var(--jp-text);
+  font-weight: 500;
+}
+
+.jp-modal-desc {
+  background: var(--jp-green-card);
+  border: 1px solid var(--jp-green-border);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.jp-modal-desc label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--jp-green-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.jp-modal-desc p {
+  font-size: 14px;
+  color: var(--jp-text);
+  line-height: 1.7;
+}
+
+/* ===== THREE-DOT MENU ===== */
+
+/* Top-right area grouping status badge + three-dot button */
+.jobposting-page .jp-card-top-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Three-dot wrapper — positions the dropdown relative to itself */
+.jobposting-page .jp-three-dot-wrapper {
+  position: relative;
+}
+
+/* The ⋮ trigger button */
+.jobposting-page .jp-three-dot-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--jp-green-muted);
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 8px;
+  transition: background 0.15s ease, color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.jobposting-page .jp-three-dot-btn:hover {
+  background: var(--jp-green-pale);
+  color: var(--jp-green-dark);
+}
+
+/* Dropdown menu */
+.jobposting-page .jp-three-dot-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--jp-white);
+  border: 1.5px solid var(--jp-green-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(26, 61, 34, 0.13);
+  z-index: 100;
+  min-width: 130px;
+  overflow: hidden;
+  animation: jp-fadeUp 0.15s ease both;
+}
+
+.jobposting-page .jp-three-dot-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: "DM Sans", sans-serif;
+  color: var(--jp-green-dark);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.jobposting-page .jp-three-dot-dropdown button:hover {
+  background: var(--jp-green-card);
+}
+
+.jobposting-page .jp-three-dot-dropdown button.jp-dropdown-delete {
+  color: #b03030;
+}
+
+.jobposting-page .jp-three-dot-dropdown button.jp-dropdown-delete:hover {
+  background: #fdecea;
+}
+
+/* ===== EDIT MODAL — additions only ===== */
+
+.jp-modal .icon-wrap {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, var(--jp-green-pale), #c8e6ca);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(39, 122, 46, 0.15);
+}
+
+.jp-modal .jp-card-header-text h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  color: var(--jp-green-dark);
+  margin: 0;
+}
+
+.jp-modal .jp-card-header-text p {
+  font-size: 13px;
+  color: var(--jp-green-muted);
+  margin-top: 2px;
+}
+
+/* Form layout inside the modal */
+.jp-modal .jp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* ═══════════════════════════════════════
+   FIX: 2 columns (was 4) — prevents
+   horizontal scroll inside the modal
+═══════════════════════════════════════ */
+.jp-modal .jp-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+@media (max-width: 480px) {
+  .jp-modal .jp-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.jp-modal .jp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.jp-modal .jp-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--jp-green-muted);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.jp-modal .jp-field input,
+.jp-modal .jp-field select,
+.jp-modal .jp-field textarea {
+  padding: 13px 16px;
+  border-radius: 14px;
+  border: 1.5px solid var(--jp-green-border);
+  background: var(--jp-green-card);
+  font-size: 14px;
+  font-family: "DM Sans", sans-serif;
+  color: var(--jp-text);
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.jp-modal .jp-field input:focus,
+.jp-modal .jp-field select:focus,
+.jp-modal .jp-field textarea:focus {
+  background: var(--jp-white);
+  border-color: var(--jp-green-mid);
+  box-shadow: 0 0 0 3px rgba(39, 122, 46, 0.1);
+}
+
+.jp-modal .jp-field textarea {
+  border-radius: 16px;
+  resize: none;
+  line-height: 1.6;
+}
+
+.jp-modal .jp-full {
+  grid-column: span 2; /* matches 2-column grid */
+}
+
+/* Buttons row inside the edit modal */
+.jp-modal .jp-buttons {
+  margin-top: 28px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  padding-top: 24px;
+  border-top: 1px solid var(--jp-green-pale);
+}
+
+.jp-modal .jp-btn {
+  padding: 13px 26px;
+  border-radius: 40px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.jp-modal .jp-btn.light {
+  background: var(--jp-green-pale);
+  color: var(--jp-green-dark);
+  border: 1.5px solid var(--jp-green-border);
+}
+
+.jp-modal .jp-btn.light:hover {
+  background: #c5e0c8;
+  transform: translateY(-1px);
+}
+
+.jp-modal .jp-btn.dark {
+  background: var(--jp-green-mid);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(39, 122, 46, 0.35);
+}
+
+.jp-modal .jp-btn.dark:hover {
+  background: var(--jp-green-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(26, 61, 34, 0.35);
+}
+
+
+/* ===== DELETE CONFIRMATION MODAL ===== */
+/* Reuses the same logout-overlay / logout-modal pattern from sidebar.css
+   so both modals look and behave identically */
+
+.logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 61, 34, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: jp-fadeUp 0.2s ease both;
+}
+
+.logout-modal {
+  background: var(--jp-white);
+  border-radius: 24px;
+  padding: 36px 32px 28px;
+  width: 360px;
+  max-width: 92vw;
+  box-shadow: 0 24px 60px rgba(26, 61, 34, 0.2);
+  border: 1px solid var(--jp-green-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: jp-fadeUp 0.25s ease both;
+}
+
+.logout-modal-title {
+  font-family: "Playfair Display", serif;
+  font-size: 22px;
+  color: var(--jp-green-dark);
+  margin: 0;
+  text-align: center;
+}
+
+.logout-modal-message {
+  font-size: 14px;
+  color: var(--jp-green-muted);
+  text-align: center;
+  line-height: 1.5;
+  margin: 4px 0 12px;
+}
+
+.logout-modal-actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+}
+
+.logout-modal-btn {
+  padding: 11px 28px;
+  border-radius: 40px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: "DM Sans", sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.logout-modal-btn--cancel {
+  background: var(--jp-green-pale);
+  color: var(--jp-green-dark);
+  border: 1.5px solid var(--jp-green-border);
+}
+
+.logout-modal-btn--cancel:hover {
+  background: #c5e0c8;
+  transform: translateY(-1px);
+}
+
+.logout-modal-btn--confirm {
+  background: #b03030;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(176, 48, 48, 0.3);
+}
+
+.logout-modal-btn--confirm:hover {
+  background: #8f2424;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(176, 48, 48, 0.35);
 }

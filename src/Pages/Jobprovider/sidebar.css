@@ -2,12 +2,11 @@
 /* Add to index.html:
    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 */
-
 /* ===========================
    SIDEBAR
    =========================== */
 .Side-bar {
-  width: 240px;
+  width: 72px;
   height: 100vh;
   background: #1a3d22;
   position: fixed;
@@ -18,18 +17,73 @@
   padding: 0 0 24px;
   z-index: 100;
   box-shadow: 4px 0 24px rgba(26, 61, 34, 0.22);
+  transition: width 0.25s ease;
+  overflow: hidden;
+}
+
+.Side-bar.expanded {
+  width: 240px;
 }
 
 /* ===== LOGO ===== */
 .farm-force-name {
   font-family: "Playfair Display", serif;
-  font-size: 26px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: -0.5px;
-  padding: 30px 28px 24px;
+  padding: 24px 0 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  text-align: left;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  flex-shrink: 0;
+}
+
+/* Collapsed: show only "F" */
+.logo-short {
+  font-size: 24px;
+  display: block;
+}
+
+/* Expanded: show full "FarmForce" */
+.logo-full {
+  font-size: 22px;
+  display: none;
+}
+
+.Side-bar.expanded .logo-short {
+  display: none;
+}
+
+.Side-bar.expanded .logo-full {
+  display: block;
+}
+
+/* ===== TOGGLE BUTTON ===== */
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  right:-20px;  
+  width: 40px;
+  height: 40px;
+  margin: 12px 5px 8px 7px;   /* pushes button to right */
+  background: none;
+  border: none;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 /* ===== NAV LINKS ===== */
@@ -37,7 +91,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 20px 16px;
+  padding: 14px 16px;
   margin: 5px 12px;
   border-radius: 14px;
   color: rgba(255, 255, 255, 0.6);
@@ -46,13 +100,13 @@
   font-weight: 500;
   font-family: "DM Sans", sans-serif;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
 }
-
 .Dashboard:hover {
   background: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.95);
 }
-
 .Dashboard.active,
 .Dashboard.active-link {
   background: #277a2e;
@@ -62,11 +116,23 @@
 
 /* ===== SIDEBAR ICON ===== */
 .sidebar-icon {
-  font-size: 16px;
+  font-size: 18px;
   width: 18px;
   display: flex;
   align-items: center;
   flex-shrink: 0;
+}
+
+/* ===== LINK TEXT ===== */
+.text {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.Side-bar.expanded .text {
+  opacity: 1;
+  transition: opacity 0.25s ease 0.1s;
 }
 
 /* ===== LOGOUT ===== */
@@ -75,7 +141,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 20px 16px 12px;
   margin-left: 12px;
   margin-right: 12px;
   border-radius: 14px;
@@ -89,15 +155,130 @@
   background: none;
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 20px;
+  white-space: nowrap;
+  overflow: hidden;
 }
-
 .logout:hover {
   background: rgba(239, 68, 68, 0.12);
   color: #fca5a5;
 }
-
 .logout-icon {
   font-size: 16px;
   flex-shrink: 0;
+}
+
+/* ===========================
+   LOGOUT CONFIRMATION MODAL
+   =========================== */
+
+/* Dark transparent overlay — green-tinted to match brand */
+.logout-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 61, 34, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: overlayFadeIn 0.18s ease;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Centered modal card */
+.logout-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 36px 32px 28px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: 0 20px 60px rgba(26, 61, 34, 0.3);
+  border-top: 4px solid #1a3d22;
+  animation: modalSlideIn 0.2s ease;
+  text-align: center;
+}
+
+@keyframes modalSlideIn {
+  from { opacity: 0; transform: translateY(-12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* Icon circle at top */
+.logout-modal-icon {
+  width: 52px;
+  height: 52px;
+  background: #fef2f2;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: #dc2626;
+  font-size: 22px;
+}
+
+.logout-modal-title {
+  font-family: "Playfair Display", serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a3d22;
+  margin: 0 0 10px;
+}
+
+.logout-modal-message {
+  font-family: "DM Sans", sans-serif;
+  font-size: 14px;
+  color: #4a6b50;
+  margin: 0 0 28px;
+  line-height: 1.6;
+}
+
+/* Button row */
+.logout-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.logout-modal-btn {
+  flex: 1;
+  padding: 11px 0;
+  border-radius: 10px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.18s ease, transform 0.1s ease, box-shadow 0.18s ease;
+}
+
+.logout-modal-btn:active {
+  transform: scale(0.97);
+}
+
+/* Cancel — light green tint */
+.logout-modal-btn--cancel {
+  background: #eaf3eb;
+  color: #1a3d22;
+  border: 1.5px solid #c2d9c5;
+}
+
+.logout-modal-btn--cancel:hover {
+  background: #d4e9d6;
+  border-color: #a8c9ac;
+}
+
+/* Logout (confirm) — red */
+.logout-modal-btn--confirm {
+  background: #dc2626;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+.logout-modal-btn--confirm:hover {
+  background: #b91c1c;
+  box-shadow: 0 4px 18px rgba(185, 28, 28, 0.45);
 }

@@ -18,6 +18,12 @@ import { FaFireAlt } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 function WorkerDashboard() {
+  const name = localStorage.getItem("name");
+  const Firstname=name?.split(" ")[0];
+  const initials = name.split(" ")
+                  .map(word => word[0])
+                  .join("");
+                  
   return (
     <div className="worker-dashboard-container">
 
@@ -43,7 +49,7 @@ function WorkerDashboard() {
               <span className="notif-dot"></span>
             </div>
             <div className="worker-avatar">
-              <span>JD</span>
+              <span>{initials}</span>
             </div>
           </div>
         </div>
@@ -53,7 +59,7 @@ function WorkerDashboard() {
           <div className="welcome-text-block">
             <div className="welcome-tag"><FaLeaf /> Farmworker Dashboard</div>
             <h2 className="worker-dashboard-welcome-title">
-              Good Morning, John 👋
+              Good Morning, {Firstname}👋
             </h2>
             <p className="worker-dashboard-welcome-subtext">
               You have <strong>2 active jobs</strong> and <strong>1 pending application</strong> awaiting review.

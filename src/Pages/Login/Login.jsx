@@ -27,13 +27,15 @@ function Login() {
         }
         
       );
-      // console.log("LOGIN DATA:", res.data);
+      console.log("LOGIN DATA:", res.data);
 
         // ✅ STORE USER ID HERE
       localStorage.setItem("userId", res.data._id);
 
     // Optional: store role if needed
       localStorage.setItem("role", res.data.role);
+
+      localStorage.setItem("name", res.data.name);
  
       if(res.data.role=="worker"){
         navigate("/worker",{state:{name:res.data.name}})

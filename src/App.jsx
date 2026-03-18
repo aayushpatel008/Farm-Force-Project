@@ -24,6 +24,7 @@ import Jobposting from './Pages/Jobprovider/jobposting';
 import Attendance from "./Pages/Jobprovider/attendance";
 // Worker
 import WorkerProfile from "./Pages/Worker/Profile/profile";
+import WorkerAttendance from "./Pages/Worker/Attendance/Attendance";
 
 
 function App() {
@@ -72,6 +73,7 @@ function App() {
         <Route path="/jobprovider/jobposting" element={<Jobposting/>}/>
         <Route path='/jobprovider/attendance' element={<Attendance/>}/>
         <Route path='/Worker/Profile/profile' element={<WorkerProfile/>}/>
+        <Route path='/Worker/Attendance/Attendance' element={<WorkerAttendance/>}/>
 
     </Routes>
     

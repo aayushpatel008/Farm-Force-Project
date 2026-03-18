@@ -33,9 +33,16 @@ body { margin: 0; font-family: 'DM Sans', sans-serif; }
 /* ===== LAYOUT ===== */
 .worker-dashboard-container {
   display: flex;
-  margin-left: 250px;
+  /* Collapsed default — matches 72px sidebar */
+  margin-left: 72px;
   min-height: 100vh;
   background: var(--bg-main);
+  transition: margin-left 0.25s ease;
+}
+
+/* Expanded sidebar → push content right */
+:has(.Side-bar.expanded) .worker-dashboard-container {
+  margin-left: 240px;
 }
 
 .worker-dashboard-main {

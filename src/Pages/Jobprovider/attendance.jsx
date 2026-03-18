@@ -2,500 +2,357 @@ import React, { useState, useMemo } from 'react';
 import './attendance.css';
 import Sidebar from './sidebar';
 
-// ── Inline SVG Icons ─────────────────────────────────────────────────────────
-const CalIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
-    <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-  </svg>
-);
-const CheckIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="20 6 9 17 4 12"/>
-  </svg>
-);
-const XIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-  </svg>
-);
-const ClockIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-  </svg>
-);
-const DownIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
-    <polyline points="6 9 12 15 18 9"/>
-  </svg>
-);
-const ExportIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
-    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-    <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
-  </svg>
-);
-const FilterIcon = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" width="14" height="14">
-    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-  </svg>
-);
-// ─────────────────────────────────────────────────────────────────────────────
-
-const WAGE_MAP = { present: 500, late: 250, halfday: 250, absent: 0 };
-
-const INITIAL_WORKERS = [
-  { id: 1, name: 'Ramesh Kumar',  role: 'Harvester',  task: 'Harvesting',  status: 'present', timeIn: '8:02 AM',  timeOut: '5:10 PM',  daysPresent: 22, absents: 2, totalEarned: 11000, rating: 4.5 },
-  { id: 2, name: 'Mohan Singh',   role: 'Driver',      task: 'Transport',   status: 'absent',  timeIn: '—',        timeOut: '—',        daysPresent: 18, absents: 6, totalEarned: 9000,  rating: 3.8 },
-  { id: 3, name: 'Suresh Patel',  role: 'Plucker',     task: 'Plucking',    status: 'late',    timeIn: '9:15 AM',  timeOut: '5:00 PM',  daysPresent: 20, absents: 3, totalEarned: 10250, rating: 4.1 },
-  { id: 4, name: 'Priya Sharma',  role: 'Packer',      task: 'Packing',     status: 'present', timeIn: '7:55 AM',  timeOut: '5:05 PM',  daysPresent: 24, absents: 0, totalEarned: 12000, rating: 4.9 },
-  { id: 5, name: 'Amit Verma',    role: 'Harvester',   task: 'Harvesting',  status: 'present', timeIn: '8:30 AM',  timeOut: '5:15 PM',  daysPresent: 21, absents: 3, totalEarned: 10500, rating: 4.2 },
-  { id: 6, name: 'Neha Gupta',    role: 'Supervisor',  task: 'Supervision', status: 'present', timeIn: '7:45 AM',  timeOut: '6:00 PM',  daysPresent: 23, absents: 1, totalEarned: 11500, rating: 4.7 },
-  { id: 7, name: 'Rajesh Yadav',  role: 'Driver',      task: 'Transport',   status: 'absent',  timeIn: '—',        timeOut: '—',        daysPresent: 15, absents: 9, totalEarned: 7500,  rating: 3.2 },
-  { id: 8, name: 'Sunita Devi',   role: 'Packer',      task: 'Packing',     status: 'late',    timeIn: '9:45 AM',  timeOut: '5:00 PM',  daysPresent: 19, absents: 4, totalEarned: 9750,  rating: 3.9 },
+const WORKER_LIST = [
+  { id: 1,  name: 'Ramesh Kumar',  role: 'Harvester',  avatar: 'RK' },
+  { id: 2,  name: 'Mohan Singh',   role: 'Driver',      avatar: 'MS' },
+  { id: 3,  name: 'Suresh Patel',  role: 'Plucker',     avatar: 'SP' },
+  { id: 4,  name: 'Priya Sharma',  role: 'Packer',      avatar: 'PS' },
+  { id: 5,  name: 'Amit Verma',    role: 'Harvester',   avatar: 'AV' },
+  { id: 6,  name: 'Neha Gupta',    role: 'Supervisor',  avatar: 'NG' },
+  { id: 7,  name: 'Rajesh Yadav',  role: 'Driver',      avatar: 'RY' },
+  { id: 8,  name: 'Sunita Devi',   role: 'Packer',      avatar: 'SD' },
+  { id: 9,  name: 'Deepak Nair',   role: 'Irrigator',   avatar: 'DN' },
+  { id: 10, name: 'Kavita Joshi',  role: 'Quality QC',  avatar: 'KJ' },
 ];
 
-const WEEKLY = [
-  { day: 'Mon', count: 14 },
-  { day: 'Tue', count: 16 },
-  { day: 'Wed', count: 15 },
-  { day: 'Thu', count: 17 },
-  { day: 'Fri', count: 13 },
-  { day: 'Sat', count: 10 },
-  { day: 'Sun', count: 0,  today: true },
-];
-
-const MAX_WORKERS = 18;
-const TODAY_IDX = 6;
-
-const stars = (rating) => {
-  const full = Math.floor(rating);
-  const half = rating % 1 >= 0.5;
-  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(5 - full - (half ? 1 : 0));
+const STATUS = ['Present', 'Absent', 'Leave'];
+const STATUS_META = {
+  Present: { color: '#16a34a', bg: '#dcfce7', dot: '#22c55e', short: 'P' },
+  Absent:  { color: '#dc2626', bg: '#fee2e2', dot: '#ef4444', short: 'A' },
+  Leave:   { color: '#d97706', bg: '#fef3c7', dot: '#f59e0b', short: 'L' },
 };
 
-const initials = (name) => name.split(' ').map(n => n[0]).join('').toUpperCase();
+const fmt = (iso) => new Date(iso).toLocaleDateString('en-IN', {
+  weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'
+});
 
-const AttendanceDashboard = () => {
-  const [workers, setWorkers]           = useState(INITIAL_WORKERS);
-  const [searchTerm, setSearchTerm]     = useState('');
-  const [filterTask, setFilterTask]     = useState('all');
-  const [showHistory, setShowHistory]   = useState(false);
-  const [selectedWorker, setSelectedWorker] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('present');
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [profileWorker, setProfileWorker] = useState(null);
+const seedRecords = () => {
+  const records = {};
+  const today = new Date();
+  for (let i = 1; i <= 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const key = d.toISOString().split('T')[0];
+    const day = {};
+    WORKER_LIST.forEach(w => {
+      const r = Math.random();
+      day[w.id] = r > 0.15 ? (r > 0.25 ? 'Present' : 'Leave') : 'Absent';
+    });
+    records[key] = day;
+  }
+  return records;
+};
 
-  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+export default function Attendance() {
+  const todayISO = new Date().toISOString().split('T')[0];
+  const [records,    setRecords]    = useState(seedRecords);
+  const [activeDate, setActiveDate] = useState(todayISO);
+  const [draft,      setDraft]      = useState({});
+  const [editMode,   setEditMode]   = useState(false);
+  const [toast,      setToast]      = useState(null);
+  const [viewTab,    setViewTab]    = useState('mark');
+  const [searchQ,    setSearchQ]    = useState('');
+  const [filterRole, setFilterRole] = useState('All');
 
-  const stats = useMemo(() => ({
-    total:   workers.length,
-    present: workers.filter(w => w.status === 'present').length,
-    absent:  workers.filter(w => w.status === 'absent').length,
-    late:    workers.filter(w => w.status === 'late').length,
-    wage:    workers.reduce((sum, w) => sum + WAGE_MAP[w.status], 0),
-  }), [workers]);
+  const loadDate = (date) => {
+    setActiveDate(date);
+    setDraft(records[date] ? { ...records[date] } : {});
+    setEditMode(!records[date]);
+  };
 
-  const attendanceRate = ((stats.present / stats.total) * 100).toFixed(0);
+  React.useEffect(() => { loadDate(activeDate); }, []); // eslint-disable-line
 
-  const tasks = ['all', ...new Set(workers.map(w => w.task))];
+  const handleDateChange = (e) => loadDate(e.target.value);
 
-  const filtered = workers.filter(w => {
-    const q = searchTerm.toLowerCase();
-    const matchQ = w.name.toLowerCase().includes(q) || w.role.toLowerCase().includes(q);
-    const matchT = filterTask === 'all' || w.task === filterTask;
-    return matchQ && matchT;
+  const setWorkerStatus = (workerId, status) =>
+    setDraft(prev => ({ ...prev, [workerId]: status }));
+
+  const roles = useMemo(() => ['All', ...new Set(WORKER_LIST.map(w => w.role))], []);
+
+  const filtered = WORKER_LIST.filter(w => {
+    const mq = w.name.toLowerCase().includes(searchQ.toLowerCase()) ||
+               w.role.toLowerCase().includes(searchQ.toLowerCase());
+    const mr = filterRole === 'All' || w.role === filterRole;
+    return mq && mr;
   });
 
-  const handleStatus = (id, status) => {
-    setWorkers(ws => ws.map(w => {
-      if (w.id !== id) return w;
-      const timeIn = (status === 'present')
-        ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        : status === 'late' ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        : '—';
-      return { ...w, status, timeIn };
-    }));
+  const markAll = (status) => {
+    const all = {};
+    filtered.forEach(w => { all[w.id] = status; });
+    setDraft(prev => ({ ...prev, ...all }));
   };
 
-  const handleMarkAll = () => {
-    setWorkers(ws => ws.map(w => ({
-      ...w, status: 'present',
-      timeIn: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    })));
+  const saveAttendance = () => {
+    setRecords(prev => ({ ...prev, [activeDate]: { ...(prev[activeDate] || {}), ...draft } }));
+    setEditMode(false);
+    setToast('Attendance saved successfully!');
+    setTimeout(() => setToast(null), 2800);
   };
 
-  const handleMarkForm = (e) => {
-    e.preventDefault();
-    if (!selectedWorker) return;
-    handleStatus(parseInt(selectedWorker), selectedStatus);
-    setSelectedWorker('');
-    setSelectedStatus('present');
+  const cancelEdit = () => {
+    setDraft(records[activeDate] ? { ...records[activeDate] } : {});
+    setEditMode(false);
   };
 
-  const getStatusLabel = (s) => ({ present: 'Present', absent: 'Absent', late: 'Late', halfday: 'Half Day' }[s] || s);
+  const stats = useMemo(() => {
+    const snap = { ...records[activeDate], ...draft };
+    const counts = { Present: 0, Absent: 0, Leave: 0, Unmarked: 0 };
+    WORKER_LIST.forEach(w => {
+      const s = snap[w.id];
+      if (s) counts[s]++; else counts.Unmarked++;
+    });
+    return counts;
+  }, [records, draft, activeDate]);
+
+  const historyDates = useMemo(() =>
+    Object.keys(records).sort((a, b) => b.localeCompare(a)), [records]);
+
+  const hasChanges = Object.keys(draft).length > 0;
+  const isSaved = !!records[activeDate];
 
   return (
-    <div className="dashboard-container">
+    <div className="ap-shell">
       <Sidebar />
 
-      <main className="main-content">
+      {/* The only scrollable container — sidebar is excluded */}
+      <div className="ap-page">
 
-        {/* ── Top Bar ── */}
-        <div className="topbar">
-          <div className="topbar-brand">
-            <h1>FarmForce</h1>
-            <p>Attendance Dashboard</p>
+        {/* Toast */}
+        {toast && (
+          <div className="ap-toast">
+            <span className="ap-toast-dot">✓</span>
+            {toast}
           </div>
-          <div className="topbar-right">
-            <div className="date-pill">
-              <CalIcon /> {today}
-            </div>
-            <button className="mark-all-btn" onClick={handleMarkAll}>
-              <CheckIcon style={{width:14,height:14}} /> Mark All Present
+        )}
+
+        {/* ── Header ── */}
+        <div className="ap-header">
+          <div className="ap-header-left">
+            <div className="ap-header-tag">🌿 Attendance Management</div>
+            <h1 className="ap-header-title">Worker Attendance</h1>
+            <p className="ap-header-sub">Track, mark and review daily attendance for all field workers</p>
+          </div>
+          <div className="ap-header-stats">
+            {[
+              { key: 'Present',  cls: 'green' },
+              { key: 'Absent',   cls: 'red'   },
+              { key: 'Leave',    cls: 'amber' },
+              { key: 'Unmarked', cls: 'gray'  },
+            ].map(({ key, cls }) => (
+              <div key={key} className={`ap-hstat ap-hstat--${cls}`}>
+                <span className="ap-hstat-num">{stats[key]}</span>
+                <span className="ap-hstat-label">{key}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Tabs ── */}
+        <div className="ap-tabs">
+          {[
+            { id: 'mark',    label: '📋 Mark Attendance'   },
+            { id: 'history', label: '📅 History & Records' },
+          ].map(t => (
+            <button key={t.id}
+              className={`ap-tab ${viewTab === t.id ? 'ap-tab--active' : ''}`}
+              onClick={() => setViewTab(t.id)}>
+              {t.label}
             </button>
-          </div>
+          ))}
         </div>
 
-        {/* ── KPI Cards ── */}
-        <div className="kpi-grid">
-          <div className="kpi-card workers">
-            <div className="kpi-icon">👷</div>
-            <div className="kpi-body">
-              <span className="kpi-label">Total Workers</span>
-              <span className="kpi-value">{stats.total}</span>
-              <span className="kpi-sub">Assigned today</span>
-            </div>
-          </div>
-          <div className="kpi-card present">
-            <div className="kpi-icon">✅</div>
-            <div className="kpi-body">
-              <span className="kpi-label">Present Today</span>
-              <span className="kpi-value">{stats.present}</span>
-              <span className="kpi-sub">{stats.late} arrived late</span>
-            </div>
-          </div>
-          <div className="kpi-card absent">
-            <div className="kpi-icon">❌</div>
-            <div className="kpi-body">
-              <span className="kpi-label">Absent Today</span>
-              <span className="kpi-value">{stats.absent}</span>
-              <span className="kpi-sub">{((stats.absent/stats.total)*100).toFixed(0)}% of workforce</span>
-            </div>
-          </div>
-          <div className="kpi-card wage">
-            <div className="kpi-icon">💰</div>
-            <div className="kpi-body">
-              <span className="kpi-label">Today's Wage Total</span>
-              <span className="kpi-value">₹{stats.wage.toLocaleString()}</span>
-              <span className="kpi-sub">₹500/day · ₹250 half/late</span>
-            </div>
-          </div>
-        </div>
+        {/* ══ MARK TAB ══ */}
+        {viewTab === 'mark' && (
+          <div className="ap-fade">
 
-        {/* ── Attendance Progress ── */}
-        <div className="progress-card">
-          <div className="progress-info">
-            <div className="progress-title">
-              <span>Today's Attendance — {stats.present}/{stats.total} workers present</span>
-              <span>{attendanceRate}% rate</span>
+            {/* Controls */}
+            <div className="ap-controls">
+              <div className="ap-date-wrap">
+                <label className="ap-control-label">Select Date</label>
+                <input type="date" className="ap-date-input"
+                  value={activeDate} max={todayISO} onChange={handleDateChange} />
+              </div>
+              <div className="ap-date-info">
+                <span className="ap-date-display">{fmt(activeDate)}</span>
+                {isSaved
+                  ? <span className="ap-chip ap-chip--saved">✓ Saved</span>
+                  : <span className="ap-chip ap-chip--unsaved">Not yet recorded</span>
+                }
+              </div>
+              <div className="ap-ctrl-right">
+                {editMode ? (
+                  <>
+                    <div className="ap-markall-group">
+                      <span className="ap-control-label">Mark All:</span>
+                      {STATUS.map(s => (
+                        <button key={s}
+                          className={`ap-markall-btn ap-markall-btn--${s.toLowerCase()}`}
+                          onClick={() => markAll(s)}>{s}</button>
+                      ))}
+                    </div>
+                    <button className="ap-btn ap-btn--outline" onClick={cancelEdit}>Cancel</button>
+                    <button className="ap-btn ap-btn--save" onClick={saveAttendance} disabled={!hasChanges}>
+                      💾 Save Attendance
+                    </button>
+                  </>
+                ) : (
+                  <button className="ap-btn ap-btn--edit" onClick={() => setEditMode(true)}>
+                    ✏️ {isSaved ? 'Edit Attendance' : 'Mark Attendance'}
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: `${attendanceRate}%` }} />
-            </div>
-          </div>
-          <div className="progress-legend">
-            <div className="legend-item"><span className="legend-dot green" /> Present</div>
-            <div className="legend-item"><span className="legend-dot amber" /> Late</div>
-            <div className="legend-item"><span className="legend-dot red"   /> Absent</div>
-          </div>
-        </div>
 
-        {/* ── Two-column: Table + Chart ── */}
-        <div className="content-row">
-
-          {/* Attendance Table */}
-          <div className="section-card">
-            {/* Combined Header + Filter in one row */}
-            <div className="table-toolbar">
-              <span className="section-title" style={{ flexShrink: 0 }}>Today's Attendance</span>
-              <input
-                className="filter-input"
-                type="text"
-                placeholder="Search worker or role..."
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
-              <select
-                className="filter-select"
-                value={filterTask}
-                onChange={e => setFilterTask(e.target.value)}
-              >
-                {tasks.map(t => (
-                  <option key={t} value={t}>{t === 'all' ? 'All Tasks' : t}</option>
-                ))}
+            {/* Search + Filter */}
+            <div className="ap-toolbar">
+              <div className="ap-search-wrap">
+                <span className="ap-search-icon">🔍</span>
+                <input className="ap-search" placeholder="Search worker or role…"
+                  value={searchQ} onChange={e => setSearchQ(e.target.value)} />
+              </div>
+              <select className="ap-select" value={filterRole}
+                onChange={e => setFilterRole(e.target.value)}>
+                {roles.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
-              <button className="btn-sm"><ExportIcon /> Export</button>
+              <span className="ap-count">{filtered.length} workers</span>
             </div>
 
-            <div className="table-wrap">
-              <table className="att-table">
+            {/* Table */}
+            <div className="ap-table-wrap">
+              <table className="ap-table">
                 <thead>
                   <tr>
+                    <th>#</th>
                     <th>Worker</th>
-                    <th>Task</th>
-                    <th>Check-In</th>
-                    <th>Check-Out</th>
+                    <th>Role</th>
                     <th>Status</th>
-                    <th>Wage</th>
-                    <th>Action</th>
+                    {editMode && <th>Mark</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map(w => (
-                    <tr key={w.id} className={`row-${w.status}`}>
-                      <td>
-                        <div className="worker-cell">
-                          <div className="w-avatar">{initials(w.name)}</div>
-                          <div>
-                            <div className="w-name" onClick={() => setProfileWorker(w)}>{w.name}</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-400)', marginTop: 1 }}>{w.role}</div>
+                  {filtered.map((w, i) => {
+                    const snap = { ...records[activeDate], ...draft };
+                    const status = snap[w.id] || null;
+                    const meta = status ? STATUS_META[status] : null;
+                    return (
+                      <tr key={w.id}
+                        className={`ap-row ${status ? `ap-row--${status.toLowerCase()}` : ''}`}
+                        style={{ animationDelay: `${i * 25}ms` }}>
+                        <td className="ap-td-num">{i + 1}</td>
+                        <td>
+                          <div className="ap-worker">
+                            <div className="ap-avatar"
+                              style={{ background: `hsl(${(w.id * 47) % 360},45%,35%)` }}>
+                              {w.avatar}
+                            </div>
+                            <span className="ap-wname">{w.name}</span>
                           </div>
-                        </div>
-                      </td>
-                      <td><span className="task-badge">{w.task}</span></td>
-                      <td>
-                        <span className={`time-cell ${w.timeIn === '—' ? 'time-missing' : ''}`}>
-                          {w.timeIn}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`time-cell ${w.timeOut === '—' ? 'time-missing' : ''}`}>
-                          {w.timeOut}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`status-badge ${w.status}`}>
-                          <span className="s-dot" /> {getStatusLabel(w.status)}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="wage-cell">
-                          {WAGE_MAP[w.status] > 0 ? `₹${WAGE_MAP[w.status]}` : '₹0'}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="row-actions">
-                          <button
-                            className={`row-btn rb-present ${w.status === 'present' ? 'active-present' : ''}`}
-                            title="Mark Present"
-                            onClick={() => handleStatus(w.id, 'present')}
-                          ><CheckIcon /></button>
-                          <button
-                            className={`row-btn rb-absent ${w.status === 'absent' ? 'active-absent' : ''}`}
-                            title="Mark Absent"
-                            onClick={() => handleStatus(w.id, 'absent')}
-                          ><XIcon /></button>
-                          <button
-                            className={`row-btn rb-late ${w.status === 'late' ? 'active-late' : ''}`}
-                            title="Mark Late"
-                            onClick={() => handleStatus(w.id, 'late')}
-                          ><ClockIcon /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td><span className="ap-role-tag">{w.role}</span></td>
+                        <td>
+                          {status
+                            ? <span className="ap-status-pill"
+                                style={{ background: meta.bg, color: meta.color }}>
+                                <span className="ap-status-dot" style={{ background: meta.dot }} />
+                                {status}
+                              </span>
+                            : <span className="ap-status-none">—</span>
+                          }
+                        </td>
+                        {editMode && (
+                          <td>
+                            <div className="ap-mark-group">
+                              {STATUS.map(s => (
+                                <button key={s}
+                                  className={`ap-mark-btn ap-mark-btn--${s.toLowerCase()}
+                                    ${(draft[w.id] === s || (!draft[w.id] && records[activeDate]?.[w.id] === s))
+                                      ? 'ap-mark-btn--on' : ''}`}
+                                  onClick={() => setWorkerStatus(w.id, s)}>
+                                  {STATUS_META[s].short}
+                                </button>
+                              ))}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
+              {filtered.length === 0 && (
+                <div className="ap-empty">No workers match your search</div>
+              )}
             </div>
-          </div>
 
-          {/* Weekly Chart */}
-          <div className="section-card">
-            <div className="section-header">
-              <div className="section-title-group">
-                <div className="section-title">Weekly Summary</div>
-              </div>
-            </div>
-            <div className="chart-body">
-              <div className="chart-days">
-                {WEEKLY.map((d, i) => (
-                  <div className="chart-row" key={d.day}>
-                    <span className="chart-day" style={i === TODAY_IDX ? { color: 'var(--green-700)', fontWeight: 800 } : {}}>
-                      {d.day}
-                    </span>
-                    <div className="chart-bar-track">
-                      <div
-                        className={`chart-bar-fill ${d.today ? 'today' : ''}`}
-                        style={{ width: `${(d.count / MAX_WORKERS) * 100}%` }}
-                      >
-                        {d.count > 0 ? d.count : ''}
-                      </div>
-                    </div>
-                    <span className="chart-num">{d.count}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="chart-max-note">Max capacity: {MAX_WORKERS} workers</div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Mark Attendance Form ── */}
-        <div className="mark-card">
-          <div className="section-header" style={{ padding: 0, marginBottom: 20, border: 'none' }}>
-            <div className="section-title-group">
-              <div className="section-icon">✍️</div>
-              <div>
-                <div className="section-title">Mark Attendance</div>
-                <div className="section-sub">Manually update a worker's attendance record</div>
-              </div>
-            </div>
-          </div>
-          <form onSubmit={handleMarkForm}>
-            <div className="mark-form-grid">
-              <div className="form-field">
-                <label className="form-label">Select Worker</label>
-                <select
-                  className="form-control"
-                  value={selectedWorker}
-                  onChange={e => setSelectedWorker(e.target.value)}
-                  required
-                >
-                  <option value="">Choose worker...</option>
-                  {workers.map(w => (
-                    <option key={w.id} value={w.id}>{w.name} — {w.role}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="form-field">
-                <label className="form-label">Date</label>
-                <input
-                  className="form-control"
-                  type="date"
-                  value={selectedDate}
-                  onChange={e => setSelectedDate(e.target.value)}
-                />
-              </div>
-              <div className="form-field">
-                <label className="form-label">Status</label>
-                <select
-                  className="form-control"
-                  value={selectedStatus}
-                  onChange={e => setSelectedStatus(e.target.value)}
-                >
-                  <option value="present">✅ Present</option>
-                  <option value="absent">❌ Absent</option>
-                  <option value="late">⏰ Late</option>
-                  <option value="halfday">🌓 Half Day</option>
-                </select>
-              </div>
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn-sm primary" style={{ padding: '10px 28px' }}>
-                <CheckIcon style={{ width: 14, height: 14 }} /> Mark Attendance
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* ── Monthly Report ── */}
-        <div className="report-section">
-          <button className="report-toggle" onClick={() => setShowHistory(!showHistory)}>
-            <div className="report-toggle-left">
-              <span className="report-toggle-icon">📂</span>
-              View Monthly Report — February 2026
-            </div>
-            <div className={`report-toggle-arrow ${showHistory ? 'open' : ''}`}>
-              <DownIcon />
-            </div>
-          </button>
-
-          {showHistory && (
-            <div className="report-panel">
-              <div className="report-header">
-                <h3>February 2026 Attendance Summary</h3>
-                <div className="report-actions">
-                  <button className="btn-sm"><FilterIcon /> Filter</button>
-                  <button className="btn-sm"><ExportIcon /> Export PDF</button>
-                </div>
-              </div>
-              <div className="report-stats">
-                <div className="report-stat">
-                  <span className="report-stat-label">Working Days</span>
-                  <span className="report-stat-value">22</span>
-                </div>
-                <div className="report-stat">
-                  <span className="report-stat-label">Avg. Attendance</span>
-                  <span className="report-stat-value">84%</span>
-                </div>
-                <div className="report-stat">
-                  <span className="report-stat-label">Late Days</span>
-                  <span className="report-stat-value">12</span>
-                </div>
-                <div className="report-stat">
-                  <span className="report-stat-label">Total Wages Paid</span>
-                  <span className="report-stat-value" style={{ fontSize: '1.3rem', color: 'var(--rupee)' }}>₹82,500</span>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Bottom ── */}
-        <div className="bottom-actions">
-          <button className="logout-btn">🚪 Logout</button>
-        </div>
-      </main>
-
-      {/* ── Worker Profile Modal ── */}
-      {profileWorker && (
-        <div className="modal-overlay" onClick={() => setProfileWorker(null)}>
-          <div className="modal-card" onClick={e => e.stopPropagation()}>
-            <div className="modal-top">
-              <button className="modal-close" onClick={() => setProfileWorker(null)}>✕</button>
-              <div className="modal-avatar">{initials(profileWorker.name)}</div>
-              <div>
-                <div className="modal-name">{profileWorker.name}</div>
-                <div className="modal-role">{profileWorker.role} · {profileWorker.task}</div>
-              </div>
-            </div>
-            <div className="modal-body">
-              <div className="modal-stats">
-                <div className="modal-stat">
-                  <span className="modal-stat-label">Days Present</span>
-                  <span className="modal-stat-value green">{profileWorker.daysPresent}</span>
-                </div>
-                <div className="modal-stat">
-                  <span className="modal-stat-label">Absences</span>
-                  <span className="modal-stat-value" style={{ color: 'var(--red)' }}>{profileWorker.absents}</span>
-                </div>
-                <div className="modal-stat">
-                  <span className="modal-stat-label">Total Earned</span>
-                  <span className="modal-stat-value rupee">₹{profileWorker.totalEarned.toLocaleString()}</span>
-                </div>
-                <div className="modal-stat">
-                  <span className="modal-stat-label">This Month</span>
-                  <span className="modal-stat-value">{profileWorker.daysPresent + profileWorker.absents} days</span>
-                </div>
-              </div>
-              <div className="rating-row">
-                <span className="rating-label">Performance Rating</span>
-                <span className="rating-stars">{stars(profileWorker.rating)}</span>
-                <span className="rating-value">{profileWorker.rating} / 5.0</span>
-              </div>
-              <div className="modal-actions">
-                <button className="btn-modal secondary" onClick={() => setProfileWorker(null)}>Close</button>
-                <button className="btn-modal primary" onClick={() => { handleStatus(profileWorker.id, 'present'); setProfileWorker(null); }}>
-                  Mark Present Now
+            {/* ── Sticky footer — sticks to bottom of ap-page scroll container ── */}
+            {editMode && (
+              <div className="ap-footer-bar">
+                <span className="ap-footer-text">
+                  {Object.keys(draft).length} of {WORKER_LIST.length} workers marked
+                </span>
+                <button className="ap-btn ap-btn--footer-ghost" onClick={cancelEdit}>Cancel</button>
+                <button className="ap-btn ap-btn--footer-save" onClick={saveAttendance} disabled={!hasChanges}>
+                  💾 Save Attendance
                 </button>
               </div>
-            </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+
+        {/* ══ HISTORY TAB ══ */}
+        {viewTab === 'history' && (
+          <div className="ap-fade">
+            {historyDates.length === 0 ? (
+              <div className="ap-empty-state">
+                <span style={{ fontSize: 48 }}>📋</span>
+                <p>No attendance records yet.</p>
+                <button className="ap-btn ap-btn--edit" onClick={() => setViewTab('mark')}>
+                  Start Marking Attendance
+                </button>
+              </div>
+            ) : (
+              <div className="ap-hist-list">
+                {historyDates.map(date => {
+                  const rec = records[date];
+                  const present = Object.values(rec).filter(s => s === 'Present').length;
+                  const absent  = Object.values(rec).filter(s => s === 'Absent').length;
+                  const leave   = Object.values(rec).filter(s => s === 'Leave').length;
+                  const total   = Object.keys(rec).length;
+                  const pct     = Math.round((present / total) * 100);
+                  return (
+                    <div key={date} className="ap-hist-card">
+                      <div className="ap-hist-left">
+                        <div className="ap-hist-date">{fmt(date)}</div>
+                        <div className="ap-hist-pills">
+                          <span className="ap-mini-pill ap-mini-pill--green">✓ {present} Present</span>
+                          <span className="ap-mini-pill ap-mini-pill--red">✗ {absent} Absent</span>
+                          <span className="ap-mini-pill ap-mini-pill--amber">◐ {leave} Leave</span>
+                        </div>
+                      </div>
+                      <div className="ap-hist-right">
+                        <div className="ap-pct-row">
+                          <div className="ap-pct-bar">
+                            <div className="ap-pct-fill" style={{
+                              width: `${pct}%`,
+                              background: pct >= 80 ? '#16a34a' : pct >= 60 ? '#d97706' : '#dc2626'
+                            }} />
+                          </div>
+                          <span className="ap-pct-label">{pct}%</span>
+                        </div>
+                        <button className="ap-btn ap-btn--edit ap-btn--sm"
+                          onClick={() => { loadDate(date); setViewTab('mark'); setEditMode(false); }}>
+                          View / Edit
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+      </div>{/* end ap-page */}
     </div>
   );
-};
-
-export default AttendanceDashboard;
+}
