@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { FaHome, FaClipboardList } from "react-icons/fa";
+import { FaHome, FaBriefcase, FaCalendarCheck, FaFileAlt, FaUsers, FaClipboardList } from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 
@@ -45,13 +45,18 @@ const Sidebar1 = () => {
         </Link>
 
         <Link to="/Worker/Profile/profile" className='Dashboard'>
-          <FaClipboardList className="sidebar-icon" />
+          <FaFileAlt className="sidebar-icon" />
           <span className='text'>Job Application</span>
         </Link>
 
         <Link to="/Worker/Attendance/Attendance" className='Dashboard'>
           <FaClipboardList className="sidebar-icon" />
           <span className='text'>Attendance</span>
+        </Link>
+
+        <Link to="/Worker/Browse/BrowseWorker" className='Dashboard'>
+          <FaUsers className="sidebar-icon" />
+          <span className='text'>Browse Jobs</span>
         </Link>
 
         <button className='logout' onClick={handleLogoutClick}>

@@ -224,3 +224,12 @@
     font-size: 0.9rem;
   }
 }
+/* Fix overscroll white space */
+body {
+  background-color: #0a1a0c;
+}
+
+html {
+  background-color: #0a1a0c;
+  overscroll-behavior: none;
+}

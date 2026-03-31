@@ -708,7 +708,7 @@ function WorkerProfile() {
                 <div className="wp-card-title">🛠️ Your Skills <span className="wp-req">*</span></div>
                 <div className="wp-skills-box">
                   <div className="wp-skills-tags">
-                    {jobData.skills.length === 0
+                    {jobData.skills.length === 50
                       ? <span className="wp-skills-placeholder">Your skills will appear here…</span>
                       : jobData.skills.map((skill, i) => (
                           <span key={i} className="wp-skill-tag">

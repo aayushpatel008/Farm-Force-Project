@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import './About.css';
 
+// About component - displays information about FarmForce company, mission, team, and FAQs
 const About = () => {
+  // State to track which FAQ accordion item is currently open (null means none)
   const [activeAccordion, setActiveAccordion] = useState(null);
+  // State to track which tab is currently active in the mission/vision/values section
   const [activeTab, setActiveTab] = useState('mission');
 
-  // Accordion data
+  // Array of FAQ items with questions and answers for the accordion section
   const faqItems = [
     {
       id: 1,
@@ -29,7 +32,8 @@ const About = () => {
     }
   ];
 
-  // Tab content
+  // Object containing content for the three tabs: mission, vision, and values
+  // Each tab has a title, content description, and an icon emoji
   const tabContent = {
     mission: {
       title: "Our Mission",
@@ -48,6 +52,7 @@ const About = () => {
     }
   };
 
+  // Array of team members with their names, roles, and brief bios
   const teamMembers = [
     { name: "Sarah Chen", role: "Founder & CEO", bio: "Former agronomist with 15+ years in sustainable farming" },
     { name: "Miguel Rodriguez", role: "Head of Technology", bio: "AI expert focused on agricultural applications" },
@@ -55,6 +60,7 @@ const About = () => {
     { name: "James Wilson", role: "Sustainability Lead", bio: "Environmental scientist specializing in regenerative agriculture" }
   ];
 
+  // Array of key achievements/statistics to display in the hero section
   const achievements = [
     { number: "10,000+", label: "Active Farmers", description: "Using our platform daily" },
     { number: "50+", label: "Countries", description: "Across 6 continents" },
@@ -62,13 +68,15 @@ const About = () => {
     { number: "40%", label: "Cost Reduction", description: "In water and fertilizer usage" }
   ];
 
+  // Function to toggle the accordion open/closed state
+  // If the clicked item is already open, close it; otherwise open it
   const toggleAccordion = (id) => {
     setActiveAccordion(activeAccordion === id ? null : id);
   };
 
   return (
     <div className="about-page">
-      {/* Hero Section */}
+      {/* Hero Section - displays company intro and key statistics */}
       <section className="about-hero">
         <div className="hero-content">
           <h1 className="hero-title">About FarmForce</h1>
@@ -90,7 +98,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Mission/Vision/Values Tabs */}
+      {/* Mission/Vision/Values Tabs - interactive tabs showing company principles */}
       <section className="core-values">
         <div className="section-header">
           <h2>What Drives Us</h2>
@@ -118,7 +126,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* Story Section */}
+      {/* Story Section - narrative about FarmForce's origins and growth */}
       <section className="our-story">
         <div className="story-content">
           <h2>Our Story</h2>

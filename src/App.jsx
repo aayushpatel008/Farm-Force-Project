@@ -16,15 +16,17 @@ import { useState } from 'react'
 /* ---------- Pages ---------- */
 import Login from "./Pages/Login/Login";
 import FarmForceSignup from "./Pages/Signup/Signup";
-import Worker from "./Pages/Worker/worker";
+import  WorkerHome from "./Pages/Worker/worker";
 
 /* ---------- Job Provider Pages ---------- */
 import JobpDashboard from "./Pages/Jobprovider/jobpDashboard";
 import Jobposting from './Pages/Jobprovider/jobposting';
 import Attendance from "./Pages/Jobprovider/attendance";
+import BrowseWorkers from "./Pages/Jobprovider/Browse";
 // Worker
 import WorkerProfile from "./Pages/Worker/Profile/profile";
 import WorkerAttendance from "./Pages/Worker/Attendance/Attendance";
+import Browsejob from "./Pages/Worker/Browse/BrowseWorker";
 
 
 function App() {
@@ -68,12 +70,15 @@ function App() {
    
         {/* Login*/}
         <Route path='/Login' element={<Login />}/>
-        <Route path="/worker" element={<Worker />} />
+        <Route path="/worker" element={<WorkerHome/>} />
         <Route path="/jobprovider/jobpDashboard" element={<JobpDashboard />} />
         <Route path="/jobprovider/jobposting" element={<Jobposting/>}/>
+        <Route path="/jobprovider/Browse" element={<BrowseWorkers/>}/>
         <Route path='/jobprovider/attendance' element={<Attendance/>}/>
         <Route path='/Worker/Profile/profile' element={<WorkerProfile/>}/>
         <Route path='/Worker/Attendance/Attendance' element={<WorkerAttendance/>}/>
+        <Route path="Worker/Browse/BrowseWorker" element={<Browsejob/>}/>
+
 
     </Routes>
     

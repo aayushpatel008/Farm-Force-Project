@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { FaHome, FaBriefcase, FaCalendarCheck,FaFileAlt } from "react-icons/fa";
+import { FaHome, FaBriefcase, FaCalendarCheck,FaFileAlt,FaUsers} from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import "./sidebar.css";
@@ -24,6 +24,7 @@ const Sidebar = () => {
     setShowLogoutModal(false);
     // existing logout logic — navigates to "/"
     navigate('/');
+    
   };
 
   const handleCancelLogout = () => {
@@ -53,7 +54,10 @@ const Sidebar = () => {
           <FaCalendarCheck className="sidebar-icon" />
           <span className='text'>Attendance</span>
         </Link>
-
+       <Link to="/jobprovider/Browse" className='Dashboard'>
+          <FaUsers className="sidebar-icon" />
+          <span className='text'>Browse Workers</span>
+        </Link>
         {/* Logout button — unchanged visually, now opens modal */}
         <button className='logout' onClick={handleLogoutClick}>
           <FiLogOut className="logout-icon" />
