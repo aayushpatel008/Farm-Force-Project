@@ -10,6 +10,7 @@ const jobpost=require('./Routes/jobpostroutes');
 const Activejob=require('./Routes/ActiveJobPosting');
 
 const WorkerApplication=require('./Routes/Workerpostroutes')
+const Workercard1=require('./Routes/WorkercardRoutes');
 
 const jobCrudRoutes = require("./Routes/jobcrudroutes");
 
@@ -33,6 +34,9 @@ app.use('/api',jobpost);
 app.use('/api',WorkerApplication);
 app.use('/api/active',Activejob);
 app.use("/api", jobCrudRoutes); 
+app.use('/api',Workercard1);
+
+
 
 
 
