@@ -1,122 +1,574 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import Sidebar1 from "./Sidebar";
 import "./worker.css";
 
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
+const getAvatarColor = (str = "") => {
+  const colors = ["green", "teal", "amber", "blue", "coral", "purple"];
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return colors[Math.abs(hash) % colors.length];
+};
+
+const getInitials = (name = "") =>
+  name.split(" ").map((w) => w[0]).join("").toUpperCase().slice(0, 2) || "??";
+
+const getApplicantInitials = (firstName = "", lastName = "") =>
+  ((firstName[0] || "") + (lastName[0] || "")).toUpperCase() || "??";
+
+const getTag = (category = "", title = "") => {
+  const src = (category || title).toLowerCase();
+  if (src.includes("harvest"))  return { label: "Harvesting",  color: "green"  };
+  if (src.includes("plant"))    return { label: "Planting",    color: "teal"   };
+  if (src.includes("irrigat"))  return { label: "Irrigation",  color: "orange" };
+  if (src.includes("spray"))    return { label: "Spraying",    color: "blue"   };
+  if (src.includes("weed"))     return { label: "Weeding",     color: "red"    };
+  if (src.includes("sort"))     return { label: "Sorting",     color: "purple" };
+  if (src.includes("tractor"))  return { label: "Machinery",   color: "orange" };
+  if (src.includes("driver"))   return { label: "Transport",   color: "blue"   };
+  return { label: category || "General", color: "green" };
+};
+
+const parseSkills = (skills) => {
+  if (!skills) return [];
+  if (Array.isArray(skills)) return skills;
+  return skills.split(",").map((s) => s.trim()).filter(Boolean);
+};
+
+// ─────────────────────────────────────────────────────────────
+// FALLBACK JOBS
+// ─────────────────────────────────────────────────────────────
+
+const fallbackJobs = [
+  { _id:"fb1", title:"Harvesting – Wheat Field", farmName:"Green Valley Farms", city:"Nashik", state:"Maharashtra", experienceRequired:"No experience required", jobCategory:"Harvesting", salary:"₹500", payType:"Per Day", duration:"2 Days", employmentType:"Full-day", startDate:null, endDate:null, deadline:null, farmAddress:"Survey No. 45, Green Valley Road", workersNeeded:8, description:"Seasonal harvesting work on wheat fields. Tasks include manual cutting, bundling, and loading. Tools and gloves will be provided.", status:"open" },
+  { _id:"fb2", title:"Planting – Paddy Field", farmName:"Sunrise Agro Farms", city:"Kolhapur", state:"Maharashtra", experienceRequired:"Beginner-friendly", jobCategory:"Planting", salary:"₹450", payType:"Per Day", duration:"3 Days", employmentType:"Part-time", startDate:null, endDate:null, deadline:null, farmAddress:"Plot 12, Sunrise Road, Hatkanangle", workersNeeded:12, description:"Help with rice seedling transplantation in flooded paddy fields. Training provided on-site.", status:"open" },
+  { _id:"fb3", title:"Irrigation – Sugarcane", farmName:"Bhumi Farm Co.", city:"Solapur", state:"Maharashtra", experienceRequired:"1 yr preferred", jobCategory:"Irrigation", salary:"₹550", payType:"Per Day", duration:"1 Day", employmentType:"Full-day", startDate:null, endDate:null, deadline:null, farmAddress:"Village Borgaon, Tal. Barshi", workersNeeded:4, description:"Operate irrigation channels and pumps across sugarcane sections. Knowledge of drip irrigation is a plus.", status:"open" },
+  { _id:"fb4", title:"Spraying – Cotton Farm", farmName:"AgroTech Fields", city:"Akola", state:"Maharashtra", experienceRequired:"Experience required", jobCategory:"Spraying", salary:"₹600", payType:"Per Day", duration:"2 Days", employmentType:"Part-time", startDate:null, endDate:null, deadline:null, farmAddress:"Field Block D, AgroTech Complex", workersNeeded:6, description:"Apply pesticides and fertilizers using backpack sprayers. Safety gear mandatory and provided.", status:"open" },
+  { _id:"fb5", title:"Weeding – Vegetable Farm", farmName:"Fresh Root Farms", city:"Pune", state:"Maharashtra", experienceRequired:"No experience required", jobCategory:"Weeding", salary:"₹400", payType:"Per Day", duration:"4 Days", employmentType:"Full-day", startDate:null, endDate:null, deadline:null, farmAddress:"Gat No. 88, Urse Road, Maval", workersNeeded:10, description:"Manual weeding between vegetable rows. Light physical work, suitable for all ages.", status:"open" },
+  { _id:"fb6", title:"Sorting – Fruit Orchard", farmName:"Golden Harvest Ltd", city:"Satara", state:"Maharashtra", experienceRequired:"Beginner-friendly", jobCategory:"Sorting", salary:"₹480", payType:"Per Day", duration:"2 Days", employmentType:"Part-time", startDate:null, endDate:null, deadline:null, farmAddress:"Orchard Zone B, Panchgani-Mahabaleshwar Road", workersNeeded:7, description:"Sort and grade freshly picked fruits by size, color, and quality. Clean indoor/shed environment.", status:"open" },
+];
+
+// ─────────────────────────────────────────────────────────────
+// STATS
+// ─────────────────────────────────────────────────────────────
+
 const stats = [
-  {
-    title: "Active Job Applications", value: "5", sub: "↑ +2 applied today", color: "green",
-    icon: <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>,
-  },
-  {
-    title: "Ongoing Work", value: "2", sub: "↑ +1 started today", color: "teal",
-    icon: <svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>,
-  },
-  {
-    title: "Total Earnings", value: "₹6,500", sub: "↑ +₹850 today", color: "gold",
-    icon: <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
-  },
+  { title:"Active Job Applications", value:"5", sub:"↑ +2 applied today", color:"green", icon:<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
+  { title:"Ongoing Work", value:"2", sub:"↑ +1 started today", color:"teal", icon:<svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg> },
+  { title:"Total Earnings", value:"₹6,500", sub:"↑ +₹850 today", color:"gold", icon:<svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
 ];
 
-const jobs = [
-  {
-    initials: "GV", avatarColor: "green",
-    title: "Harvesting – Wheat Field", farm: "Green Valley Farms", sub: "Agriculture Work",
-    location: "2.5 km away", experience: "No experience required",
-    tag: "Harvesting", tagColor: "green",
-    pay: "₹500/day", duration: "2 Days", type: "Full-day",
-    description: "Seasonal harvesting work on wheat fields. Tasks include manual cutting, bundling, and loading. Tools and gloves will be provided by the farm.",
-    skills: ["Physical fitness", "Outdoor work", "Teamwork"],
-    contact: "Farm Manager – Ramesh Patel · Report at 8:00 AM",
-  },
-  {
-    initials: "SA", avatarColor: "teal",
-    title: "Planting – Paddy Field", farm: "Sunrise Agro Farms", sub: "Agriculture Work",
-    location: "1.2 km away", experience: "Beginner-friendly",
-    tag: "Planting", tagColor: "teal",
-    pay: "₹450/day", duration: "3 Days", type: "Part-time",
-    description: "Help with rice seedling transplantation in flooded paddy fields. Training provided on-site. Rubber boots will be supplied.",
-    skills: ["Willingness to learn", "Stamina"],
-    contact: "Supervisor – Kavita Mehta · Report at 7:30 AM",
-  },
-  {
-    initials: "BF", avatarColor: "amber",
-    title: "Irrigation – Sugarcane", farm: "Bhumi Farm Co.", sub: "Agriculture Work",
-    location: "3.8 km away", experience: "1 yr preferred",
-    tag: "Irrigation", tagColor: "orange",
-    pay: "₹550/day", duration: "1 Day", type: "Full-day",
-    description: "Operate irrigation channels and pumps across sugarcane sections. Knowledge of drip irrigation is a plus.",
-    skills: ["Irrigation basics", "Equipment handling"],
-    contact: "Owner – Suresh Bhumi · Report at 9:00 AM",
-  },
-  {
-    initials: "AT", avatarColor: "blue",
-    title: "Spraying – Cotton Farm", farm: "AgroTech Fields", sub: "Agriculture Work",
-    location: "5.0 km away", experience: "Experience required",
-    tag: "Spraying", tagColor: "blue",
-    pay: "₹600/day", duration: "2 Days", type: "Part-time",
-    description: "Apply pesticides and fertilizers using backpack sprayers. Safety gear mandatory and provided. Must have prior spraying experience.",
-    skills: ["Sprayer operation", "Safety protocols", "Pest awareness"],
-    contact: "Field Lead – Arjun Desai · Report at 8:30 AM",
-  },
-  {
-    initials: "FR", avatarColor: "coral",
-    title: "Weeding – Vegetable Farm", farm: "Fresh Root Farms", sub: "Agriculture Work",
-    location: "0.8 km away", experience: "No experience required",
-    tag: "Weeding", tagColor: "red",
-    pay: "₹400/day", duration: "4 Days", type: "Full-day",
-    description: "Manual weeding between vegetable rows. Light physical work, suitable for all ages. Comfortable outdoor setting.",
-    skills: ["Attention to detail", "Physical endurance"],
-    contact: "Manager – Priya Sharma · Report at 7:00 AM",
-  },
-  {
-    initials: "GH", avatarColor: "purple",
-    title: "Sorting – Fruit Orchard", farm: "Golden Harvest Ltd", sub: "Agriculture Work",
-    location: "4.2 km away", experience: "Beginner-friendly",
-    tag: "Sorting", tagColor: "purple",
-    pay: "₹480/day", duration: "2 Days", type: "Part-time",
-    description: "Sort and grade freshly picked fruits by size, color, and quality. Clean indoor/shed environment. Good for detail-oriented workers.",
-    skills: ["Quality checking", "Sorting", "Basic counting"],
-    contact: "Supervisor – Meena Joshi · Report at 10:00 AM",
-  },
-];
+// ─────────────────────────────────────────────────────────────
+// JOB CARD
+// ─────────────────────────────────────────────────────────────
 
-const applications = [
-  { title: "Planting – Rice Field",     farm: "Sunrise Agro Farms",  applied: "2 hours ago",  status: "pending",  statusLabel: "Under Review",           message: "Your application is being reviewed by the farm owner." },
-  { title: "Harvesting – Wheat Field",  farm: "Green Valley Farms",  applied: "1 day ago",    status: "accepted", statusLabel: "Selected – Join Tomorrow", message: "You have been selected. Please report at 8 AM." },
-  { title: "Irrigation – Cotton Farm",  farm: "AgroTech Fields",     applied: "3 days ago",   status: "rejected", statusLabel: "Not Selected",            message: "Thank you for applying. This position has been filled." },
-  { title: "Weeding – Vegetable Plot",  farm: "Fresh Root Farms",    applied: "5 hours ago",  status: "pending",  statusLabel: "Under Review",           message: "Your application is being reviewed by the farm owner." },
-];
-
-export default function WorkerHome() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [selectedJob, setSelectedJob] = useState(null);
+function JobCard({ job, onClick, isSelected }) {
+  const tag         = getTag(job.jobCategory, job.title);
+  const initials    = getInitials(job.farmName);
+  const avatarColor = getAvatarColor(job.farmName);
+  const locationText = [job.city, job.state].filter(Boolean).join(", ") || job.farmAddress || "Location N/A";
 
   return (
-    <div className="wk-root">
-      <Sidebar1 isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+    <div className={`job-card${isSelected ? " job-card--selected" : ""}`} onClick={() => onClick(job)}>
+      <div className="job-card__top">
+        <div className={`job-card__avatar avatar--${avatarColor}`}>{initials}</div>
+        <div className="job-card__info">
+          <p className="job-card__title">{job.title}</p>
+          <p className="job-card__farm">{job.farmName}</p>
+          <p className="job-card__sub">Agriculture Work</p>
+        </div>
+      </div>
+      <div className="job-card__meta">
+        <div className="job-meta__row">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          {locationText}
+        </div>
+        <div className="job-meta__row">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          {job.experienceRequired || "Open to all"}
+        </div>
+      </div>
+      <div className="job-card__footer">
+        <span className={`tag tag--${tag.color}`}>{tag.label}</span>
+      </div>
+    </div>
+  );
+}
 
-      <div className={`wk-page ${sidebarOpen ? "" : "wk-page--wide"}`}>
+// ─────────────────────────────────────────────────────────────
+// JOB DETAIL MODAL
+// ─────────────────────────────────────────────────────────────
 
-        {/* ── HERO ───────────────────────────────── */}
+function JobDetailModal({ job, onClose }) {
+  if (!job) return null;
+  const tag         = getTag(job.jobCategory, job.title);
+  const initials    = getInitials(job.farmName);
+  const avatarColor = getAvatarColor(job.farmName);
+
+  return (
+    <div className="wjd-overlay" onClick={(e) => e.target.classList.contains("wjd-overlay") && onClose()}>
+      <div className="wjd-modal">
+        <div className="wjd-header">
+          <div className="wjd-header__geo">
+            <div className="wjd-hcircle wjd-hcircle--lg" />
+            <div className="wjd-hcircle wjd-hcircle--sm" />
+          </div>
+          <button className="wjd-close" onClick={onClose}>✕</button>
+          <div className="wjd-header__top">
+            <div className={`wjd-avatar avatar--${avatarColor}`}>{initials}</div>
+            <div>
+              <div className={`tag tag--${tag.color}`} style={{ marginBottom: 8 }}>{tag.label}</div>
+              <p className="wjd-title">{job.title}</p>
+              <p className="wjd-farm">{job.farmName}</p>
+            </div>
+          </div>
+        </div>
+        <div className="wjd-body">
+          <div className="wjd-section">
+            <div className="wjd-section__header"><span className="wjd-section__icon">💼</span><span className="wjd-section__title">Role Overview</span></div>
+            <div className="wjd-section__divider" />
+            <div className="wjd-grid">
+              <div className="wjd-field"><p className="wjd-label">Job Title</p><p className="wjd-val">{job.title || "—"}</p></div>
+              <div className="wjd-field"><p className="wjd-label">Category</p><p className="wjd-val">{job.jobCategory || "—"}</p></div>
+              <div className="wjd-field"><p className="wjd-label">Farm / Company</p><p className="wjd-val">{job.farmName || "—"}</p></div>
+              <div className="wjd-field"><p className="wjd-label">Employment Type</p><p className="wjd-val">{job.employmentType || "—"}</p></div>
+              <div className="wjd-field"><p className="wjd-label">Workers Needed</p><p className="wjd-val">{job.workersNeeded ?? "—"}</p></div>
+              <div className="wjd-field"><p className="wjd-label">Experience</p><p className="wjd-val">{job.experienceRequired || "Open to all"}</p></div>
+            </div>
+          </div>
+          <div className="wjd-section">
+            <div className="wjd-section__header"><span className="wjd-section__icon">💰</span><span className="wjd-section__title">Pay &amp; Compensation</span></div>
+            <div className="wjd-section__divider" />
+            <div className="wjd-grid">
+              <div className="wjd-field"><p className="wjd-label">Salary</p><p className="wjd-val wjd-val--highlight">{job.salary || "—"}</p></div>
+              <div className="wjd-field"><p className="wjd-label">Pay Type</p><p className="wjd-val">{job.payType || "—"}</p></div>
+            </div>
+          </div>
+          <div className="wjd-section">
+            <div className="wjd-section__header"><span className="wjd-section__icon">📅</span><span className="wjd-section__title">Work Schedule</span></div>
+            <div className="wjd-section__divider" />
+            <div className="wjd-grid">
+              <div className="wjd-field"><p className="wjd-label">Duration</p><p className="wjd-val">{job.duration || "—"}</p></div>
+              <div className="wjd-field"><p className="wjd-label">Application Deadline</p><p className="wjd-val">{formatDate(job.deadline)}</p></div>
+              <div className="wjd-field"><p className="wjd-label">Start Date</p><p className="wjd-val">{formatDate(job.startDate)}</p></div>
+              <div className="wjd-field"><p className="wjd-label">End Date</p><p className="wjd-val">{formatDate(job.endDate)}</p></div>
+            </div>
+          </div>
+          <div className="wjd-section">
+            <div className="wjd-section__header"><span className="wjd-section__icon">📍</span><span className="wjd-section__title">Work Location</span></div>
+            <div className="wjd-section__divider" />
+            <div className="wjd-grid">
+              <div className="wjd-field"><p className="wjd-label">City / Village</p><p className="wjd-val">{job.city || "—"}</p></div>
+              <div className="wjd-field"><p className="wjd-label">State</p><p className="wjd-val">{job.state || "—"}</p></div>
+              <div className="wjd-field wjd-field--full"><p className="wjd-label">Farm Address</p><p className="wjd-val">{job.farmAddress || "—"}</p></div>
+            </div>
+          </div>
+          {job.description && (
+            <div className="wjd-section">
+              <div className="wjd-section__header"><span className="wjd-section__icon">📝</span><span className="wjd-section__title">About the Role</span></div>
+              <div className="wjd-section__divider" />
+              <p className="wjd-desc">{job.description}</p>
+            </div>
+          )}
+        </div>
+        <div className="wjd-footer">
+          <button className="wjd-btn-secondary" onClick={onClose}>Close</button>
+          <button className="wjd-btn-primary">Apply Now</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// APPLICANT CARD
+// ─────────────────────────────────────────────────────────────
+
+function ApplicantCard({ applicant, onView, openDotMenu, setOpenDotMenu, dotMenuRef }) {
+  const { firstName, lastName, jobTitle, location, experienceRequired, createdAt, skills, email } = applicant;
+  const fullName    = `${firstName || ""} ${lastName || ""}`.trim() || "Unknown";
+  const initials    = getApplicantInitials(firstName, lastName);
+  const avatarColor = getAvatarColor(firstName + lastName);
+  const parsedSkills = parseSkills(skills);
+  const isOpen = openDotMenu === applicant._id;
+
+  return (
+    <div className="wra-card" onClick={() => onView(applicant)}>
+
+      {/* 3-dot menu */}
+      <div
+        className="wra-card__dot-wrap"
+        ref={isOpen ? dotMenuRef : null}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          className="wra-card__dot-btn"
+          title="More options"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenDotMenu((prev) => (prev === applicant._id ? null : applicant._id));
+          }}
+        >
+          ⋮
+        </button>
+        {isOpen && (
+          <div className="wra-card__dot-menu">
+            <button onClick={() => { onView(applicant); setOpenDotMenu(null); }}>👁 View Profile</button>
+            <button onClick={() => setOpenDotMenu(null)}>💬 Message</button>
+            <button onClick={() => setOpenDotMenu(null)}>📅 Schedule</button>
+            <button className="wra-card__dot-menu--danger" onClick={() => setOpenDotMenu(null)}>✕ Remove</button>
+          </div>
+        )}
+      </div>
+
+      {/* Top: avatar + name */}
+      <div className="wra-card__top">
+        <div className={`wra-card__avatar avatar--${avatarColor}`}>{initials}</div>
+        <div className="wra-card__identity">
+          <h4 className="wra-card__name">{fullName}</h4>
+          <p className="wra-card__role">{jobTitle || "—"}</p>
+        </div>
+      </div>
+
+      {/* Detail rows */}
+      <div className="wra-card__details">
+        <div className="wra-card__detail-row">
+          <span className="wra-card__detail-item">
+            <span className="wra-card__detail-icon">📍</span>
+            {location || "—"}
+          </span>
+          <span className="wra-card__detail-item">
+            <span className="wra-card__detail-icon">🧑‍🌾</span>
+            {experienceRequired || "—"}
+          </span>
+        </div>
+        {email && email !== "—" && (
+          <div className="wra-card__detail-row">
+            <span className="wra-card__detail-item">
+              <span className="wra-card__detail-icon">📧</span>
+              {email}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Divider */}
+      <div className="wra-card__divider" />
+
+      {/* Skills */}
+      <div className="wra-card__skills">
+        {parsedSkills.slice(0, 3).map((skill, i) => (
+          <span key={i} className="wra-card__skill-tag">{skill}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// APPLICANT MODAL
+// ─────────────────────────────────────────────────────────────
+
+function ApplicantModal({ applicant, onClose }) {
+  if (!applicant) return null;
+
+  const {
+    firstName, lastName, jobTitle, location, experienceRequired, createdAt,
+    jobDuration, employmentType, numberOfWorkers, salaryRange, availableFrom, skills,
+    dateOfBirth, gender, nationality,
+    email, phone, emergencyContact,
+    description,
+  } = applicant;
+
+  const fullName     = `${firstName || ""} ${lastName || ""}`.trim() || "Unknown";
+  const initials     = getApplicantInitials(firstName, lastName);
+  const avatarColor  = getAvatarColor(firstName + lastName);
+  const parsedSkills = parseSkills(skills);
+
+  return (
+    <div className="wra-modal-overlay" onClick={(e) => e.target.classList.contains("wra-modal-overlay") && onClose()}>
+      <div className="wra-modal">
+        {/* Banner */}
+        <div className="wra-modal__banner">
+          <div className="wra-modal__banner-left">
+            <div className={`wra-modal__avatar avatar--${avatarColor}`}>{initials}</div>
+            <div>
+              <h2 className="wra-modal__name">{fullName}</h2>
+              <span className="wra-modal__role-label">{jobTitle || "Applicant"}</span>
+              <div className="wra-modal__banner-meta">
+                {location && location !== "—" && <span>📍 {location}</span>}
+                {experienceRequired && experienceRequired !== "—" && <span>🧑‍🌾 {experienceRequired} exp</span>}
+                {createdAt && <span>📅 Applied {formatDate(createdAt)}</span>}
+              </div>
+            </div>
+          </div>
+          <button className="wra-modal__close" onClick={onClose}>✕</button>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="wra-modal__scroll">
+
+          {/* Row 1: Personal + Contact side by side */}
+          <div className="wra-modal__row">
+
+            {/* Personal Details */}
+            <div className="wra-modal__section">
+              <div className="wra-modal__section-heading"><span>🪪</span> Personal Details</div>
+              <div className="wra-modal__section-divider" />
+              <div className="wra-modal__fields-grid">
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">FIRST NAME</span>
+                  <span className="wra-modal__field-val">{firstName || "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">LAST NAME</span>
+                  <span className="wra-modal__field-val">{lastName || "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">DATE OF BIRTH</span>
+                  <span className="wra-modal__field-val">{dateOfBirth ? formatDate(dateOfBirth) : "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">GENDER</span>
+                  <span className="wra-modal__field-val">{gender || "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">NATIONALITY</span>
+                  <span className="wra-modal__field-val">{nationality || "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">LOCATION</span>
+                  <span className="wra-modal__field-val"><span className="wra-modal__field-icon">📍</span>{location || "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Information */}
+            <div className="wra-modal__section">
+              <div className="wra-modal__section-heading"><span>📞</span> Contact Information</div>
+              <div className="wra-modal__section-divider" />
+              <div className="wra-modal__fields-single">
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">EMAIL ADDRESS</span>
+                  <span className="wra-modal__field-val"><span className="wra-modal__field-icon">📧</span>{email || "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">PHONE NUMBER</span>
+                  <span className="wra-modal__field-val"><span className="wra-modal__field-icon">📱</span>{phone || "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+                <div className="wra-modal__field">
+                  <span className="wra-modal__field-label">EMERGENCY CONTACT</span>
+                  <span className="wra-modal__field-val"><span className="wra-modal__field-icon">🚨</span>{emergencyContact || "—"}</span>
+                  <div className="wra-modal__field-line" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Work Details — full width */}
+          <div className="wra-modal__section wra-modal__section--full">
+            <div className="wra-modal__section-heading"><span>💼</span> Work Details</div>
+            <div className="wra-modal__section-divider" />
+
+            <div className="wra-modal__field wra-modal__field--fullw">
+              <span className="wra-modal__field-label">JOB TITLE</span>
+              <span className="wra-modal__field-val"><span className="wra-modal__field-icon">🧑‍🌾</span>{jobTitle || "—"}</span>
+              <div className="wra-modal__field-line" />
+            </div>
+
+            <div className="wra-modal__fields-grid">
+              <div className="wra-modal__field">
+                <span className="wra-modal__field-label">JOB DURATION</span>
+                <span className="wra-modal__field-val"><span className="wra-modal__field-icon">⏱️</span>{jobDuration || "—"}</span>
+                <div className="wra-modal__field-line" />
+              </div>
+              <div className="wra-modal__field">
+                <span className="wra-modal__field-label">EMPLOYMENT TYPE</span>
+                <span className="wra-modal__field-val"><span className="wra-modal__field-icon">👥</span>{employmentType || "—"}</span>
+                <div className="wra-modal__field-line" />
+              </div>
+              <div className="wra-modal__field">
+                <span className="wra-modal__field-label">WORKERS AVAILABLE</span>
+                <span className="wra-modal__field-val"><span className="wra-modal__field-icon">🔢</span>{numberOfWorkers ?? "—"}</span>
+                <div className="wra-modal__field-line" />
+              </div>
+              <div className="wra-modal__field">
+                <span className="wra-modal__field-label">EXPECTED SALARY</span>
+                <span className="wra-modal__field-val">
+                  <span className="wra-modal__field-icon">💰</span>
+                  {salaryRange || <em className="wra-modal__not-provided">Not provided</em>}
+                </span>
+                <div className="wra-modal__field-line" />
+              </div>
+              <div className="wra-modal__field">
+                <span className="wra-modal__field-label">YEARS OF EXPERIENCE</span>
+                <span className="wra-modal__field-val"><span className="wra-modal__field-icon">📅</span>{experienceRequired || "—"}</span>
+                <div className="wra-modal__field-line" />
+              </div>
+              <div className="wra-modal__field">
+                <span className="wra-modal__field-label">AVAILABLE FROM</span>
+                <span className="wra-modal__field-val">
+                  <span className="wra-modal__field-icon">📅</span>
+                  {availableFrom ? formatDate(availableFrom) : <em className="wra-modal__not-provided">Not provided</em>}
+                </span>
+                <div className="wra-modal__field-line" />
+              </div>
+            </div>
+
+            {parsedSkills.length > 0 && (
+              <div className="wra-modal__field wra-modal__field--fullw" style={{ marginTop: 8 }}>
+                <span className="wra-modal__field-label">SKILLS</span>
+                <div className="wra-modal__skills-row">
+                  {parsedSkills.map((skill, i) => (
+                    <span key={i} className="wra-modal__skill-pill">{skill}</span>
+                  ))}
+                </div>
+                <div className="wra-modal__field-line" />
+              </div>
+            )}
+          </div>
+
+          {/* About Me */}
+          {description && (
+            <div className="wra-modal__section wra-modal__section--full">
+              <div className="wra-modal__section-heading"><span>📝</span> About Me</div>
+              <div className="wra-modal__section-divider" />
+              <p className="wra-modal__bio">{description}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="wra-modal__footer">
+          <button className="wra-modal__btn-light" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// SKELETON LOADER
+// ─────────────────────────────────────────────────────────────
+
+function JobSkeleton() {
+  return (
+    <div className="job-card job-card--skeleton">
+      <div className="job-card__top">
+        <div className="skel skel--avatar" />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+          <div className="skel skel--line skel--lg" />
+          <div className="skel skel--line skel--md" />
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+        <div className="skel skel--line skel--sm" />
+        <div className="skel skel--line skel--sm" />
+      </div>
+      <div className="job-card__footer">
+        <div className="skel skel--pill" />
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// MAIN COMPONENT
+// ─────────────────────────────────────────────────────────────
+
+export default function WorkerHome() {
+  // Jobs state
+  const [jobPostings, setJobPostings] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [selectedJob, setSelectedJob] = useState(null);
+
+  // Applicants state
+  const [applicants,        setApplicants]        = useState([]);
+  const [loadingApplicants, setLoadingApplicants] = useState(true);
+  const [selectedApplicant, setSelectedApplicant] = useState(null);
+
+  // 3-dot menu state
+  const [openDotMenu, setOpenDotMenu] = useState(null);
+  const dotMenuRef = useRef(null);
+
+  // Close dot menu on outside click
+  useEffect(() => {
+    const handleOutside = (e) => {
+      if (dotMenuRef.current && !dotMenuRef.current.contains(e.target)) {
+        setOpenDotMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handleOutside);
+    return () => document.removeEventListener("mousedown", handleOutside);
+  }, []);
+
+  // Fetch jobs
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/active/ActiveJobPosting", { withCredentials: true })
+      .then((res) => setJobPostings(res.data))
+      .catch((err) => console.error("Failed to load jobs:", err))
+      .finally(() => setLoadingJobs(false));
+  }, []);
+
+  // Fetch applicants
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/Workercard", { withCredentials: true })
+      .then((res) => {
+        const sorted = (res.data || []).sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setApplicants(sorted);
+      })
+      .catch((err) => console.error("Failed to load applicants:", err))
+      .finally(() => setLoadingApplicants(false));
+  }, []);
+
+  const displayJobs = jobPostings.length > 0 ? jobPostings.slice(0, 6) : [];
+  const useFallback = !loadingJobs && jobPostings.length === 0;
+
+  return (
+    <div className="worker-layout">
+
+      {/* Sidebar — CSS :has(.Side-bar.expanded) handles the margin automatically */}
+      <Sidebar1 />
+
+      {/* Single scrollable main area */}
+      <div className="wk-page">
+
+        {/* ── HERO ── */}
         <section className="hero">
           <div className="hero__geo">
             <div className="hero__circle-lg" />
             <div className="hero__circle-md" />
             <div className="hero__circle-sm" />
           </div>
-
           <div className="hero__content">
             <div className="hero__left">
               <div className="hero__badge">
                 <div className="hero__badge-dot" />
                 <span>Worker Dashboard</span>
               </div>
-
               <p className="hero__greeting">Welcome back, Aayush 🌾</p>
-              <p className="hero__sub">
-                You have <strong>3 new job matches</strong> near you. Start applying today.
-              </p>
-
               <div className="hero__btns">
                 <button className="hero__cta-primary">
                   Browse New Jobs
@@ -127,12 +579,10 @@ export default function WorkerHome() {
                 <button className="hero__cta-secondary">My Applications</button>
               </div>
             </div>
-
-            
           </div>
         </section>
 
-        {/* ── STATS ──────────────────────────────── */}
+        {/* ── STATS ── */}
         <section className="stats">
           {stats.map((s, i) => (
             <div className={`stat-card stat-card--${s.color}`} key={i}>
@@ -146,142 +596,91 @@ export default function WorkerHome() {
           ))}
         </section>
 
-        {/* ── AVAILABLE JOBS ─────────────────────── */}
+        {/* ── JOBS NEAR YOU ── */}
         <section className="section">
           <div className="section__head">
-            <h2 className="section__title">Jobs Available Near You</h2>
+            <h2 className="section__title">
+              Jobs Available Near You
+              {useFallback && <span className="wjd-fallback-badge">Sample listings</span>}
+            </h2>
             <a href="#" className="section__link">View all</a>
           </div>
           <div className="jobs-grid">
-            {jobs.map((j, i) => (
-              <div className="job-card" key={i} onClick={() => setSelectedJob(j)}>
-                <div className="job-card__top">
-                  <div className={`job-card__avatar avatar--${j.avatarColor}`}>
-                    {j.initials}
-                  </div>
-                  <div className="job-card__info">
-                    <p className="job-card__title">{j.title}</p>
-                    <p className="job-card__farm">{j.farm}</p>
-                    <p className="job-card__sub">{j.sub}</p>
-                  </div>
-                </div>
-
-                <div className="job-card__meta">
-                  <div className="job-meta__row">
-                    <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {j.location}
-                  </div>
-                  <div className="job-meta__row">
-                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    {j.experience}
-                  </div>
-                </div>
-
-                <div className="job-card__footer">
-                  <span className={`tag tag--${j.tagColor}`}>{j.tag}</span>
-                </div>
-              </div>
+            {loadingJobs && <><JobSkeleton /><JobSkeleton /><JobSkeleton /></>}
+            {!loadingJobs && displayJobs.map((job) => (
+              <JobCard key={job._id} job={job} onClick={setSelectedJob} isSelected={selectedJob?._id === job._id} />
+            ))}
+            {useFallback && fallbackJobs.map((job) => (
+              <JobCard key={job._id} job={job} onClick={setSelectedJob} isSelected={selectedJob?._id === job._id} />
             ))}
           </div>
         </section>
 
-        {/* ── RECENT APPLICATIONS ────────────────── */}
+        {/* ── RECENT APPLICANTS ── */}
         <section className="section">
-          <div className="section__head">
-            <h2 className="section__title">Recent Applications</h2>
-            <a href="#" className="section__link">View all</a>
+          <div className="wra-header">
+            <div className="wra-header__left">
+              <span className="wra-header__icon">👥</span>
+              <span className="wra-header__title">Recent Applicants</span>
+            </div>
+            <div className="wra-header__right">
+              <span>View All</span>
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,8 12,8 9,5"/><polyline points="9,11 12,8"/></svg>
+            </div>
           </div>
-          <div className="apps-grid">
-            {applications.map((a, i) => (
-              <div className="app-card" key={i}>
-                <div className="app-card__top">
-                  <div>
-                    <p className="app-card__title">{a.title}</p>
-                    <p className="app-card__farm">{a.farm}</p>
-                  </div>
-                  <span className={`status-badge status-badge--${a.status}`}>{a.statusLabel}</span>
-                </div>
-                <p className="app-card__msg">{a.message}</p>
-                <div className="app-card__footer">
-                  <span className="app-card__date">Applied {a.applied}</span>
-                  <button className="btn-details">View Details</button>
-                </div>
+
+          {/* Loading */}
+          {loadingApplicants && (
+            <div className="wra-loading">
+              <div className="wra-spinner" />
+              <p className="wra-loading__text">Loading applicants…</p>
+            </div>
+          )}
+
+          {/* Empty */}
+          {!loadingApplicants && applicants.length === 0 && (
+            <div className="wra-empty">
+              <div className="wra-empty__icon">
+                <svg viewBox="0 0 24 24">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
               </div>
-            ))}
-          </div>
+              <p className="wra-empty__title">No applicants yet</p>
+              <p className="wra-empty__sub">Applicants will appear here once they register.</p>
+            </div>
+          )}
+
+          {/* Cards grid */}
+          {!loadingApplicants && applicants.length > 0 && (
+            <div className="wra-cards">
+              {applicants.slice(0, 4).map((applicant, i) => (
+                <ApplicantCard
+                  key={applicant._id || i}
+                  applicant={applicant}
+                  onView={setSelectedApplicant}
+                  openDotMenu={openDotMenu}
+                  setOpenDotMenu={setOpenDotMenu}
+                  dotMenuRef={dotMenuRef}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
       </div>
 
-      {/* ── JOB DETAIL MODAL ───────────────────── */}
+      {/* ── JOB DETAIL MODAL ── */}
       {selectedJob && (
-        <div className="modal-overlay open" onClick={(e) => e.target.classList.contains("modal-overlay") && setSelectedJob(null)}>
-          <div className="modal">
-            <div className="modal__header">
-              <div className="modal__header-geo">
-                <div className="modal__hcircle modal__hcircle--lg" />
-                <div className="modal__hcircle modal__hcircle--sm" />
-              </div>
-              <button className="modal__close" onClick={() => setSelectedJob(null)}>✕</button>
-              <div className="modal__header-badge">
-                <span>{selectedJob.tag}</span>
-              </div>
-              <p className="modal__title">{selectedJob.title}</p>
-              <p className="modal__farm">{selectedJob.farm}</p>
-            </div>
-
-            <div className="modal__body">
-              <div className="modal__meta-grid">
-                <div className="modal__meta-item">
-                  <p className="modal__meta-label">Pay</p>
-                  <p className="modal__meta-val">{selectedJob.pay}</p>
-                </div>
-                <div className="modal__meta-item">
-                  <p className="modal__meta-label">Duration</p>
-                  <p className="modal__meta-val">{selectedJob.duration}</p>
-                </div>
-                <div className="modal__meta-item">
-                  <p className="modal__meta-label">Location</p>
-                  <p className="modal__meta-val">{selectedJob.location}</p>
-                </div>
-                <div className="modal__meta-item">
-                  <p className="modal__meta-label">Type</p>
-                  <p className="modal__meta-val">{selectedJob.type}</p>
-                </div>
-              </div>
-
-              <div>
-                <p className="modal__section-label">About this job</p>
-                <p className="modal__desc">{selectedJob.description}</p>
-              </div>
-
-              <div>
-                <p className="modal__section-label">Skills required</p>
-                <div className="modal__skills">
-                  {selectedJob.skills.map((s, i) => (
-                    <span key={i} className="modal__skill-pill">{s}</span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="modal__contact">
-                <div className="modal__contact-icon">
-                  <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                </div>
-                <div>
-                  <p className="modal__contact-label">Report to</p>
-                  <p className="modal__contact-val">{selectedJob.contact}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="modal__footer">
-              <button className="btn-apply-modal">Apply Now</button>
-            </div>
-          </div>
-        </div>
+        <JobDetailModal job={selectedJob} onClose={() => setSelectedJob(null)} />
       )}
 
+      {/* ── APPLICANT DETAIL MODAL ── */}
+      {selectedApplicant && (
+        <ApplicantModal applicant={selectedApplicant} onClose={() => setSelectedApplicant(null)} />
+      )}
     </div>
   );
 }

@@ -998,3 +998,112 @@
   transform: translateY(-2px);
   box-shadow: 0 10px 24px rgba(176, 48, 48, 0.35);
 }
+
+/* ============================================================
+   BOXED SECTION CARDS — jobposting-section-cards.css
+   Import this after jobposting.css and jobposting-sections.css,
+   or paste these rules at the bottom of jobposting.css.
+   All selectors are new — nothing existing is touched.
+   ============================================================ */
+
+/* Each section is its own card — mirrors .jp-card exactly */
+.jobposting-page .jp-form-section-card {
+  background: var(--jp-white);
+  border-radius: 28px;
+  padding: 28px 36px;
+  box-shadow: 0 8px 30px rgba(26, 61, 34, 0.08);
+  border: 1px solid var(--jp-green-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  animation: jp-fadeUp 0.5s ease 0.1s both;
+}
+
+/* The section-header and divider already exist from jobposting-sections.css.
+   Inside a card they just need a little bottom breathing room. */
+.jobposting-page .jp-form-section-card .jp-section-header {
+  margin-bottom: 4px;
+}
+
+.jobposting-page .jp-form-section-card .jp-section-divider {
+  margin-bottom: 24px;
+}
+
+/* jp-form inside a section card — same gap as the original form */
+.jobposting-page .jp-form-section-card .jp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* Title card: compact — just enough padding for the header block */
+.jobposting-page .jp-form-title-card {
+  padding-bottom: 24px;
+}
+
+/* Buttons card: compact — no top border needed, buttons are already styled */
+.jobposting-page .jp-form-buttons-card {
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+/* ============================================================
+   LAYOUT FIX — jobposting-layout-fix.css
+   Import LAST, after all other jobposting CSS files.
+   Fixes: empty right-side space, unequal columns, inputs
+   not stretching. Zero design changes.
+   ============================================================ */
+
+/* ── Form wrapper: full width, no centering constraints ── */
+.jobposting-page .jp-form {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Section cards: full width, no max-width cap ── */
+.jobposting-page .jp-form-section-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Grid row: strict 2 equal columns, full width ── */
+.jobposting-page .jp-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Every field wrapper fills its grid cell completely ── */
+.jobposting-page .jp-field {
+  width: 100%;
+  min-width: 0;          /* prevents grid blowout from long content */
+  box-sizing: border-box;
+}
+
+/* ── All inputs, selects, textareas fill their field wrapper ── */
+.jobposting-page .jp-field input,
+.jobposting-page .jp-field select,
+.jobposting-page .jp-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Full-width fields span both columns ── */
+.jobposting-page .jp-full {
+  grid-column: span 2;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Mobile: collapse to single column ── */
+@media (max-width: 600px) {
+  .jobposting-page .jp-row {
+    grid-template-columns: 1fr;
+  }
+
+  .jobposting-page .jp-full {
+    grid-column: span 1;
+  }
+}

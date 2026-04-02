@@ -75,12 +75,16 @@ const JobDetailModal = ({ job, onClose }) => {
         {/* Grid of job details */}
         <div className="jp-modal-grid">
           <div className="jp-modal-field">
-            <label>📍 Location</label>
-            <p>{job.location || "N/A"}</p>
+            <label>🏢 Farm / Company</label>
+            <p>{job.farmName || "N/A"}</p>
+          </div>
+          <div className="jp-modal-field">
+            <label>🏷️ Job Category</label>
+            <p>{job.jobCategory || "N/A"}</p>
           </div>
           <div className="jp-modal-field">
             <label>💰 Salary</label>
-            <p>{job.salary || "N/A"}</p>
+            <p>{job.salary ? `${job.salary} (${job.payType || "N/A"})` : "N/A"}</p>
           </div>
           <div className="jp-modal-field">
             <label>👥 Workers Needed</label>
@@ -99,6 +103,14 @@ const JobDetailModal = ({ job, onClose }) => {
             <p>{deadline}</p>
           </div>
           <div className="jp-modal-field">
+            <label>🗓️ Start Date</label>
+            <p>{formatDate(job.startDate)}</p>
+          </div>
+          <div className="jp-modal-field">
+            <label>🗓️ End Date</label>
+            <p>{formatDate(job.endDate)}</p>
+          </div>
+          <div className="jp-modal-field">
             <label>💼 Employment Type</label>
             <p>{job.employmentType || "N/A"}</p>
           </div>
@@ -106,7 +118,23 @@ const JobDetailModal = ({ job, onClose }) => {
             <label>⏳ Duration</label>
             <p>{job.duration || "N/A"}</p>
           </div>
+          <div className="jp-modal-field">
+            <label>🏙️ City / Village</label>
+            <p>{job.city || "N/A"}</p>
+          </div>
+          <div className="jp-modal-field">
+            <label>📍 State</label>
+            <p>{job.state || "N/A"}</p>
+          </div>
         </div>
+
+        {/* Farm Address */}
+        {job.farmAddress && (
+          <div className="jp-modal-desc" style={{ marginBottom: 16 }}>
+            <label>🗺️ Farm Address</label>
+            <p>{job.farmAddress}</p>
+          </div>
+        )}
 
         {/* Only shows description section if description exists */}
         {job.description && (
@@ -189,7 +217,7 @@ const JobCard = ({ job, onDelete, onView, onEdit }) => {
   const status = job.status || "open";
   const applicants = job.applicantsCount ?? job.applicants ?? 0;
   const wage = job.salary || "N/A";
-  const location = job.location || "N/A";
+  const location = job.city && job.state ? `${job.city}, ${job.state}` : job.city || job.state || "N/A";
 
   return (
     <div className="job-card" onClick={() => onView(job)} style={{ cursor: "pointer" }}>
@@ -254,10 +282,17 @@ const Jobposting = () => {
     duration: "",
     employmentType: "Full-time",
     workersNeeded: 1,
-    location: "",
+    jobCategory: "",
+    farmName: "",
     salary: "",
+    payType: "Per Day",
     experienceRequired: "",
     deadline: "",
+    startDate: "",
+    endDate: "",
+    farmAddress: "",
+    city: "",
+    state: "",
     description: "",
   });
 
@@ -295,10 +330,17 @@ const Jobposting = () => {
       duration: formData.duration,
       employmentType: formData.employmentType,
       workersNeeded: formData.workersNeeded,
-      location: formData.location,
+      jobCategory: formData.jobCategory,
+      farmName: formData.farmName,
       salary: formData.salary,
+      payType: formData.payType,
       experienceRequired: formData.experienceRequired,
       deadline: formData.deadline,
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      farmAddress: formData.farmAddress,
+      city: formData.city,
+      state: formData.state,
       description: formData.description,
     };
 
@@ -313,10 +355,17 @@ const Jobposting = () => {
         duration: "",
         employmentType: "Full-time",
         workersNeeded: 1,
-        location: "",
+        jobCategory: "",
+        farmName: "",
         salary: "",
+        payType: "Per Day",
         experienceRequired: "",
         deadline: "",
+        startDate: "",
+        endDate: "",
+        farmAddress: "",
+        city: "",
+        state: "",
         description: "",
       });
       fetchJobs(); // Refresh job list
@@ -360,11 +409,18 @@ const Jobposting = () => {
       duration: job.duration || "",
       employmentType: job.employmentType || "Full-time",
       workersNeeded: job.workersNeeded || 1,
-      location: job.location || "",
+      jobCategory: job.jobCategory || "",
+      farmName: job.farmName || "",
       salary: job.salary || "",
+      payType: job.payType || "Per Day",
       experienceRequired: job.experienceRequired || "",
       // Strip time from ISO date string so the date input works correctly
       deadline: job.deadline ? job.deadline.split("T")[0] : "",
+      startDate: job.startDate ? job.startDate.split("T")[0] : "",
+      endDate: job.endDate ? job.endDate.split("T")[0] : "",
+      farmAddress: job.farmAddress || "",
+      city: job.city || "",
+      state: job.state || "",
       description: job.description || "",
     });
   };
@@ -432,8 +488,9 @@ const Jobposting = () => {
               </div>
             </div>
 
-            {/* Edit form — 2-column layout to prevent horizontal scroll */}
+            {/* Edit form — 2-column layout */}
             <div className="jp-form">
+              {/* Row 1: Job Title | Job Duration */}
               <div className="jp-row">
                 <div className="jp-field">
                   <label>Job Title</label>
@@ -443,6 +500,10 @@ const Jobposting = () => {
                   <label>Job Duration</label>
                   <input type="text" name="duration" value={editForm.duration} onChange={handleEditChange} />
                 </div>
+              </div>
+
+              {/* Row 2: Employment Type | Workers Needed */}
+              <div className="jp-row">
                 <div className="jp-field">
                   <label>Employment Type</label>
                   <select name="employmentType" value={editForm.employmentType} onChange={handleEditChange}>
@@ -456,15 +517,37 @@ const Jobposting = () => {
                   <input type="number" name="workersNeeded" value={editForm.workersNeeded} onChange={handleEditChange} min="1" />
                 </div>
               </div>
+
+              {/* Row 3: Job Category | Farm / Company Name */}
               <div className="jp-row">
                 <div className="jp-field">
-                  <label>Location</label>
-                  <input type="text" name="location" value={editForm.location} onChange={handleEditChange} />
+                  <label>Job Category</label>
+                  <input type="text" name="jobCategory" value={editForm.jobCategory} onChange={handleEditChange} />
                 </div>
+                <div className="jp-field">
+                  <label>Farm / Company Name</label>
+                  <input type="text" name="FarmName" value={editForm.farmName} onChange={handleEditChange} />
+                </div>
+              </div>
+
+              {/* Row 4: Salary Range | Pay Type */}
+              <div className="jp-row">
                 <div className="jp-field">
                   <label>Salary Range</label>
                   <input type="text" name="salary" value={editForm.salary} onChange={handleEditChange} />
                 </div>
+                <div className="jp-field">
+                  <label>Pay Type</label>
+                  <select name="payType" value={editForm.payType} onChange={handleEditChange}>
+                    <option value="Per Day">Per Day</option>
+                    <option value="Per Hour">Per Hour</option>
+                    <option value="Per Task">Per Task</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Row 5: Experience Required | Application Deadline */}
+              <div className="jp-row">
                 <div className="jp-field">
                   <label>Experience Required</label>
                   <input type="text" name="experienceRequired" value={editForm.experienceRequired} onChange={handleEditChange} />
@@ -480,6 +563,53 @@ const Jobposting = () => {
                   />
                 </div>
               </div>
+
+              {/* Row 6: Start Date | End Date */}
+              <div className="jp-row">
+                <div className="jp-field">
+                  <label>Start Date</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={editForm.startDate}
+                    onChange={handleEditChange}
+                  />
+                </div>
+                <div className="jp-field">
+                  <label>End Date</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={editForm.endDate}
+                    onChange={handleEditChange}
+                  />
+                </div>
+              </div>
+
+              {/* Row 7: City / Village | State */}
+              <div className="jp-row">
+                <div className="jp-field">
+                  <label>City / Village</label>
+                  <input type="text" name="city" value={editForm.city} onChange={handleEditChange} />
+                </div>
+                <div className="jp-field">
+                  <label>State</label>
+                  <input type="text" name="state" value={editForm.state} onChange={handleEditChange} />
+                </div>
+              </div>
+
+              {/* Row 8: Farm Address (full width) */}
+              <div className="jp-field jp-full">
+                <label>Farm Address</label>
+                <input
+                  type="text"
+                  name="farmAddress"
+                  value={editForm.farmAddress}
+                  onChange={handleEditChange}
+                />
+              </div>
+
+              {/* Row 9: Short Description (full width) */}
               <div className="jp-field jp-full">
                 <label>Short Description &amp; Skills Required</label>
                 <textarea rows="4" name="description" value={editForm.description} onChange={handleEditChange}></textarea>
@@ -534,16 +664,28 @@ const Jobposting = () => {
         </div>
 
         {/* ── CREATE NEW JOB FORM ── */}
-        <div className="jp-card">
-          <div className="jp-card-header">
+
+        {/* Top card: title + subtitle only */}
+        <div className="jp-card jp-form-title-card">
+          <div className="jp-card-header" style={{ marginBottom: 0, paddingBottom: 0, borderBottom: "none" }}>
             <div className="icon-wrap">🌾</div>
             <div className="jp-card-header-text">
               <h2>Upload New Job</h2>
               <p>Fill in the details to post a new agricultural position</p>
             </div>
           </div>
+        </div>
+
+        {/* ── SECTION 1: Role Overview ── */}
+        <div className="jp-form-section-card">
+          <div className="jp-section-header">
+            <span className="jp-section-icon">💼</span>
+            <span className="jp-section-title">Role Overview</span>
+          </div>
+          <div className="jp-section-divider" />
 
           <div className="jp-form">
+            {/* Row 1: Job Title | Job Duration */}
             <div className="jp-row">
               <div className="jp-field">
                 <label>Job Title</label>
@@ -565,6 +707,10 @@ const Jobposting = () => {
                   placeholder="e.g. 3 months"
                 />
               </div>
+            </div>
+
+            {/* Row 2: Employment Type | Workers Needed */}
+            <div className="jp-row">
               <div className="jp-field">
                 <label>Employment Type</label>
                 <select
@@ -590,17 +736,43 @@ const Jobposting = () => {
               </div>
             </div>
 
+            {/* Row 3: Job Category | Farm / Company Name */}
             <div className="jp-row">
               <div className="jp-field">
-                <label>Location</label>
+                <label>Job Category / Tag</label>
                 <input
                   type="text"
-                  name="location"
-                  value={formData.location}
+                  name="jobCategory"
+                  value={formData.jobCategory}
                   onChange={handleChange}
-                  placeholder="City, State"
+                  placeholder="e.g. Harvesting, Irrigation"
                 />
               </div>
+              <div className="jp-field">
+                <label>Farm / Company Name</label>
+                <input
+                  type="text"
+                  name="farmName"
+                  value={formData.farmName}
+                  onChange={handleChange}
+                  placeholder="e.g. Green Acres Farm"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── SECTION 2: Pay & Compensation ── */}
+        <div className="jp-form-section-card">
+          <div className="jp-section-header">
+            <span className="jp-section-icon">💰</span>
+            <span className="jp-section-title">Pay &amp; Compensation</span>
+          </div>
+          <div className="jp-section-divider" />
+
+          <div className="jp-form">
+            {/* Row 4: Salary Range | Pay Type */}
+            <div className="jp-row">
               <div className="jp-field">
                 <label>Salary Range</label>
                 <input
@@ -608,9 +780,36 @@ const Jobposting = () => {
                   name="salary"
                   value={formData.salary}
                   onChange={handleChange}
-                  placeholder="e.g. $18–$24/hr"
+                  placeholder="e.g. $18–$24"
                 />
               </div>
+              <div className="jp-field">
+                <label>Pay Type</label>
+                <select
+                  name="payType"
+                  value={formData.payType}
+                  onChange={handleChange}
+                >
+                  <option value="Per Day">Per Day</option>
+                  <option value="Per Hour">Per Hour</option>
+                  <option value="Per Task">Per Task</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── SECTION 3: Work Schedule ── */}
+        <div className="jp-form-section-card">
+          <div className="jp-section-header">
+            <span className="jp-section-icon">📅</span>
+            <span className="jp-section-title">Work Schedule</span>
+          </div>
+          <div className="jp-section-divider" />
+
+          <div className="jp-form">
+            {/* Row 5: Experience Required | Application Deadline */}
+            <div className="jp-row">
               <div className="jp-field">
                 <label>Experience Required</label>
                 <input
@@ -633,6 +832,87 @@ const Jobposting = () => {
               </div>
             </div>
 
+            {/* Row 6: Start Date | End Date */}
+            <div className="jp-row">
+              <div className="jp-field">
+                <label>Start Date</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate || ""}
+                  onChange={handleChange}
+                />
+              </div>
+              <div className="jp-field">
+                <label>End Date</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate || ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── SECTION 4: Work Location ── */}
+        <div className="jp-form-section-card">
+          <div className="jp-section-header">
+            <span className="jp-section-icon">📍</span>
+            <span className="jp-section-title">Work Location</span>
+          </div>
+          <div className="jp-section-divider" />
+
+          <div className="jp-form">
+            {/* Row 7: City / Village | State */}
+            <div className="jp-row">
+              <div className="jp-field">
+                <label>City / Village</label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  placeholder="e.g. Oakfield"
+                />
+              </div>
+              <div className="jp-field">
+                <label>State</label>
+                <input
+                  type="text"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  placeholder="e.g. Iowa"
+                />
+              </div>
+            </div>
+
+            {/* Row 8: Farm Address (full width) */}
+            <div className="jp-field jp-full">
+              <label>Farm Address</label>
+              <input
+                type="text"
+                name="farmAddress"
+                value={formData.farmAddress}
+                onChange={handleChange}
+                placeholder="e.g. 1234 County Road 12, Township Name"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ── SECTION 5: About the Role ── */}
+        <div className="jp-form-section-card">
+          <div className="jp-section-header">
+            <span className="jp-section-icon">📝</span>
+            <span className="jp-section-title">About the Role</span>
+          </div>
+          <div className="jp-section-divider" />
+
+          <div className="jp-form">
+            {/* Row 9: Short Description (full width) */}
             <div className="jp-field jp-full">
               <label>Short Description &amp; Skills Required</label>
               <textarea
@@ -644,8 +924,11 @@ const Jobposting = () => {
               ></textarea>
             </div>
           </div>
+        </div>
 
-          <div className="jp-buttons">
+        {/* Bottom card: action buttons */}
+        <div className="jp-card jp-form-buttons-card">
+          <div className="jp-buttons" style={{ marginTop: 0, paddingTop: 0, borderTop: "none" }}>
             <button className="jp-btn light">
               <i className="fas fa-camera"></i> Add Photo
             </button>
