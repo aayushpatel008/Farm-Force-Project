@@ -1,136 +1,315 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import "./BrowseWorker.css";
 import Sidebar1 from "../Sidebar";
 
+// ─────────────────────────────────────────────────────────────
+// HELPERS
+// ─────────────────────────────────────────────────────────────
 
-const jobsData = [
-  {
-    id: 1,
-    initials: "SR",
-    color: "#2d6a4f",
-    title: "Tractor Driver",
-    company: "Sharma Farms",
-    location: "Kalol, Gandhinagar",
-    wage: "₹500/day",
-    wageNum: 500,
-    badge: "Hiring Now",
-    badgeColor: "#d1fae5",
-    badgeText: "#065f46",
-    description: "Experienced tractor driver needed for wheat plowing across 40 acres of agricultural land.",
-    tags: ["Tractor Driving", "Plowing"],
-    duration: "3 Weeks",
-    availability: "Now",
-    skills: ["Valid tractor license", "2+ years experience", "Knowledge of soil preparation"],
-    fullDescription:
-      "We are looking for a skilled tractor driver to operate and maintain our tractor fleet for seasonal plowing and field preparation. The job involves operating heavy farm equipment, ensuring safe and efficient operation, and minor equipment maintenance. Accommodation may be provided on-site.",
-    experience: "2+ Years",
-    type: "Tractor Driving",
-  },
-  {
-    id: 2,
-    initials: "PK",
-    color: "#1b4332",
-    title: "Harvesting Supervisor",
-    company: "Patel Krishi Kendra",
-    location: "Deesa, Banaskantha",
-    wage: "₹650/day",
-    wageNum: 650,
-    badge: "Urgent",
-    badgeColor: "#fef3c7",
-    badgeText: "#92400e",
-    description: "Lead a harvesting team for cotton picking season. Must have prior supervisory experience.",
-    tags: ["Harvesting", "Team Lead"],
-    duration: "1 Month",
-    availability: "This Week",
-    skills: ["Cotton harvesting expertise", "Team management", "Physical fitness"],
-    fullDescription:
-      "Patel Krishi Kendra is hiring a harvest supervisor for the upcoming cotton season. You will manage a team of 10–15 workers, coordinate daily task assignments, track progress, and ensure quality control during picking. Knowledge of cotton grading is a plus.",
-    experience: "2+ Years",
-    type: "Harvesting",
-  },
-  {
-    id: 3,
-    initials: "AG",
-    color: "#40916c",
-    title: "Irrigation Technician",
-    company: "Agrofield Gujarat",
-    location: "Anand, Gujarat",
-    wage: "₹420/day",
-    wageNum: 420,
-    badge: "Hiring Now",
-    badgeColor: "#d1fae5",
-    badgeText: "#065f46",
-    description: "Install and manage drip irrigation systems across vegetable farms in Anand district.",
-    tags: ["Irrigation", "Drip System"],
-    duration: "Weekly",
-    availability: "Now",
-    skills: ["Drip irrigation setup", "Pipe fitting basics", "Field mapping"],
-    fullDescription:
-      "We are expanding our drip irrigation network across 25 hectares of vegetable cultivation. Duties include laying pipe lines, setting up emitters, testing pressure, and maintaining the system weekly. Training will be provided for the right candidate.",
-    experience: "1+ Year",
-    type: "Irrigation",
-  },
-  {
-    id: 4,
-    initials: "VF",
-    color: "#74c69d",
-    title: "Livestock Caretaker",
-    company: "Varma Farms",
-    location: "Mehsana, Gujarat",
-    wage: "₹380/day",
-    wageNum: 380,
-    badge: "Open",
-    badgeColor: "#ede9fe",
-    badgeText: "#5b21b6",
-    description: "Care for dairy cattle herd including feeding, milking, and basic health monitoring.",
-    tags: ["Livestock Handling", "Dairy"],
-    duration: "Monthly",
-    availability: "This Week",
-    skills: ["Cattle handling", "Basic veterinary knowledge", "Milking machines"],
-    fullDescription:
-      "Varma Farms is a growing dairy operation seeking a dedicated livestock caretaker. Responsibilities include feeding schedules, operating milking equipment, monitoring animal health, and maintaining clean pen environments. Accommodation and meals provided.",
-    experience: "1+ Year",
-    type: "Livestock Handling",
-  },
-  {
-    id: 5,
-    initials: "NK",
-    color: "#52b788",
-    title: "Farm Helper (General)",
-    company: "Narmada Krishi",
-    location: "Vadodara, Gujarat",
-    wage: "₹300/day",
-    wageNum: 300,
-    badge: "New",
-    badgeColor: "#dbeafe",
-    badgeText: "#1e40af",
-    description: "General farm helper needed for daily tasks including weeding, watering, and crop care.",
-    tags: ["Harvesting", "No Experience"],
-    duration: "1 Day",
-    availability: "Now",
-    skills: ["Willingness to work outdoors", "Physical stamina"],
-    fullDescription:
-      "No experience needed! Narmada Krishi is hiring daily farm helpers for routine agricultural tasks including manual weeding, hand watering, sorting produce, and general field maintenance. Daily wages paid same evening. Great opportunity for first-time workers.",
-    experience: "No Experience",
-    type: "Harvesting",
-  },
-];
+const getInitials = (name = "") =>
+  name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "??";
 
-const SKILLS = ["Tractor Driving", "Harvesting", "Irrigation", "Livestock Handling"];
+const AVATAR_COLORS = ["#2d6a4f", "#1b4332", "#40916c", "#74c69d", "#52b788", "#1f4d2a"];
+const getColor = (str = "") => {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+};
+
+const getTags = (category = "", title = "") => {
+  const src = (category + " " + title).toLowerCase();
+  const tags = [];
+  if (src.includes("tractor") || src.includes("driver"))  tags.push("Tractor Driving");
+  if (src.includes("harvest"))                             tags.push("Harvesting");
+  if (src.includes("irrigat"))                             tags.push("Irrigation");
+  if (src.includes("livestock") || src.includes("dairy")) tags.push("Livestock Handling");
+  if (src.includes("plant"))                               tags.push("Planting");
+  if (src.includes("spray"))                               tags.push("Spraying");
+  if (src.includes("weed"))                                tags.push("Weeding");
+  if (src.includes("sort"))                                tags.push("Sorting");
+  if (tags.length === 0) tags.push(category || "General");
+  if (!tags.includes("No Experience") && /no.?exp/i.test(src)) tags.push("No Experience");
+  return tags;
+};
+
+const getBadge = (job) => {
+  if (job.status === "urgent") return { label: "Urgent",     bg: "#fef3c7", text: "#92400e" };
+  if (job.status === "new")    return { label: "New",        bg: "#dbeafe", text: "#1e40af" };
+  if (job.status === "open")   return { label: "Hiring Now", bg: "#d1fae5", text: "#065f46" };
+  return                              { label: "Open",       bg: "#ede9fe", text: "#5b21b6" };
+};
+
+const normaliseExp = (exp = "") => {
+  if (!exp || /no.?exp/i.test(exp)) return "No Experience";
+  if (/1/i.test(exp))               return "1+ Year";
+  if (/2/i.test(exp))               return "2+ Years";
+  return exp;
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+};
+
+const getTag = (category = "", title = "") => {
+  const src = (category || title).toLowerCase();
+  if (src.includes("harvest"))  return { label: "Harvesting",  color: "green"  };
+  if (src.includes("plant"))    return { label: "Planting",    color: "teal"   };
+  if (src.includes("irrigat"))  return { label: "Irrigation",  color: "orange" };
+  if (src.includes("spray"))    return { label: "Spraying",    color: "blue"   };
+  if (src.includes("weed"))     return { label: "Weeding",     color: "red"    };
+  if (src.includes("sort"))     return { label: "Sorting",     color: "purple" };
+  if (src.includes("tractor"))  return { label: "Machinery",   color: "orange" };
+  if (src.includes("driver"))   return { label: "Transport",   color: "blue"   };
+  return { label: category || "General", color: "green" };
+};
+
+const SKILLS_LIST         = ["Tractor Driving", "Harvesting", "Irrigation", "Livestock Handling"];
 const AVAILABILITY_OPTIONS = ["Now", "This Week", "This Month"];
 
-export default function Browsejob() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [expandedJob, setExpandedJob] = useState(null);
-  const [appliedJobs, setAppliedJobs] = useState([]);
+// ─────────────────────────────────────────────────────────────
+// JOB DETAIL MODAL  (wja-modal-*)
+// Copied verbatim from worker.jsx.
+// Receives the RAW job object from the backend — no mapping.
+// ─────────────────────────────────────────────────────────────
 
-  const [minWage, setMinWage] = useState(0);
-  const [maxWage, setMaxWage] = useState(2000);
-  const [selectedSkills, setSelectedSkills] = useState([]);
-  const [experienceLevel, setExperienceLevel] = useState("All");
-  const [location, setLocation] = useState("");
+function JobDetailModal({ job, onClose }) {
+  if (!job) return null;
+
+  const tag          = getTag(job.jobCategory, job.title);
+  const initials     = getInitials(job.farmName || "");
+  const avatarColor  = getColor(job.farmName || "");
+  const locationText =
+    [job.city, job.state].filter(Boolean).join(", ") || job.farmAddress || "—";
+
+  return (
+    <div
+      className="wja-modal-overlay"
+      onClick={(e) =>
+        e.target.classList.contains("wja-modal-overlay") && onClose()
+      }
+    >
+      <div className="wja-modal">
+
+        {/* Banner */}
+        <div className="wja-modal__banner">
+          <div className="wja-modal__banner-left">
+            <div className="wja-modal__avatar" style={{ background: avatarColor }}>
+              {initials}
+            </div>
+            <div>
+              <h2 className="wja-modal__name">{job.title}</h2>
+              <span className="wja-modal__role-label">{job.farmName}</span>
+              <div className="wja-modal__banner-meta">
+                {locationText && locationText !== "—" && <span>📍 {locationText}</span>}
+                {job.jobCategory && <span>🌾 {job.jobCategory}</span>}
+                {job.status      && <span>✅ {job.status}</span>}
+              </div>
+            </div>
+          </div>
+          <button className="wja-modal__close" onClick={onClose}>✕</button>
+        </div>
+
+        {/* Scrollable body */}
+        <div className="wja-modal__scroll">
+
+          {/* Row 1: Role Overview + Pay side by side */}
+          <div className="wja-modal__row">
+
+            {/* Role Overview */}
+            <div className="wja-modal__section">
+              <div className="wja-modal__section-heading"><span>💼</span> Role Overview</div>
+              <div className="wja-modal__section-divider" />
+              <div className="wja-modal__fields-grid">
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">CATEGORY</span>
+                  <span className="wja-modal__field-val">{job.jobCategory || "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">EMPLOYMENT TYPE</span>
+                  <span className="wja-modal__field-val">{job.employmentType || "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">WORKERS NEEDED</span>
+                  <span className="wja-modal__field-val">{job.workersNeeded ?? "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">EXPERIENCE</span>
+                  <span className="wja-modal__field-val">{job.experienceRequired || "Open to all"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+              </div>
+            </div>
+
+            {/* Pay & Schedule */}
+            <div className="wja-modal__section">
+              <div className="wja-modal__section-heading"><span>💰</span> Pay &amp; Schedule</div>
+              <div className="wja-modal__section-divider" />
+              <div className="wja-modal__fields-single">
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">SALARY</span>
+                  <span className="wja-modal__field-val">
+                    <span className="wja-modal__field-icon">💰</span>
+                    {job.salary || "—"}
+                  </span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">PAY TYPE</span>
+                  <span className="wja-modal__field-val">{job.payType || "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">DURATION</span>
+                  <span className="wja-modal__field-val">
+                    <span className="wja-modal__field-icon">⏱️</span>
+                    {job.duration || "—"}
+                  </span>
+                  <div className="wja-modal__field-line" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Location & Dates — full width */}
+          <div className="wja-modal__section wja-modal__section--full">
+            <div className="wja-modal__section-heading"><span>📍</span> Location &amp; Dates</div>
+            <div className="wja-modal__section-divider" />
+
+            <div className="wja-modal__fields-grid">
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">CITY / VILLAGE</span>
+                <span className="wja-modal__field-val">
+                  <span className="wja-modal__field-icon">📍</span>
+                  {job.city || "—"}
+                </span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">STATE</span>
+                <span className="wja-modal__field-val">{job.state || "—"}</span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">START DATE</span>
+                <span className="wja-modal__field-val">
+                  <span className="wja-modal__field-icon">📅</span>
+                  {formatDate(job.startDate)}
+                </span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">END DATE</span>
+                <span className="wja-modal__field-val">
+                  <span className="wja-modal__field-icon">📅</span>
+                  {formatDate(job.endDate)}
+                </span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">APPLICATION DEADLINE</span>
+                <span className="wja-modal__field-val">
+                  <span className="wja-modal__field-icon">⏰</span>
+                  {job.deadline
+                    ? formatDate(job.deadline)
+                    : <em className="wja-modal__not-provided">Not specified</em>}
+                </span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">STATUS</span>
+                <span className="wja-modal__field-val">{job.status || "—"}</span>
+                <div className="wja-modal__field-line" />
+              </div>
+            </div>
+
+            <div className="wja-modal__field wja-modal__field--fullw" style={{ marginTop: 4 }}>
+              <span className="wja-modal__field-label">FARM ADDRESS</span>
+              <span className="wja-modal__field-val">{job.farmAddress || "—"}</span>
+              <div className="wja-modal__field-line" />
+            </div>
+
+            {/* Tag chips */}
+            <div className="wja-modal__field wja-modal__field--fullw" style={{ marginTop: 8 }}>
+              <span className="wja-modal__field-label">JOB TYPE</span>
+              <div className="wja-modal__chips-row">
+                {[getTag(job.jobCategory, job.title).label, job.employmentType, job.payType]
+                  .filter(Boolean)
+                  .map((chip, i) => (
+                    <span key={i} className="wja-modal__chip-pill">{chip}</span>
+                  ))}
+              </div>
+              <div className="wja-modal__field-line" />
+            </div>
+          </div>
+
+          {/* About the Role */}
+          {job.description && (
+            <div className="wja-modal__section wja-modal__section--full">
+              <div className="wja-modal__section-heading"><span>📝</span> About the Role</div>
+              <div className="wja-modal__section-divider" />
+              <p className="wja-modal__bio">{job.description}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="wja-modal__footer">
+          <button className="wja-modal__btn-light" onClick={onClose}>Close</button>
+          <button className="wja-modal__btn-primary">Apply Now</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
+// COMPONENT
+// ─────────────────────────────────────────────────────────────
+
+export default function Browsejob() {
+  // ── Backend data
+  const [jobPostings, setJobPostings] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+
+  // ── UI state
+  const [searchQuery,          setSearchQuery]          = useState("");
+  const [expandedJob,          setExpandedJob]          = useState(null);
+  const [appliedJobs,          setAppliedJobs]          = useState([]);
+  const [minWage,              setMinWage]              = useState(0);
+  const [maxWage,              setMaxWage]              = useState(2000);
+  const [selectedSkills,       setSelectedSkills]       = useState([]);
+  const [experienceLevel,      setExperienceLevel]      = useState("All");
+  const [location,             setLocation]             = useState("");
   const [selectedAvailability, setSelectedAvailability] = useState([]);
 
+  // ── Job detail modal — holds the raw backend job object, nothing else
+  const [selectedJob, setSelectedJob] = useState(null);
+
+  // ── Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const jobsPerPage = 5;
+
+  // ── Fetch
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/active/ActiveJobPosting", { withCredentials: true })
+      .then((res) => setJobPostings(res.data))
+      .catch((err) => console.error("Failed to load jobs:", err))
+      .finally(() => setLoadingJobs(false));
+  }, []);
+
+  // ── Filter helpers
   const toggleSkill = (skill) =>
     setSelectedSkills((prev) =>
       prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
@@ -149,28 +328,72 @@ export default function Browsejob() {
     setLocation("");
     setSelectedAvailability([]);
     setSearchQuery("");
+    setCurrentPage(1);
   };
 
-  const filteredJobs = jobsData.filter((job) => {
-    if (job.wageNum < minWage || job.wageNum > maxWage) return false;
-    if (selectedSkills.length && !selectedSkills.some((s) => job.tags.includes(s) || job.type === s)) return false;
-    if (experienceLevel !== "All" && job.experience !== experienceLevel) return false;
-    if (location && !job.location.toLowerCase().includes(location.toLowerCase())) return false;
-    if (selectedAvailability.length && !selectedAvailability.includes(job.availability)) return false;
+  // ── Normalise for display/filtering only — original backend object preserved via spread
+  const normalisedJobs = jobPostings.map((job) => {
+    const wageNum = parseInt((job.salary || "0").replace(/[^\d]/g, ""), 10) || 0;
+    const tags    = getTags(job.jobCategory, job.title);
+    const badge   = getBadge(job);
+    const exp     = normaliseExp(job.experienceRequired);
+    return {
+      ...job,                 // ← all original backend fields untouched
+      _initials : getInitials(job.farmName || ""),
+      _color    : getColor(job.farmName || ""),
+      _wageNum  : wageNum,
+      _tags     : tags,
+      _badge    : badge,
+      _exp      : exp,
+      _location :
+        [job.city, job.state].filter(Boolean).join(", ") ||
+        job.farmAddress ||
+        "—",
+    };
+  });
+
+  // ── Filter
+  const filteredJobs = normalisedJobs.filter((job) => {
+    if (job._wageNum < minWage || job._wageNum > maxWage) return false;
+    if (selectedSkills.length && !selectedSkills.some((s) => job._tags.includes(s)))
+      return false;
+    if (experienceLevel !== "All" && job._exp !== experienceLevel) return false;
+    if (location && !job._location.toLowerCase().includes(location.toLowerCase()))
+      return false;
+    if (
+      selectedAvailability.length &&
+      job.availability &&
+      !selectedAvailability.includes(job.availability)
+    )
+      return false;
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       return (
-        job.title.toLowerCase().includes(q) ||
-        job.tags.some((t) => t.toLowerCase().includes(q)) ||
-        job.location.toLowerCase().includes(q)
+        (job.title    || "").toLowerCase().includes(q) ||
+        (job.farmName || "").toLowerCase().includes(q) ||
+        job._tags.some((t) => t.toLowerCase().includes(q)) ||
+        job._location.toLowerCase().includes(q)
       );
     }
     return true;
   });
 
+  // ── Pagination reset
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, minWage, maxWage, selectedSkills, experienceLevel, location, selectedAvailability]);
+
+  const totalPages      = Math.ceil(filteredJobs.length / jobsPerPage);
+  const indexOfLastJob  = currentPage * jobsPerPage;
+  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const currentJobs     = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
+
   const handleApply = (id) =>
     setAppliedJobs((prev) => (prev.includes(id) ? prev : [...prev, id]));
 
+  // ─────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────
   return (
     <div className="agri-jm__root">
       <Sidebar1 />
@@ -213,7 +436,6 @@ export default function Browsejob() {
 
           <div className="agri-jm__sb-divider" />
 
-          {/* Daily Wage */}
           <div className="agri-jm__sb-block">
             <div className="agri-jm__sb-label">Daily Wage (₹)</div>
             <div className="agri-jm__sb-wage-row">
@@ -241,10 +463,9 @@ export default function Browsejob() {
 
           <div className="agri-jm__sb-divider" />
 
-          {/* Skills */}
           <div className="agri-jm__sb-block">
             <div className="agri-jm__sb-label">Skills</div>
-            {SKILLS.map((skill) => (
+            {SKILLS_LIST.map((skill) => (
               <label key={skill} className="agri-jm__sb-check-row">
                 <input
                   type="checkbox"
@@ -259,7 +480,6 @@ export default function Browsejob() {
 
           <div className="agri-jm__sb-divider" />
 
-          {/* Experience Level */}
           <div className="agri-jm__sb-block">
             <div className="agri-jm__sb-label">Experience Level</div>
             <div className="agri-jm__sb-select-wrap">
@@ -279,7 +499,6 @@ export default function Browsejob() {
 
           <div className="agri-jm__sb-divider" />
 
-          {/* Location */}
           <div className="agri-jm__sb-block">
             <div className="agri-jm__sb-label">Location</div>
             <input
@@ -292,7 +511,6 @@ export default function Browsejob() {
 
           <div className="agri-jm__sb-divider" />
 
-          {/* Availability */}
           <div className="agri-jm__sb-block">
             <div className="agri-jm__sb-label">Availability</div>
             {AVAILABILITY_OPTIONS.map((opt) => (
@@ -317,69 +535,190 @@ export default function Browsejob() {
             </span>
           </div>
 
-          {filteredJobs.length === 0 && (
+          {/* Loading */}
+          {loadingJobs && (
+            <div className="agri-jm__no-results">
+              <div style={{ fontSize: 40 }}>🌱</div>
+              <p>Loading jobs…</p>
+            </div>
+          )}
+
+          {/* Empty */}
+          {!loadingJobs && filteredJobs.length === 0 && (
             <div className="agri-jm__no-results">
               <div style={{ fontSize: 40 }}>🌱</div>
               <p>No jobs match your filters. Try adjusting your search.</p>
             </div>
           )}
 
-          {filteredJobs.map((job) => (
-            <div key={job.id}>
-              <div className={`agri-jm__job-card${expandedJob === job.id ? " agri-jm__job-card--active" : ""}`}>
+          {/* Cards */}
+          {!loadingJobs && currentJobs.map((job) => (
+            <div key={job._id}>
+              <div className={`agri-jm__job-card${expandedJob === job._id ? " agri-jm__job-card--active" : ""}`}>
 
-                {/* ── TOP ROW: avatar + info + wage/exp ── */}
+                {/* TOP ROW */}
                 <div className="agri-jm__card-top">
-                  <div className="agri-jm__avatar" style={{ background: job.color }}>
-                    {job.initials}
+                  <div className="agri-jm__avatar" style={{ background: job._color }}>
+                    {job._initials}
                   </div>
 
                   <div className="agri-jm__card-info">
                     <div className="agri-jm__card-title-row">
                       <span className="agri-jm__job-title">{job.title}</span>
-                      
                     </div>
-                    <div className="agri-jm__company">{job.company}</div>
-                    <div className="agri-jm__location">📍 {job.location}</div>
-                    <p className="agri-jm__job-desc">{job.description}</p>
+                    <div className="agri-jm__company">{job.farmName}</div>
+                    <div className="agri-jm__location">📍 {job._location}</div>
+                    <p className="agri-jm__job-desc">{job.description || "—"}</p>
                     <div className="agri-jm__tag-row">
-                      {job.tags.map((tag) => (
+                      {job._tags.map((tag) => (
                         <span key={tag} className="agri-jm__tag">{tag}</span>
                       ))}
-                      <span className="agri-jm__duration-tag">⏱ {job.duration}</span>
+                      {job.duration && (
+                        <span className="agri-jm__duration-tag">⏱ {job.duration}</span>
+                      )}
                     </div>
                   </div>
 
-                  {/* Wage + Exp — top right, no buttons here */}
                   <div className="agri-jm__card-right">
-                    <div className="agri-jm__wage">{job.wage}</div>
-                    <div className="agri-jm__exp">Exp: {job.experience}</div>
+                    <div className="agri-jm__wage">{job.salary || "—"}</div>
+                    <div className="agri-jm__exp">Exp: {job._exp}</div>
                   </div>
                 </div>
 
-                {/* ── BOTTOM ROW: Contact + View Profile buttons ── */}
+                {/* BOTTOM ROW */}
                 <div className="agri-jm__card-actions">
                   <button
-                    className={`agri-jm__contact-action-btn${appliedJobs.includes(job.id) ? " agri-jm__contact-action-btn--done" : ""}`}
-                    onClick={() => handleApply(job.id)}
+                    className={`agri-jm__contact-action-btn${
+                      appliedJobs.includes(job._id)
+                        ? " agri-jm__contact-action-btn--done"
+                        : ""
+                    }`}
+                    onClick={() => handleApply(job._id)}
                   >
-                    {appliedJobs.includes(job.id) ? "✓ Contacted" : "Contact"}
+                    {appliedJobs.includes(job._id) ? "✓ Contacted" : "Contact"}
                   </button>
+
+                  {/*
+                    ✅ FIX: onClick passes `job` (which has all original backend
+                    fields via the ...job spread in normalisedJobs) directly into
+                    JobDetailModal. No worker data. No field mapping.
+                  */}
                   <button
                     className="agri-jm__profile-btn"
-                    onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}
+                    onClick={() => setSelectedJob(job)}
                   >
-                    {expandedJob === job.id ? "Hide Profile" : "View Profile"}
+                    View Profile
                   </button>
                 </div>
 
-                {/* ── EXPANDED DETAILS ── */}
-                
+                {/* EXPANDED DETAILS (inline — untouched) */}
+                {expandedJob === job._id && (
+                  <div className="agri-jm__expanded">
+                    <div className="agri-jm__expanded-divider" />
+                    <div className="agri-jm__expanded-grid">
+                      <div className="agri-jm__expanded-left">
+                        <div className="agri-jm__expanded-section-title">About the Role</div>
+                        <p className="agri-jm__expanded-text">
+                          {job.description || "No description provided."}
+                        </p>
+                        {job.skills && job.skills.length > 0 && (
+                          <>
+                            <div className="agri-jm__expanded-section-title">Skills Required</div>
+                            <ul className="agri-jm__skills-list">
+                              {(Array.isArray(job.skills) ? job.skills : job.skills.split(","))
+                                .map((s, i) => (
+                                  <li key={i} className="agri-jm__skill-item">
+                                    <span className="agri-jm__skill-dot" />
+                                    {s.trim()}
+                                  </li>
+                                ))}
+                            </ul>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="agri-jm__expanded-right">
+                        <div className="agri-jm__info-card">
+                          {[
+                            ["Pay Type",   job.payType        || "—"],
+                            ["Duration",   job.duration       || "—"],
+                            ["Employment", job.employmentType || "—"],
+                            ["Workers",    job.workersNeeded  ?? "—"],
+                            ["Start Date", job.startDate      || "—"],
+                            ["Deadline",   job.deadline       || "—"],
+                          ].map(([label, val]) => (
+                            <div key={label} className="agri-jm__info-row">
+                              <span>{label}</span>
+                              <strong>{val}</strong>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          className={`agri-jm__apply-btn-large${
+                            appliedJobs.includes(job._id) ? " agri-jm__apply-btn--done" : ""
+                          }`}
+                          onClick={() => handleApply(job._id)}
+                        >
+                          {appliedJobs.includes(job._id) ? "✓ Applied" : "Apply Now"}
+                        </button>
+                        <button className="agri-jm__contact-btn">Contact Farm</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
               </div>
             </div>
           ))}
+
+          {/* PAGINATION */}
+          {!loadingJobs && totalPages > 1 && (
+            <div className="agri-jm__pagination">
+              <button
+                className="agri-jm__page-btn"
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                &lt;
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  className={`agri-jm__page-btn${
+                    currentPage === page ? " agri-jm__page-btn--active" : ""
+                  }`}
+                  onClick={() => setCurrentPage(page)}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                className="agri-jm__page-btn"
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                &gt;
+              </button>
+            </div>
+          )}
         </main>
       </div>
+
+      {/*
+        ✅ FIX: JobDetailModal receives the raw job object.
+        job.title, job.farmName, job.salary, job.city, job.state,
+        job.deadline, job.description, etc. all come directly from
+        the backend — nothing is mapped, substituted, or derived.
+      */}
+      {selectedJob && (
+        <JobDetailModal
+          job={selectedJob}
+          onClose={() => setSelectedJob(null)}
+        />
+      )}
+
     </div>
   );
 }

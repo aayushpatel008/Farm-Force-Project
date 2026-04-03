@@ -69,44 +69,68 @@ const stats = [
 ];
 
 // ─────────────────────────────────────────────────────────────
-// JOB CARD
+// JOB CARD  — styled to match wra-card (Recent Applicants)
 // ─────────────────────────────────────────────────────────────
 
-function JobCard({ job, onClick, isSelected }) {
-  const tag         = getTag(job.jobCategory, job.title);
-  const initials    = getInitials(job.farmName);
-  const avatarColor = getAvatarColor(job.farmName);
+function JobCard({ job, onClick }) {
+  const tag          = getTag(job.jobCategory, job.title);
+  const initials     = getInitials(job.farmName);
+  const avatarColor  = getAvatarColor(job.farmName);
   const locationText = [job.city, job.state].filter(Boolean).join(", ") || job.farmAddress || "Location N/A";
 
+  // build a "skills-like" chip list from tag + employmentType
+  const chips = [tag.label, job.employmentType, job.payType].filter(Boolean);
+
   return (
-    <div className={`job-card${isSelected ? " job-card--selected" : ""}`} onClick={() => onClick(job)}>
-      <div className="job-card__top">
-        <div className={`job-card__avatar avatar--${avatarColor}`}>{initials}</div>
-        <div className="job-card__info">
-          <p className="job-card__title">{job.title}</p>
-          <p className="job-card__farm">{job.farmName}</p>
-          <p className="job-card__sub">Agriculture Work</p>
+    <div className="wja-card" onClick={() => onClick(job)}>
+      {/* accent bar via ::before in CSS */}
+
+      {/* Top: avatar + name */}
+      <div className="wja-card__top">
+        <div className={`wja-card__avatar avatar--${avatarColor}`}>{initials}</div>
+        <div className="wja-card__identity">
+          <h4 className="wja-card__name">{job.title}</h4>
+          <p className="wja-card__role">{job.farmName}</p>
         </div>
       </div>
-      <div className="job-card__meta">
-        <div className="job-meta__row">
-          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          {locationText}
+
+      {/* Detail rows */}
+      <div className="wja-card__details">
+        <div className="wja-card__detail-row">
+          <span className="wja-card__detail-item">
+            <span className="wja-card__detail-icon">📍</span>
+            {locationText}
+          </span>
+          <span className="wja-card__detail-item">
+            <span className="wja-card__detail-icon">🧑‍🌾</span>
+            {job.experienceRequired || "Open to all"}
+          </span>
         </div>
-        <div className="job-meta__row">
-          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          {job.experienceRequired || "Open to all"}
-        </div>
+        {job.salary && (
+          <div className="wja-card__detail-row">
+            <span className="wja-card__detail-item">
+              <span className="wja-card__detail-icon">💰</span>
+              {job.salary}{job.payType ? ` / ${job.payType}` : ""}
+            </span>
+          </div>
+        )}
       </div>
-      <div className="job-card__footer">
-        <span className={`tag tag--${tag.color}`}>{tag.label}</span>
+
+      {/* Divider */}
+      <div className="wja-card__divider" />
+
+      {/* Chips (mirror skill tags) */}
+      <div className="wja-card__chips">
+        {chips.slice(0, 3).map((chip, i) => (
+          <span key={i} className="wja-card__chip-tag">{chip}</span>
+        ))}
       </div>
     </div>
   );
 }
 
 // ─────────────────────────────────────────────────────────────
-// JOB DETAIL MODAL
+// JOB DETAIL MODAL — styled to match wra-modal (Applicant Modal)
 // ─────────────────────────────────────────────────────────────
 
 function JobDetailModal({ job, onClose }) {
@@ -114,76 +138,162 @@ function JobDetailModal({ job, onClose }) {
   const tag         = getTag(job.jobCategory, job.title);
   const initials    = getInitials(job.farmName);
   const avatarColor = getAvatarColor(job.farmName);
+  const locationText = [job.city, job.state].filter(Boolean).join(", ") || job.farmAddress || "—";
 
   return (
-    <div className="wjd-overlay" onClick={(e) => e.target.classList.contains("wjd-overlay") && onClose()}>
-      <div className="wjd-modal">
-        <div className="wjd-header">
-          <div className="wjd-header__geo">
-            <div className="wjd-hcircle wjd-hcircle--lg" />
-            <div className="wjd-hcircle wjd-hcircle--sm" />
-          </div>
-          <button className="wjd-close" onClick={onClose}>✕</button>
-          <div className="wjd-header__top">
-            <div className={`wjd-avatar avatar--${avatarColor}`}>{initials}</div>
+    <div className="wja-modal-overlay" onClick={(e) => e.target.classList.contains("wja-modal-overlay") && onClose()}>
+      <div className="wja-modal">
+
+        {/* Banner — mirrors wra-modal__banner */}
+        <div className="wja-modal__banner">
+          <div className="wja-modal__banner-left">
+            <div className={`wja-modal__avatar avatar--${avatarColor}`}>{initials}</div>
             <div>
-              <div className={`tag tag--${tag.color}`} style={{ marginBottom: 8 }}>{tag.label}</div>
-              <p className="wjd-title">{job.title}</p>
-              <p className="wjd-farm">{job.farmName}</p>
+              <h2 className="wja-modal__name">{job.title}</h2>
+              <span className="wja-modal__role-label">{job.farmName}</span>
+              <div className="wja-modal__banner-meta">
+                {locationText && locationText !== "—" && <span>📍 {locationText}</span>}
+                {job.jobCategory && <span>🌾 {job.jobCategory}</span>}
+                {job.status && <span>✅ {job.status}</span>}
+              </div>
             </div>
           </div>
+          <button className="wja-modal__close" onClick={onClose}>✕</button>
         </div>
-        <div className="wjd-body">
-          <div className="wjd-section">
-            <div className="wjd-section__header"><span className="wjd-section__icon">💼</span><span className="wjd-section__title">Role Overview</span></div>
-            <div className="wjd-section__divider" />
-            <div className="wjd-grid">
-              <div className="wjd-field"><p className="wjd-label">Job Title</p><p className="wjd-val">{job.title || "—"}</p></div>
-              <div className="wjd-field"><p className="wjd-label">Category</p><p className="wjd-val">{job.jobCategory || "—"}</p></div>
-              <div className="wjd-field"><p className="wjd-label">Farm / Company</p><p className="wjd-val">{job.farmName || "—"}</p></div>
-              <div className="wjd-field"><p className="wjd-label">Employment Type</p><p className="wjd-val">{job.employmentType || "—"}</p></div>
-              <div className="wjd-field"><p className="wjd-label">Workers Needed</p><p className="wjd-val">{job.workersNeeded ?? "—"}</p></div>
-              <div className="wjd-field"><p className="wjd-label">Experience</p><p className="wjd-val">{job.experienceRequired || "Open to all"}</p></div>
+
+        {/* Scrollable body */}
+        <div className="wja-modal__scroll">
+
+          {/* Row 1: Role Overview + Pay side by side */}
+          <div className="wja-modal__row">
+
+            {/* Role Overview */}
+            <div className="wja-modal__section">
+              <div className="wja-modal__section-heading"><span>💼</span> Role Overview</div>
+              <div className="wja-modal__section-divider" />
+              <div className="wja-modal__fields-grid">
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">CATEGORY</span>
+                  <span className="wja-modal__field-val">{job.jobCategory || "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">EMPLOYMENT TYPE</span>
+                  <span className="wja-modal__field-val">{job.employmentType || "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">WORKERS NEEDED</span>
+                  <span className="wja-modal__field-val">{job.workersNeeded ?? "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">EXPERIENCE</span>
+                  <span className="wja-modal__field-val">{job.experienceRequired || "Open to all"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+              </div>
+            </div>
+
+            {/* Pay & Schedule */}
+            <div className="wja-modal__section">
+              <div className="wja-modal__section-heading"><span>💰</span> Pay &amp; Schedule</div>
+              <div className="wja-modal__section-divider" />
+              <div className="wja-modal__fields-single">
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">SALARY</span>
+                  <span className="wja-modal__field-val"><span className="wja-modal__field-icon">💰</span>{job.salary || "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">PAY TYPE</span>
+                  <span className="wja-modal__field-val">{job.payType || "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+                <div className="wja-modal__field">
+                  <span className="wja-modal__field-label">DURATION</span>
+                  <span className="wja-modal__field-val"><span className="wja-modal__field-icon">⏱️</span>{job.duration || "—"}</span>
+                  <div className="wja-modal__field-line" />
+                </div>
+              </div>
             </div>
           </div>
-          <div className="wjd-section">
-            <div className="wjd-section__header"><span className="wjd-section__icon">💰</span><span className="wjd-section__title">Pay &amp; Compensation</span></div>
-            <div className="wjd-section__divider" />
-            <div className="wjd-grid">
-              <div className="wjd-field"><p className="wjd-label">Salary</p><p className="wjd-val wjd-val--highlight">{job.salary || "—"}</p></div>
-              <div className="wjd-field"><p className="wjd-label">Pay Type</p><p className="wjd-val">{job.payType || "—"}</p></div>
+
+          {/* Location & Dates — full width */}
+          <div className="wja-modal__section wja-modal__section--full">
+            <div className="wja-modal__section-heading"><span>📍</span> Location &amp; Dates</div>
+            <div className="wja-modal__section-divider" />
+
+            <div className="wja-modal__fields-grid">
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">CITY / VILLAGE</span>
+                <span className="wja-modal__field-val"><span className="wja-modal__field-icon">📍</span>{job.city || "—"}</span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">STATE</span>
+                <span className="wja-modal__field-val">{job.state || "—"}</span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">START DATE</span>
+                <span className="wja-modal__field-val"><span className="wja-modal__field-icon">📅</span>{formatDate(job.startDate)}</span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">END DATE</span>
+                <span className="wja-modal__field-val"><span className="wja-modal__field-icon">📅</span>{formatDate(job.endDate)}</span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">APPLICATION DEADLINE</span>
+                <span className="wja-modal__field-val">
+                  <span className="wja-modal__field-icon">⏰</span>
+                  {job.deadline ? formatDate(job.deadline) : <em className="wja-modal__not-provided">Not specified</em>}
+                </span>
+                <div className="wja-modal__field-line" />
+              </div>
+              <div className="wja-modal__field">
+                <span className="wja-modal__field-label">STATUS</span>
+                <span className="wja-modal__field-val">{job.status || "—"}</span>
+                <div className="wja-modal__field-line" />
+              </div>
+            </div>
+
+            <div className="wja-modal__field wja-modal__field--fullw" style={{ marginTop: 4 }}>
+              <span className="wja-modal__field-label">FARM ADDRESS</span>
+              <span className="wja-modal__field-val">{job.farmAddress || "—"}</span>
+              <div className="wja-modal__field-line" />
+            </div>
+
+            {/* Tag chips — mirrors skill pills */}
+            <div className="wja-modal__field wja-modal__field--fullw" style={{ marginTop: 8 }}>
+              <span className="wja-modal__field-label">JOB TYPE</span>
+              <div className="wja-modal__chips-row">
+                {[getTag(job.jobCategory, job.title).label, job.employmentType, job.payType]
+                  .filter(Boolean)
+                  .map((chip, i) => (
+                    <span key={i} className="wja-modal__chip-pill">{chip}</span>
+                  ))}
+              </div>
+              <div className="wja-modal__field-line" />
             </div>
           </div>
-          <div className="wjd-section">
-            <div className="wjd-section__header"><span className="wjd-section__icon">📅</span><span className="wjd-section__title">Work Schedule</span></div>
-            <div className="wjd-section__divider" />
-            <div className="wjd-grid">
-              <div className="wjd-field"><p className="wjd-label">Duration</p><p className="wjd-val">{job.duration || "—"}</p></div>
-              <div className="wjd-field"><p className="wjd-label">Application Deadline</p><p className="wjd-val">{formatDate(job.deadline)}</p></div>
-              <div className="wjd-field"><p className="wjd-label">Start Date</p><p className="wjd-val">{formatDate(job.startDate)}</p></div>
-              <div className="wjd-field"><p className="wjd-label">End Date</p><p className="wjd-val">{formatDate(job.endDate)}</p></div>
-            </div>
-          </div>
-          <div className="wjd-section">
-            <div className="wjd-section__header"><span className="wjd-section__icon">📍</span><span className="wjd-section__title">Work Location</span></div>
-            <div className="wjd-section__divider" />
-            <div className="wjd-grid">
-              <div className="wjd-field"><p className="wjd-label">City / Village</p><p className="wjd-val">{job.city || "—"}</p></div>
-              <div className="wjd-field"><p className="wjd-label">State</p><p className="wjd-val">{job.state || "—"}</p></div>
-              <div className="wjd-field wjd-field--full"><p className="wjd-label">Farm Address</p><p className="wjd-val">{job.farmAddress || "—"}</p></div>
-            </div>
-          </div>
+
+          {/* About the Role */}
           {job.description && (
-            <div className="wjd-section">
-              <div className="wjd-section__header"><span className="wjd-section__icon">📝</span><span className="wjd-section__title">About the Role</span></div>
-              <div className="wjd-section__divider" />
-              <p className="wjd-desc">{job.description}</p>
+            <div className="wja-modal__section wja-modal__section--full">
+              <div className="wja-modal__section-heading"><span>📝</span> About the Role</div>
+              <div className="wja-modal__section-divider" />
+              <p className="wja-modal__bio">{job.description}</p>
             </div>
           )}
         </div>
-        <div className="wjd-footer">
-          <button className="wjd-btn-secondary" onClick={onClose}>Close</button>
-          <button className="wjd-btn-primary">Apply Now</button>
+
+        {/* Footer */}
+        <div className="wja-modal__footer">
+          <button className="wja-modal__btn-light" onClick={onClose}>Close</button>
+          <button className="wja-modal__btn-primary">Apply Now</button>
         </div>
       </div>
     </div>
@@ -191,7 +301,7 @@ function JobDetailModal({ job, onClose }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// APPLICANT CARD
+// APPLICANT CARD (unchanged)
 // ─────────────────────────────────────────────────────────────
 
 function ApplicantCard({ applicant, onView, openDotMenu, setOpenDotMenu, dotMenuRef }) {
@@ -276,7 +386,7 @@ function ApplicantCard({ applicant, onView, openDotMenu, setOpenDotMenu, dotMenu
 }
 
 // ─────────────────────────────────────────────────────────────
-// APPLICANT MODAL
+// APPLICANT MODAL (unchanged)
 // ─────────────────────────────────────────────────────────────
 
 function ApplicantModal({ applicant, onClose }) {
@@ -471,19 +581,21 @@ function ApplicantModal({ applicant, onClose }) {
 
 function JobSkeleton() {
   return (
-    <div className="job-card job-card--skeleton">
-      <div className="job-card__top">
+    <div className="wja-card wja-card--skeleton">
+      <div className="wja-card__top">
         <div className="skel skel--avatar" />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
           <div className="skel skel--line skel--lg" />
           <div className="skel skel--line skel--md" />
         </div>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
         <div className="skel skel--line skel--sm" />
         <div className="skel skel--line skel--sm" />
       </div>
-      <div className="job-card__footer">
+      <div className="wja-card__divider" />
+      <div style={{ display: "flex", gap: 8 }}>
+        <div className="skel skel--pill" />
         <div className="skel skel--pill" />
       </div>
     </div>
@@ -549,10 +661,8 @@ export default function WorkerHome() {
   return (
     <div className="worker-layout">
 
-      {/* Sidebar — CSS :has(.Side-bar.expanded) handles the margin automatically */}
       <Sidebar1 />
 
-      {/* Single scrollable main area */}
       <div className="wk-page">
 
         {/* ── HERO ── */}
@@ -598,22 +708,38 @@ export default function WorkerHome() {
 
         {/* ── JOBS NEAR YOU ── */}
         <section className="section">
-          <div className="section__head">
-            <h2 className="section__title">
-              Jobs Available Near You
-              {useFallback && <span className="wjd-fallback-badge">Sample listings</span>}
-            </h2>
-            <a href="#" className="section__link">View all</a>
+          <div className="wra-header">
+            <div className="wra-header__left">
+              <span className="wra-header__icon">🌾</span>
+              <span className="wra-header__title">
+                Jobs Available Near You
+                {useFallback && <span className="wjd-fallback-badge">Sample listings</span>}
+              </span>
+            </div>
+            <div className="wra-header__right">
+              <span>View All</span>
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,8 12,8 9,5"/><polyline points="9,11 12,8"/></svg>
+            </div>
           </div>
-          <div className="jobs-grid">
-            {loadingJobs && <><JobSkeleton /><JobSkeleton /><JobSkeleton /></>}
-            {!loadingJobs && displayJobs.map((job) => (
-              <JobCard key={job._id} job={job} onClick={setSelectedJob} isSelected={selectedJob?._id === job._id} />
-            ))}
-            {useFallback && fallbackJobs.map((job) => (
-              <JobCard key={job._id} job={job} onClick={setSelectedJob} isSelected={selectedJob?._id === job._id} />
-            ))}
-          </div>
+
+          {/* Loading */}
+          {loadingJobs && (
+            <div className="wra-cards">
+              <JobSkeleton /><JobSkeleton /><JobSkeleton />
+            </div>
+          )}
+
+          {/* Cards grid — same grid class as applicants */}
+          {!loadingJobs && (displayJobs.length > 0 || useFallback) && (
+            <div className="wra-cards">
+              {displayJobs.map((job) => (
+                <JobCard key={job._id} job={job} onClick={setSelectedJob} />
+              ))}
+              {useFallback && fallbackJobs.map((job) => (
+                <JobCard key={job._id} job={job} onClick={setSelectedJob} />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ── RECENT APPLICANTS ── */}
@@ -629,7 +755,6 @@ export default function WorkerHome() {
             </div>
           </div>
 
-          {/* Loading */}
           {loadingApplicants && (
             <div className="wra-loading">
               <div className="wra-spinner" />
@@ -637,7 +762,6 @@ export default function WorkerHome() {
             </div>
           )}
 
-          {/* Empty */}
           {!loadingApplicants && applicants.length === 0 && (
             <div className="wra-empty">
               <div className="wra-empty__icon">
@@ -653,7 +777,6 @@ export default function WorkerHome() {
             </div>
           )}
 
-          {/* Cards grid */}
           {!loadingApplicants && applicants.length > 0 && (
             <div className="wra-cards">
               {applicants.slice(0, 4).map((applicant, i) => (
