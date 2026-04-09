@@ -1171,3 +1171,208 @@
   transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(26,61,34,0.3);
 }
+
+/* ── Hire button states ── */
+.bw-btn-hire--done {
+  background: #6b7280 !important;
+  box-shadow: none !important;
+  cursor: default !important;
+  transform: none !important;
+}
+
+.bw-btn-hire--error {
+  background: #b91c1c !important;
+  box-shadow: 0 4px 12px rgba(185, 28, 28, 0.3) !important;
+}
+
+.bw-btn-hire--error:hover {
+  background: #991b1b !important;
+}
+
+/* ── Inline invite feedback message ── */
+.bw-invite-msg {
+  font-size: 0.78rem;
+  font-weight: 600;
+  flex: 1;
+  align-self: center;
+}
+
+.bw-invite-msg--success { color: #1e7a3f; }
+.bw-invite-msg--error   { color: #b91c1c; }
+
+/* ── Job Selector Modal ── */
+.bw-jobsel-card {
+  max-width: 520px !important;
+}
+
+.bw-jobsel-body {
+  padding: 20px 28px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.bw-jobsel-empty {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.88rem;
+  padding: 24px 0;
+}
+
+.bw-jobsel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #f4f8f4;
+  border: 1.5px solid #c2d9c5;
+  border-radius: 14px;
+  padding: 14px 18px;
+  cursor: pointer;
+  text-align: left;
+  font-family: "DM Sans", sans-serif;
+  transition: all 0.18s ease;
+  width: 100%;
+}
+
+.bw-jobsel-row:hover {
+  background: #d4ead6;
+  border-color: #277a2e;
+  transform: translateY(-1px);
+}
+
+.bw-jobsel-row-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bw-jobsel-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #1a3d22;
+}
+
+.bw-jobsel-meta {
+  font-size: 0.78rem;
+  color: #4a6b4e;
+}
+
+.bw-jobsel-arrow {
+  font-size: 1.1rem;
+  color: #277a2e;
+  flex-shrink: 0;
+}
+
+/* ============================
+   JOB SELECTOR BAR
+   Sits between hero and main content
+   ============================ */
+.bw-job-selector-bar {
+  background: #ffffff;
+  border-bottom: 1.5px solid var(--bw-border);
+  padding: 14px 40px;
+  box-shadow: 0 2px 8px rgba(26, 61, 34, 0.06);
+}
+
+.bw-job-selector-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 900px;
+  flex-wrap: wrap;
+}
+
+.bw-job-selector-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--bw-green-dark);
+  white-space: nowrap;
+}
+
+.bw-job-selector-select {
+  flex: 1;
+  min-width: 240px;
+  max-width: 480px;
+  padding: 9px 36px 9px 14px;
+  background: var(--bw-bg);
+  border: 1.5px solid var(--bw-border);
+  border-radius: var(--bw-radius-sm);
+  color: var(--bw-text);
+  font-size: 0.88rem;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23277a2e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-color: var(--bw-bg);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bw-job-selector-select:focus {
+  border-color: var(--bw-green-mid);
+  box-shadow: 0 0 0 3px rgba(39, 122, 46, 0.1);
+  background-color: #fff;
+}
+
+.bw-job-selector-badge {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #1e7a3f;
+  background: #dcf5e0;
+  border: 1px solid #b2e4bb;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.bw-job-selector-loading {
+  font-size: 0.83rem;
+  color: var(--bw-text-muted);
+  font-style: italic;
+}
+
+.bw-job-selector-empty {
+  font-size: 0.83rem;
+  color: var(--bw-text-muted);
+}
+
+.bw-job-selector-link {
+  color: var(--bw-green-mid);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.bw-job-selector-link:hover {
+  color: var(--bw-green-dark);
+  text-decoration: underline;
+}
+
+/* ── Hire button — no-job-selected state ── */
+/* Visually muted when no job is picked yet, same size as normal */
+.bw-btn-hire--no-job {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Hire button — loading state ── */
+.bw-btn-hire--loading {
+  opacity: 0.75;
+  cursor: wait !important;
+  transform: none !important;
+}
+
+/* ── Responsive: stack job selector on small screens ── */
+@media (max-width: 600px) {
+  .bw-job-selector-bar  { padding: 12px 16px; }
+  .bw-job-selector-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .bw-job-selector-select { max-width: 100%; width: 100%; }
+}

@@ -27,6 +27,7 @@ import BrowseWorkers from "./Pages/Jobprovider/Browse";
 import WorkerProfile from "./Pages/Worker/Profile/profile";
 import WorkerAttendance from "./Pages/Worker/Attendance/Attendance";
 import Browsejob from "./Pages/Worker/Browse/BrowseWorker";
+import ApplicationWorker from "./Pages/Worker/Application/ApplicationWorker";
 
 
 function App() {
@@ -78,6 +79,7 @@ function App() {
         <Route path='/Worker/Profile/profile' element={<WorkerProfile/>}/>
         <Route path='/Worker/Attendance/Attendance' element={<WorkerAttendance/>}/>
         <Route path="Worker/Browse/BrowseWorker" element={<Browsejob/>}/>
+        <Route path="Worker/Application/ApplicationWorker" element={<ApplicationWorker/>}/>
 
 
     </Routes>

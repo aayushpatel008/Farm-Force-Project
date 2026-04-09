@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import "./BrowseWorker.css";
 import Sidebar1 from "../Sidebar";
+import { toast } from "react-toastify";
 
 // ─────────────────────────────────────────────────────────────
 // HELPERS
@@ -71,13 +72,11 @@ const getTag = (category = "", title = "") => {
   return { label: category || "General", color: "green" };
 };
 
-const SKILLS_LIST         = ["Tractor Driving", "Harvesting", "Irrigation", "Livestock Handling"];
+const SKILLS_LIST          = ["Tractor Driving", "Harvesting", "Irrigation", "Livestock Handling"];
 const AVAILABILITY_OPTIONS = ["Now", "This Week", "This Month"];
 
 // ─────────────────────────────────────────────────────────────
 // JOB DETAIL MODAL  (wja-modal-*)
-// Copied verbatim from worker.jsx.
-// Receives the RAW job object from the backend — no mapping.
 // ─────────────────────────────────────────────────────────────
 
 function JobDetailModal({ job, onClose }) {
@@ -274,7 +273,7 @@ function JobDetailModal({ job, onClose }) {
 }
 
 // ─────────────────────────────────────────────────────────────
-// COMPONENT
+// MAIN COMPONENT
 // ─────────────────────────────────────────────────────────────
 
 export default function Browsejob() {
@@ -285,7 +284,6 @@ export default function Browsejob() {
   // ── UI state
   const [searchQuery,          setSearchQuery]          = useState("");
   const [expandedJob,          setExpandedJob]          = useState(null);
-  const [appliedJobs,          setAppliedJobs]          = useState([]);
   const [minWage,              setMinWage]              = useState(0);
   const [maxWage,              setMaxWage]              = useState(2000);
   const [selectedSkills,       setSelectedSkills]       = useState([]);
@@ -293,14 +291,18 @@ export default function Browsejob() {
   const [location,             setLocation]             = useState("");
   const [selectedAvailability, setSelectedAvailability] = useState([]);
 
-  // ── Job detail modal — holds the raw backend job object, nothing else
+  // ── Apply state — keyed by job._id
+  // applyStatus[id]: 'idle' | 'loading' | 'applied' | 'error'
+  const [applyStatus, setApplyStatus] = useState({});
+
+  // ── Job detail modal
   const [selectedJob, setSelectedJob] = useState(null);
 
   // ── Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const jobsPerPage = 5;
 
-  // ── Fetch
+  // ── Fetch jobs
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/active/ActiveJobPosting", { withCredentials: true })
@@ -308,6 +310,36 @@ export default function Browsejob() {
       .catch((err) => console.error("Failed to load jobs:", err))
       .finally(() => setLoadingJobs(false));
   }, []);
+
+  // ── Apply handler
+  const handleApply = async (jobId) => {
+    if (applyStatus[jobId] === "loading" || applyStatus[jobId] === "applied") return;
+
+    setApplyStatus((prev) => ({ ...prev, [jobId]: "loading" }));
+
+    try {
+      await axios.post(
+        `http://localhost:5000/api/applications/apply/${jobId}`,
+        {},
+        { withCredentials: true }
+      );
+
+      setApplyStatus((prev) => ({ ...prev, [jobId]: "applied" }));
+      toast.success("Applied successfully!");
+
+    } catch (err) {
+      const status = err.response?.status;
+      const msg =
+        status === 409
+          ? "You have already applied."
+          : status === 401
+          ? "Please log in to apply."
+          : err.response?.data?.message || "Something went wrong.";
+
+      setApplyStatus((prev) => ({ ...prev, [jobId]: "error" }));
+      toast.error(msg);
+    }
+  };
 
   // ── Filter helpers
   const toggleSkill = (skill) =>
@@ -331,14 +363,14 @@ export default function Browsejob() {
     setCurrentPage(1);
   };
 
-  // ── Normalise for display/filtering only — original backend object preserved via spread
+  // ── Normalise jobs for display/filtering — original fields preserved via spread
   const normalisedJobs = jobPostings.map((job) => {
     const wageNum = parseInt((job.salary || "0").replace(/[^\d]/g, ""), 10) || 0;
     const tags    = getTags(job.jobCategory, job.title);
     const badge   = getBadge(job);
     const exp     = normaliseExp(job.experienceRequired);
     return {
-      ...job,                 // ← all original backend fields untouched
+      ...job,
       _initials : getInitials(job.farmName || ""),
       _color    : getColor(job.farmName || ""),
       _wageNum  : wageNum,
@@ -378,7 +410,7 @@ export default function Browsejob() {
     return true;
   });
 
-  // ── Pagination reset
+  // ── Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, minWage, maxWage, selectedSkills, experienceLevel, location, selectedAvailability]);
@@ -387,9 +419,6 @@ export default function Browsejob() {
   const indexOfLastJob  = currentPage * jobsPerPage;
   const indexOfFirstJob = indexOfLastJob - jobsPerPage;
   const currentJobs     = filteredJobs.slice(indexOfFirstJob, indexOfLastJob);
-
-  const handleApply = (id) =>
-    setAppliedJobs((prev) => (prev.includes(id) ? prev : [...prev, id]));
 
   // ─────────────────────────────────────────────────────────────
   // RENDER
@@ -585,24 +614,32 @@ export default function Browsejob() {
                   </div>
                 </div>
 
-                {/* BOTTOM ROW */}
+                {/* BOTTOM ROW — Apply button */}
                 <div className="agri-jm__card-actions">
+
+                  {/* Apply button */}
                   <button
                     className={`agri-jm__contact-action-btn${
-                      appliedJobs.includes(job._id)
+                      applyStatus[job._id] === "applied"
                         ? " agri-jm__contact-action-btn--done"
+                        : applyStatus[job._id] === "error"
+                        ? " agri-jm__contact-action-btn--error"
                         : ""
                     }`}
                     onClick={() => handleApply(job._id)}
+                    disabled={
+                      applyStatus[job._id] === "loading" ||
+                      applyStatus[job._id] === "applied"
+                    }
                   >
-                    {appliedJobs.includes(job._id) ? "✓ Contacted" : "Contact"}
+                    {applyStatus[job._id] === "loading"
+                      ? "Applying…"
+                      : applyStatus[job._id] === "applied"
+                      ? "✓ Applied"
+                      : "Apply"}
                   </button>
 
-                  {/*
-                    ✅ FIX: onClick passes `job` (which has all original backend
-                    fields via the ...job spread in normalisedJobs) directly into
-                    JobDetailModal. No worker data. No field mapping.
-                  */}
+                  {/* View Profile button — unchanged */}
                   <button
                     className="agri-jm__profile-btn"
                     onClick={() => setSelectedJob(job)}
@@ -611,7 +648,7 @@ export default function Browsejob() {
                   </button>
                 </div>
 
-                {/* EXPANDED DETAILS (inline — untouched) */}
+                {/* EXPANDED DETAILS — untouched */}
                 {expandedJob === job._id && (
                   <div className="agri-jm__expanded">
                     <div className="agri-jm__expanded-divider" />
@@ -655,11 +692,21 @@ export default function Browsejob() {
                         </div>
                         <button
                           className={`agri-jm__apply-btn-large${
-                            appliedJobs.includes(job._id) ? " agri-jm__apply-btn--done" : ""
+                            applyStatus[job._id] === "applied"
+                              ? " agri-jm__apply-btn--done"
+                              : ""
                           }`}
                           onClick={() => handleApply(job._id)}
+                          disabled={
+                            applyStatus[job._id] === "loading" ||
+                            applyStatus[job._id] === "applied"
+                          }
                         >
-                          {appliedJobs.includes(job._id) ? "✓ Applied" : "Apply Now"}
+                          {applyStatus[job._id] === "loading"
+                            ? "Applying…"
+                            : applyStatus[job._id] === "applied"
+                            ? "✓ Applied"
+                            : "Apply Now"}
                         </button>
                         <button className="agri-jm__contact-btn">Contact Farm</button>
                       </div>
@@ -706,12 +753,7 @@ export default function Browsejob() {
         </main>
       </div>
 
-      {/*
-        ✅ FIX: JobDetailModal receives the raw job object.
-        job.title, job.farmName, job.salary, job.city, job.state,
-        job.deadline, job.description, etc. all come directly from
-        the backend — nothing is mapped, substituted, or derived.
-      */}
+      {/* Job Detail Modal */}
       {selectedJob && (
         <JobDetailModal
           job={selectedJob}

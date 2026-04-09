@@ -58,6 +58,10 @@ const Sidebar1 = () => {
           <FaUsers className="sidebar-icon" />
           <span className='text'>Browse Jobs</span>
         </Link>
+        <Link to="/Worker/Application/ApplicationWorker" className='Dashboard'>
+          <FaBriefcase className="sidebar-icon" />
+          <span className='text'>My Applications</span>
+        </Link>
 
         <button className='logout' onClick={handleLogoutClick}>
           <FiLogOut className="logout-icon" />

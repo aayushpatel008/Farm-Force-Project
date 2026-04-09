@@ -1,0 +1,613 @@
+/* =====================================================
+   ApplicationWorker.css — FarmForce Premium Theme
+   Modern SaaS Dashboard · Green + White
+   ===================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700&display=swap');
+
+/* ── CSS Variables ───────────────────────────────────── */
+:root {
+  --green-900: #1b4332;
+  --green-800: #1e5c38;
+  --green-700: #2d6a4f;
+  --green-600: #40916c;
+  --green-500: #52b788;
+  --green-400: #74c69d;
+  --green-200: #b7e4c7;
+  --green-100: #d8f3dc;
+  --green-50:  #f0faf4;
+
+  --orange-600: #ea580c;
+  --orange-100: #fff7ed;
+  --orange-200: #fed7aa;
+
+  --red-600: #dc2626;
+  --red-100: #fef2f2;
+  --red-200: #fecaca;
+
+  --neutral-900: #0f1f17;
+  --neutral-700: #374151;
+  --neutral-500: #6b7280;
+  --neutral-300: #d1d5db;
+  --neutral-100: #f3f4f6;
+  --neutral-50:  #fafafa;
+
+  --white: #ffffff;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 20px;
+
+  --shadow-sm: 0 1px 4px rgba(27, 67, 50, 0.06);
+  --shadow-md: 0 4px 16px rgba(27, 67, 50, 0.10);
+  --shadow-lg: 0 12px 36px rgba(27, 67, 50, 0.14);
+
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Layout ─────────────────────────────────────────── */
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+/* Outer flex wrapper */
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background: linear-gradient(155deg, #f0faf4 0%, #f5f7f5 50%, #f0f4ff 100%);
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Main content — default (sidebar collapsed ~72px) */
+.main-content {
+  margin-left: 72px;
+  width: calc(100% - 72px);
+  transition: margin-left 0.25s ease, width 0.25s ease;
+  box-sizing: border-box;
+}
+
+/* When sidebar expands (~240px) — adjust selector to match your Sidebar's class */
+.Side-bar.expanded ~ .main-content {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+}
+
+/* Inner page layout */
+.worker-content {
+  padding: 36px 40px 60px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  min-height: 100vh;
+}
+
+/* ── Page Hero Bar ───────────────────────────────────── */
+.wd-page-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 100%);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.wd-page-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.wd-hero-icon {
+  width: 52px;
+  height: 52px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.2);
+  flex-shrink: 0;
+}
+
+.wd-hero-icon svg {
+  stroke: #ffffff;
+}
+
+.wd-page-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 3px 0;
+  letter-spacing: -0.3px;
+}
+
+.wd-page-sub {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+}
+
+/* ── Section wrapper ─────────────────────────────────── */
+.wd-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Section header ──────────────────────────────────── */
+.wd-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wd-section-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.wd-section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--green-900);
+  margin: 0;
+  letter-spacing: -0.2px;
+}
+
+.wd-section-sub {
+  font-size: 0.82rem;
+  color: var(--neutral-500);
+  margin: 0;
+}
+
+.wd-title-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+/* "Important" tag */
+.wd-important-tag {
+  background: var(--orange-100);
+  color: var(--orange-600);
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--orange-200);
+}
+
+/* Count pill */
+.wd-pill {
+  font-size: 0.77rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.wd-pill--green {
+  background: var(--green-100);
+  color: var(--green-700);
+  border: 1px solid var(--green-200);
+}
+
+/* ── Card grid ───────────────────────────────────────── */
+.wd-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+/* ── Base card ───────────────────────────────────────── */
+.wd-card {
+  background: var(--white);
+  border: 1px solid rgba(27, 67, 50, 0.08);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    border-color var(--transition);
+  animation: cardFadeIn 0.45s ease both;
+  position: relative;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.wd-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--green-400);
+}
+
+/* Green left accent stripe */
+.wd-card-accent {
+  height: 4px;
+  background: linear-gradient(90deg, var(--green-500), var(--green-400));
+  border-radius: 0;
+}
+
+.wd-card--invite .wd-card-accent {
+  display: none;
+}
+
+.wd-card-body {
+  padding: 0;
+}
+
+/* ── Card top section ────────────────────────────────── */
+.wd-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 18px 20px 0;
+}
+
+.wd-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.wd-job-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--green-900);
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Meta ────────────────────────────────────────────── */
+.wd-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 14px;
+}
+
+.wd-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.79rem;
+  color: var(--neutral-500);
+}
+
+.wd-meta-item svg {
+  flex-shrink: 0;
+  color: var(--green-500);
+}
+
+/* ── Status badge ────────────────────────────────────── */
+.wd-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.71rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.wd-badge--pending {
+  background: #fff8e1;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.wd-badge--accepted {
+  background: var(--green-100);
+  color: var(--green-700);
+  border: 1px solid var(--green-200);
+}
+
+.wd-badge--rejected {
+  background: var(--red-100);
+  color: var(--red-600);
+  border: 1px solid var(--red-200);
+}
+
+/* ── Card footer (applied date) ──────────────────────── */
+.wd-card-footer {
+  padding: 10px 20px 16px;
+  border-top: 1px solid var(--green-50);
+  margin-top: 4px;
+}
+
+.wd-date-label {
+  font-size: 0.74rem;
+  color: var(--neutral-300);
+  font-weight: 500;
+}
+
+/* ── Invite ribbon ───────────────────────────────────── */
+.wd-invite-ribbon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, var(--green-50), #fff);
+  color: var(--green-700);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 9px 18px;
+  border-bottom: 1px solid var(--green-100);
+}
+
+.wd-invite-ribbon svg {
+  stroke: var(--green-500);
+}
+
+/* ── Card actions (invite buttons) ───────────────────── */
+.wd-card-actions {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px 18px;
+}
+
+/* ── Buttons ─────────────────────────────────────────── */
+.wd-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition:
+    background-color var(--transition),
+    transform 0.12s ease,
+    box-shadow var(--transition),
+    opacity var(--transition);
+  font-family: inherit;
+}
+
+.wd-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.wd-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+/* Accept */
+.wd-btn--accept {
+  background: linear-gradient(135deg, var(--green-600), var(--green-500));
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(64, 145, 108, 0.35);
+}
+
+.wd-btn--accept:not(:disabled):hover {
+  background: linear-gradient(135deg, var(--green-700), var(--green-600));
+  box-shadow: 0 4px 14px rgba(64, 145, 108, 0.45);
+}
+
+/* Reject */
+.wd-btn--reject {
+  background: var(--white);
+  color: var(--red-600);
+  border: 1.5px solid var(--red-200);
+}
+
+.wd-btn--reject:not(:disabled):hover {
+  background: var(--red-100);
+  border-color: #f87171;
+}
+
+/* ── Button spinners ─────────────────────────────────── */
+.wd-btn-spinner {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  animation: wd-spin 0.65s linear infinite;
+}
+
+.wd-btn-spinner--white {
+  border-color: rgba(255,255,255,0.3);
+  border-top-color: #ffffff;
+}
+
+.wd-btn-spinner--red {
+  border-color: rgba(220, 38, 38, 0.2);
+  border-top-color: var(--red-600);
+}
+
+@keyframes wd-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Skeleton Loading ────────────────────────────────── */
+.wd-skeleton-card {
+  background: var(--white);
+  border: 1px solid rgba(27, 67, 50, 0.07);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.wd-skeleton-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px 20px 16px;
+}
+
+.wd-skeleton-lines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wd-skeleton-line {
+  height: 11px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f4f0 25%, #e8f0e8 50%, #f0f4f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.wd-skeleton-title {
+  height: 15px;
+  width: 70%;
+}
+
+.wd-skeleton-meta {
+  width: 55%;
+}
+
+.wd-skeleton-meta--short {
+  width: 42%;
+}
+
+.wd-skeleton-badge {
+  width: 68px;
+  height: 26px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, #f0f4f0 25%, #e8f0e8 50%, #f0f4f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  flex-shrink: 0;
+}
+
+.wd-skeleton-footer {
+  height: 38px;
+  border-top: 1px solid var(--green-50);
+  background: linear-gradient(90deg, #f8fbf8 25%, #f2f7f2 50%, #f8fbf8 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Empty state ─────────────────────────────────────── */
+.wd-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 56px 20px;
+  text-align: center;
+  background: var(--white);
+  border: 1.5px dashed var(--green-200);
+  border-radius: var(--radius-md);
+  animation: cardFadeIn 0.4s ease both;
+}
+
+.wd-empty-icon {
+  margin-bottom: 16px;
+  opacity: 0.3;
+  color: var(--green-600);
+}
+
+.wd-empty-icon svg {
+  stroke: var(--green-500);
+}
+
+.wd-empty-title {
+  font-size: 0.97rem;
+  font-weight: 700;
+  color: var(--green-900);
+  margin: 0 0 6px 0;
+}
+
+.wd-empty-sub {
+  font-size: 0.81rem;
+  color: var(--neutral-500);
+  margin: 0;
+  max-width: 260px;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 900px) {
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .worker-content {
+    padding: 24px 20px 48px;
+    gap: 36px;
+  }
+
+  .wd-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .wd-page-title {
+    font-size: 1.35rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .worker-content {
+    padding: 16px 14px 40px;
+    gap: 28px;
+  }
+
+  .wd-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wd-page-hero {
+    padding: 18px 20px;
+    border-radius: var(--radius-md);
+  }
+
+  .wd-page-title {
+    font-size: 1.2rem;
+  }
+
+  .wd-card-actions {
+    flex-direction: column;
+  }
+
+  .wd-section-title {
+    font-size: 1.1rem;
+  }
+}

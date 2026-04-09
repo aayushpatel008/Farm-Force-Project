@@ -678,7 +678,7 @@ export default function WorkerHome() {
                 <div className="hero__badge-dot" />
                 <span>Worker Dashboard</span>
               </div>
-              <p className="hero__greeting">Welcome back, Aayush 🌾</p>
+              <p className="hero__greeting">Welcome back, Aayush🌾</p>
               <div className="hero__btns">
                 <button className="hero__cta-primary">
                   Browse New Jobs

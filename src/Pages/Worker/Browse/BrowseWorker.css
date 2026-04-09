@@ -1395,3 +1395,21 @@ body:has(.Side-bar.expanded) .agri-jm__root {
   .wja-modal-overlay { align-items: flex-end; }
   .wja-modal         { border-radius: 22px 22px 0 0; max-width: 100%; max-height: 95vh; }
 }
+/* Apply button — error state */
+.agri-jm__contact-action-btn--error {
+  background: #b91c1c;
+  cursor: pointer;
+}
+.agri-jm__contact-action-btn--error:hover {
+  background: #991b1b;
+  transform: translateY(-1px);
+}
+
+/* Inline feedback message next to Apply button */
+.agri-jm__apply-msg {
+  font-size: 13px;
+  font-weight: 600;
+  flex: 1;
+}
+.agri-jm__apply-msg--success { color: #065f46; }
+.agri-jm__apply-msg--error   { color: #b91c1c; }

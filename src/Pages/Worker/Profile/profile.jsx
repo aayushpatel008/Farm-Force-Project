@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
@@ -8,14 +8,45 @@ import "./profile.css";
 
 function WorkerProfile() {
 
-  const [activeTab, setActiveTab] = useState("upload");
-  const [isEditing, setIsEditing] = useState(false);
+  // ── Core states for profile management ────────────────────────────
+  const [workerProfile, setWorkerProfile] = useState(null);
+  const [loading,       setLoading]       = useState(true);
+  // ─────────────────────────────────────────────────────────────────
+
+  const [isEditing,     setIsEditing]     = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const avatarInputRef = useRef(null);
-  const [loading, setLoading] = useState(false);
+  const [submitting,    setSubmitting]    = useState(false); // renamed to avoid clash with §2 `loading`
 
-  const [profileData, setProfileData] = useState({
-    // ── Personal Details ──
+  // ── Fetch profile on mount with correct API response handling ──────
+  useEffect(() => {
+    const fetchWorkerProfile = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/myWorkercard", 
+          { withCredentials: true });
+
+        // API returns: { success: true, data: profile }
+        // Check nested data.data for _id before accepting
+        if (response.data?.data?._id) {
+          setWorkerProfile(response.data.data);   // ✅ Set the nested profile object
+        } else {
+          // No valid profile data in response
+          setWorkerProfile(null);
+        }
+      } catch (err) {
+        // Error or 404 — no profile found
+        console.error("Failed to fetch worker profile:", err);
+        setWorkerProfile(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchWorkerProfile();
+  }, []);
+  // ─────────────────────────────────────────────────────────────────
+
+  // ── Static fallback defaults (used when no API data available) ───
+  const DEFAULTS = {
     firstName: "John",
     lastName: "Doe",
     dateOfBirth: "1992-06-15",
@@ -23,12 +54,10 @@ function WorkerProfile() {
     nationality: "American",
     location: "Sacramento, CA",
     bio: "Experienced farm worker with 6+ years in harvesting, irrigation, and livestock management.",
-    // ── Contact Information ──
     email: "john.doe@email.com",
     phone: "+1 (555) 234-5678",
     linkedIn: "",
     emergencyContact: "Jane Doe — +1 (555) 999-0000",
-    // ── NEW: Work Details — editable from My Profile tab ──
     jobTitle: "Farm Worker",
     jobDuration: "Full-time",
     employmentType: "Individual",
@@ -37,39 +66,68 @@ function WorkerProfile() {
     experienceRequired: "6+ years",
     availableFrom: "",
     skills: ["Harvesting", "Irrigation", "Livestock Management"],
-  });
+  };
 
-  const [savedProfile, setSavedProfile] = useState({ ...profileData });
+  const [profileData,  setProfileData]  = useState(DEFAULTS);
+  const [savedProfile, setSavedProfile] = useState(DEFAULTS);
+
+  // ── NEW §7: Sync profile states when workerProfile is set ─────────
+  //    Covers both initial fetch AND post-submit (§6)
+  useEffect(() => {
+    if (!workerProfile) return;
+
+    const merged = {
+      ...DEFAULTS,
+      // §7 — direct backend field mapping
+      firstName:          workerProfile.firstName          ?? DEFAULTS.firstName,
+      lastName:           workerProfile.lastName           ?? DEFAULTS.lastName,
+      dateOfBirth:        workerProfile.dateOfBirth        ?? DEFAULTS.dateOfBirth,
+      gender:             workerProfile.gender             ?? DEFAULTS.gender,
+      nationality:        workerProfile.nationality        ?? DEFAULTS.nationality,
+      location:           workerProfile.location           ?? DEFAULTS.location,
+      bio:                workerProfile.bio                ?? DEFAULTS.bio,
+      email:              workerProfile.email              ?? DEFAULTS.email,
+      phone:              workerProfile.phone              ?? DEFAULTS.phone,
+      linkedIn:           workerProfile.linkedIn           ?? DEFAULTS.linkedIn,
+      emergencyContact:   workerProfile.emergencyContact   ?? DEFAULTS.emergencyContact,
+      jobTitle:           workerProfile.jobTitle           ?? DEFAULTS.jobTitle,
+      jobDuration:        workerProfile.jobDuration        ?? DEFAULTS.jobDuration,
+      employmentType:     workerProfile.employmentType     ?? DEFAULTS.employmentType,
+      numberOfWorkers:    workerProfile.numberOfWorkers    ?? DEFAULTS.numberOfWorkers,
+      salaryRange:        workerProfile.salaryRange        ?? DEFAULTS.salaryRange,
+      experienceRequired: workerProfile.experienceRequired ?? DEFAULTS.experienceRequired,
+      availableFrom:      workerProfile.availableFrom      ?? DEFAULTS.availableFrom,
+      skills:
+        Array.isArray(workerProfile.skills) && workerProfile.skills.length > 0
+          ? workerProfile.skills
+          : DEFAULTS.skills,
+    };
+
+    setProfileData(merged);
+    setSavedProfile(merged);
+  }, [workerProfile]);
+  // ─────────────────────────────────────────────────────────────────
+
+  // ── NEW CROSS-TAB SYNC: Reload on focus to sync login state ─────
+  useEffect(() => {
+    const handleFocus = () => {
+      window.location.reload();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
+  // ─────────────────────────────────────────────────────────────────
 
   const [jobData, setJobData] = useState({
-    // ── NEW: Personal Details fields added to job application form ──
-    firstName: "",
-    lastName: "",
-    dateOfBirth: "",
-    gender: "Male",
-    nationality: "",
-    // ── NEW: Contact Information fields added to job application form ──
-    email: "",
-    phone: "",
-    emergencyContact: "",
-    // ── Existing Job Details fields (unchanged) ──
-    jobTitle: "",
-    jobDuration: "Full-time",
-    employmentType: "Individual",
-    numberOfWorkers: "1",
-    location: "",
-    salaryRange: "",
-    experienceRequired: "",
-    availableFrom: "",
-    description: "",
-    skills: [],
-    // ── REMOVED: photos array removed (photos upload section deleted) ──
+    firstName: "", lastName: "", dateOfBirth: "", gender: "Male",
+    nationality: "", email: "", phone: "", emergencyContact: "",
+    jobTitle: "", jobDuration: "Full-time", employmentType: "Individual",
+    numberOfWorkers: "1", location: "", salaryRange: "",
+    experienceRequired: "", availableFrom: "", description: "", skills: [],
   });
 
   const [currentSkill, setCurrentSkill] = useState("");
-  // ── REMOVED: previewImages state removed (no longer needed without photo upload) ──
-
-  // ── NEW: separate skill input state for the My Profile tab Work Details card ──
   const [profileSkill, setProfileSkill] = useState("");
 
   const employmentTypes = ["Individual", "Team", "Contractor"];
@@ -77,9 +135,8 @@ function WorkerProfile() {
   const genders         = ["Male", "Female"];
 
   // ── Profile handlers ──────────────────────────────────────────────
-  const handleProfileChange = (e) => {
+  const handleProfileChange = (e) =>
     setProfileData({ ...profileData, [e.target.name]: e.target.value });
-  };
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -87,20 +144,17 @@ function WorkerProfile() {
   };
 
   const handleSaveProfile = () => {
-    // ── Spread profileData; skills array is copied by reference so we clone it ──
     setSavedProfile({ ...profileData, skills: [...profileData.skills] });
     setIsEditing(false);
-    setProfileSkill("");  // clear any pending skill input on save
+    setProfileSkill("");
   };
 
   const handleCancelEdit = () => {
-    // ── Restore all fields including skills array on discard ──
     setProfileData({ ...savedProfile, skills: [...savedProfile.skills] });
-    setProfileSkill("");  // clear any pending skill input on discard
+    setProfileSkill("");
     setIsEditing(false);
   };
 
-  // ── NEW: Profile skill tag handlers (Work Details card in My Profile tab) ──
   const handleAddProfileSkill = () => {
     const skill = profileSkill.trim();
     if (skill && !profileData.skills.includes(skill)) {
@@ -109,18 +163,16 @@ function WorkerProfile() {
     }
   };
 
-  const handleRemoveProfileSkill = (skill) => {
+  const handleRemoveProfileSkill = (skill) =>
     setProfileData({ ...profileData, skills: profileData.skills.filter((s) => s !== skill) });
-  };
 
   const handleProfileSkillKeyPress = (e) => {
     if (e.key === "Enter") { e.preventDefault(); handleAddProfileSkill(); }
   };
 
   // ── Job form handlers ─────────────────────────────────────────────
-  const handleJobChange = (e) => {
+  const handleJobChange = (e) =>
     setJobData({ ...jobData, [e.target.name]: e.target.value });
-  };
 
   const handleAddSkill = () => {
     const skill = currentSkill.trim();
@@ -130,96 +182,85 @@ function WorkerProfile() {
     }
   };
 
-  const handleRemoveSkill = (skill) => {
+  const handleRemoveSkill = (skill) =>
     setJobData({ ...jobData, skills: jobData.skills.filter((s) => s !== skill) });
-  };
 
   const handleKeyPress = (e) => {
     if (e.key === "Enter") { e.preventDefault(); handleAddSkill(); }
   };
 
-  // ── REMOVED: handlePhotoUpload handler deleted (photos section removed) ──
-  // ── REMOVED: handleRemovePhoto handler deleted (photos section removed) ──
-
-  // ── SUBMIT — POST to backend ──────────────────────────────────────
+  // ── SUBMIT ────────────────────────────────────────────────────────
   const handleJobSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
     try {
-      // ── CHANGED: Using JSON body instead of FormData since photos are removed ──
       const payload = {
-        // ── NEW: Personal Details included in submission payload ──
-        firstName:          jobData.firstName,
-        lastName:           jobData.lastName,
-        dateOfBirth:        jobData.dateOfBirth,
-        gender:             jobData.gender,
-        nationality:        jobData.nationality,
-        // ── NEW: Contact Information included in submission payload ──
-        email:              jobData.email,
-        phone:              jobData.phone,
-        emergencyContact:   jobData.emergencyContact,
-        // ── Existing fields (unchanged) ──
-        jobTitle:           jobData.jobTitle,
-        jobDuration:        jobData.jobDuration,
-        employmentType:     jobData.employmentType,
-        numberOfWorkers:    jobData.numberOfWorkers,
-        location:           jobData.location,
-        salaryRange:        jobData.salaryRange,
-        experienceRequired: jobData.experienceRequired,
-        availableFrom:      jobData.availableFrom,
-        description:        jobData.description,
-        skills:             jobData.skills,
-        // ── REMOVED: photos field removed from payload ──
+        firstName: jobData.firstName, lastName: jobData.lastName,
+        dateOfBirth: jobData.dateOfBirth, gender: jobData.gender,
+        nationality: jobData.nationality, email: jobData.email,
+        phone: jobData.phone, emergencyContact: jobData.emergencyContact,
+        jobTitle: jobData.jobTitle, jobDuration: jobData.jobDuration,
+        employmentType: jobData.employmentType, numberOfWorkers: jobData.numberOfWorkers,
+        location: jobData.location, salaryRange: jobData.salaryRange,
+        experienceRequired: jobData.experienceRequired, availableFrom: jobData.availableFrom,
+        description: jobData.description, skills: jobData.skills,
       };
 
-      await axios.post(
+      const res = await axios.post(
         "http://localhost:5000/api/applicationpost",
         payload,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "application/json" },
-        }
+        { withCredentials: true, headers: { "Content-Type": "application/json" } }
       );
 
       toast.success("Job application posted successfully!");
 
-      // Reset form after successful submit
+      // Use response data if available, otherwise use payload
+      const newApplication = res.data?.newapplication ?? res.data?.data ?? payload;
+
+      setWorkerProfile(newApplication); // Updates workerProfile → hasProfile becomes true → UI switches to profile view
+
+      // Reset upload form
       setJobData({
-        // ── NEW: Reset personal details fields ──
-        firstName: "",
-        lastName: "",
-        dateOfBirth: "",
-        gender: "Male",
-        nationality: "",
-        // ── NEW: Reset contact information fields ──
-        email: "",
-        phone: "",
-        emergencyContact: "",
-        // ── Existing resets (unchanged) ──
-        jobTitle: "",
-        jobDuration: "Full-time",
-        employmentType: "Individual",
-        numberOfWorkers: "1",
-        location: "",
-        salaryRange: "",
-        experienceRequired: "",
-        availableFrom: "",
-        description: "",
-        skills: [],
-        // ── REMOVED: photos reset removed ──
+        firstName: "", lastName: "", dateOfBirth: "", gender: "Male",
+        nationality: "", email: "", phone: "", emergencyContact: "",
+        jobTitle: "", jobDuration: "Full-time", employmentType: "Individual",
+        numberOfWorkers: "1", location: "", salaryRange: "",
+        experienceRequired: "", availableFrom: "", description: "", skills: [],
       });
 
     } catch (error) {
       console.error(error);
-      toast.error(
-        error?.response?.data?.message || "Failed to post application. Please try again."
-      );
+      toast.error(error?.response?.data?.message || "Failed to post application. Please try again.");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
-  const initials = `${profileData.firstName[0]}${profileData.lastName[0]}`.toUpperCase();
+  // ── Derived display values ────────────────────────────────────────
+  const avatarSrc = workerProfile?.avatarUrl       ?? null;
+  const yearsExp  = workerProfile?.yearsExperience ?? "6+";
+  const jobsDone  = workerProfile?.jobsDone        ?? "10";
+  const rating    = workerProfile?.rating          ?? "4.9★";
+
+  const initials =
+    `${profileData.firstName?.[0] ?? "J"}${profileData.lastName?.[0] ?? "D"}`.toUpperCase();
+
+  // ── SINGLE SOURCE OF TRUTH: Derive hasProfile from workerProfile ──
+  const hasProfile = !!workerProfile;
+
+  // ── NEW §2: Loading gate — block render until fetch resolves ──────
+  if (loading) {
+    return (
+      <div className="wp-container">
+        <Sidebar1 />
+        <div className="wp-main" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <p style={{ color: "var(--text-muted)", fontSize: "1rem", fontFamily: "'DM Sans', sans-serif" }}>
+            Loading…
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="wp-container">
@@ -240,7 +281,9 @@ function WorkerProfile() {
               >
                 {avatarPreview
                   ? <img src={avatarPreview} alt="avatar" className="wp-avatar-img" />
-                  : <span className="wp-avatar-initials">{initials}</span>
+                  : avatarSrc
+                    ? <img src={avatarSrc} alt="avatar" className="wp-avatar-img" />
+                    : <span className="wp-avatar-initials">{initials}</span>
                 }
                 {isEditing && (
                   <div className="wp-avatar-overlay">📷<br /><small>Change</small></div>
@@ -259,28 +302,28 @@ function WorkerProfile() {
             <div className="wp-hero-info">
               <div className="wp-hero-name-row">
                 <h1 className="wp-hero-name">
-                  {savedProfile.firstName} {savedProfile.lastName}
+                  {profileData.firstName} {profileData.lastName}
                 </h1>
                 <span className="wp-verified-badge">✓ Verified</span>
               </div>
               <p className="wp-hero-role">🌾 Agricultural Worker</p>
-              <p className="wp-hero-location">📍{savedProfile.location}</p>
-              <p className="wp-hero-bio">{savedProfile.bio}</p>
+              <p className="wp-hero-location">📍{profileData.location}</p>
+              <p className="wp-hero-bio">{profileData.bio}</p>
             </div>
 
             <div className="wp-hero-stats">
               <div className="wp-hero-stat">
-                <span className="wp-hero-stat-num">6+</span>
+                <span className="wp-hero-stat-num">{yearsExp}</span>
                 <span className="wp-hero-stat-lbl">Years Exp.</span>
               </div>
               <div className="wp-hero-stat-divider" />
               <div className="wp-hero-stat">
-                <span className="wp-hero-stat-num">10</span>
+                <span className="wp-hero-stat-num">{jobsDone}</span>
                 <span className="wp-hero-stat-lbl">Jobs Done</span>
               </div>
               <div className="wp-hero-stat-divider" />
               <div className="wp-hero-stat">
-                <span className="wp-hero-stat-num">4.9★</span>
+                <span className="wp-hero-stat-num">{rating}</span>
                 <span className="wp-hero-stat-lbl">Rating</span>
               </div>
             </div>
@@ -288,32 +331,21 @@ function WorkerProfile() {
           </div>
         </div>
 
-        {/* ── TABS ── */}
-        <div className="wp-tabs">
-          <button
-            className={`wp-tab-btn ${activeTab === "upload" ? "active" : ""}`}
-            onClick={() => setActiveTab("upload")}
-          >
-            📤 Upload Job Application
-          </button>
-          <button
-            className={`wp-tab-btn ${activeTab === "profile" ? "active" : ""}`}
-            onClick={() => setActiveTab("profile")}
-          >
-            👤 My Profile
-          </button>
-        </div>
+        {/* ────────────────────────────────────────────────────────────── */}
+        {/* CONDITIONAL RENDERING: Profile OR Upload Form                 */}
+        {/* Single source of truth: workerProfile                          */}
+        {/* ────────────────────────────────────────────────────────────── */}
 
-        {/* ════════ TAB: MY PROFILE ════════ */}
-        {activeTab === "profile" && (
+        {hasProfile ? (
+          // ╔═══════════════════════════════════════════════════════════╗
+          // ║ PROFILE VIEW — when workerProfile exists with valid data  ║
+          // ╚═══════════════════════════════════════════════════════════╝
           <div className="wp-tab-content">
 
             <div className="wp-section-topbar">
               <h2 className="wp-section-heading">Personal Information</h2>
               {!isEditing ? (
-                <button className="wp-edit-btn" onClick={() => setIsEditing(true)}>
-                  ✏️ Edit Profile
-                </button>
+                <button className="wp-edit-btn" onClick={() => setIsEditing(true)}>✏️ Edit Profile</button>
               ) : (
                 <div className="wp-edit-actions">
                   <button className="wp-save-btn" onClick={handleSaveProfile}>💾 Save Changes</button>
@@ -331,19 +363,19 @@ function WorkerProfile() {
                     <label>First Name</label>
                     {isEditing
                       ? <input className="wp-input" name="firstName" value={profileData.firstName} onChange={handleProfileChange} />
-                      : <p className="wp-value">{savedProfile.firstName}</p>}
+                      : <p className="wp-value">{profileData.firstName}</p>}
                   </div>
                   <div className="wp-field">
                     <label>Last Name</label>
                     {isEditing
                       ? <input className="wp-input" name="lastName" value={profileData.lastName} onChange={handleProfileChange} />
-                      : <p className="wp-value">{savedProfile.lastName}</p>}
+                      : <p className="wp-value">{profileData.lastName}</p>}
                   </div>
                   <div className="wp-field">
                     <label>Date of Birth</label>
                     {isEditing
                       ? <input className="wp-input" type="date" name="dateOfBirth" value={profileData.dateOfBirth} onChange={handleProfileChange} />
-                      : <p className="wp-value">{new Date(savedProfile.dateOfBirth).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}</p>}
+                      : <p className="wp-value">{profileData.dateOfBirth ? new Date(profileData.dateOfBirth).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : <span className="wp-empty">Not provided</span>}</p>}
                   </div>
                   <div className="wp-field">
                     <label>Gender</label>
@@ -351,19 +383,19 @@ function WorkerProfile() {
                       ? <select className="wp-input" name="gender" value={profileData.gender} onChange={handleProfileChange}>
                           {genders.map(g => <option key={g}>{g}</option>)}
                         </select>
-                      : <p className="wp-value">{savedProfile.gender}</p>}
+                      : <p className="wp-value">{profileData.gender}</p>}
                   </div>
                   <div className="wp-field">
                     <label>Nationality</label>
                     {isEditing
                       ? <input className="wp-input" name="nationality" value={profileData.nationality} onChange={handleProfileChange} />
-                      : <p className="wp-value">{savedProfile.nationality}</p>}
+                      : <p className="wp-value">{profileData.nationality}</p>}
                   </div>
                   <div className="wp-field">
                     <label>Location</label>
                     {isEditing
                       ? <input className="wp-input" name="location" value={profileData.location} onChange={handleProfileChange} placeholder="City, State" />
-                      : <p className="wp-value">📍 {savedProfile.location}</p>}
+                      : <p className="wp-value">📍 {profileData.location}</p>}
                   </div>
                 </div>
               </div>
@@ -375,66 +407,54 @@ function WorkerProfile() {
                     <label>Email Address</label>
                     {isEditing
                       ? <input className="wp-input" type="email" name="email" value={profileData.email} onChange={handleProfileChange} />
-                      : <p className="wp-value">✉️ {savedProfile.email}</p>}
+                      : <p className="wp-value">✉️ {profileData.email}</p>}
                   </div>
                   <div className="wp-field wp-field-full">
                     <label>Phone Number</label>
                     {isEditing
                       ? <input className="wp-input" type="tel" name="phone" value={profileData.phone} onChange={handleProfileChange} />
-                      : <p className="wp-value">📱 {savedProfile.phone}</p>}
+                      : <p className="wp-value">📱 {profileData.phone}</p>}
                   </div>
-                 
                   <div className="wp-field wp-field-full">
                     <label>Emergency Contact</label>
                     {isEditing
                       ? <input className="wp-input" name="emergencyContact" value={profileData.emergencyContact} onChange={handleProfileChange} placeholder="Name — Phone" />
-                      : <p className="wp-value">🚨 {savedProfile.emergencyContact}</p>}
+                      : <p className="wp-value">🚨 {profileData.emergencyContact}</p>}
                   </div>
                 </div>
               </div>
 
-              {/* ── NEW: Work Details card — all job-related profile fields editable here ── */}
               <div className="wp-card wp-card-full">
                 <div className="wp-card-title">💼 Work Details</div>
                 <div className="wp-field-grid">
-
-                  {/* ── NEW: Job Title ── */}
                   <div className="wp-field wp-field-full">
                     <label>Job Title</label>
                     {isEditing
                       ? <input className="wp-input" type="text" name="jobTitle" value={profileData.jobTitle} onChange={handleProfileChange} placeholder="e.g., Farm Worker, Harvester" />
-                      : <p className="wp-value">🧑‍🌾 {savedProfile.jobTitle || <span className="wp-empty">Not provided</span>}</p>}
+                      : <p className="wp-value">🧑‍🌾 {profileData.jobTitle || <span className="wp-empty">Not provided</span>}</p>}
                   </div>
-
-                  {/* ── NEW: Job Duration ── */}
                   <div className="wp-field">
                     <label>Job Duration</label>
                     {isEditing
                       ? <select className="wp-input wp-select" name="jobDuration" value={profileData.jobDuration} onChange={handleProfileChange}>
                           {jobDurations.map(d => <option key={d}>{d}</option>)}
                         </select>
-                      : <p className="wp-value">⏱️ {savedProfile.jobDuration}</p>}
+                      : <p className="wp-value">⏱️ {profileData.jobDuration}</p>}
                   </div>
-
-                  {/* ── NEW: Employment Type ── */}
                   <div className="wp-field">
                     <label>Employment Type</label>
                     {isEditing
                       ? <select className="wp-input wp-select" name="employmentType" value={profileData.employmentType} onChange={handleProfileChange}>
                           {employmentTypes.map(t => <option key={t}>{t}</option>)}
                         </select>
-                      : <p className="wp-value">👥 {savedProfile.employmentType}</p>}
+                      : <p className="wp-value">👥 {profileData.employmentType}</p>}
                   </div>
-
-                  {/* ── NEW: Workers Available ── */}
                   <div className="wp-field">
                     <label>Workers Available</label>
                     {isEditing
                       ? <input className="wp-input" type="number" min="1" max="100" name="numberOfWorkers" value={profileData.numberOfWorkers} onChange={handleProfileChange} />
-                      : <p className="wp-value">🔢 {savedProfile.numberOfWorkers}</p>}
+                      : <p className="wp-value">🔢 {profileData.numberOfWorkers}</p>}
                   </div>
-
-                  {/* ── NEW: Expected Salary ── */}
                   <div className="wp-field">
                     <label>Expected Salary</label>
                     {isEditing
@@ -442,26 +462,20 @@ function WorkerProfile() {
                           <span className="wp-currency">₹</span>
                           <input className="wp-input wp-salary-input" type="text" name="salaryRange" value={profileData.salaryRange} onChange={handleProfileChange} placeholder="200-300 per day" />
                         </div>
-                      : <p className="wp-value">💰 {savedProfile.salaryRange || <span className="wp-empty">Not provided</span>}</p>}
+                      : <p className="wp-value">💰 {profileData.salaryRange || <span className="wp-empty">Not provided</span>}</p>}
                   </div>
-
-                  {/* ── NEW: Years of Experience ── */}
                   <div className="wp-field">
                     <label>Years of Experience</label>
                     {isEditing
                       ? <input className="wp-input" type="text" name="experienceRequired" value={profileData.experienceRequired} onChange={handleProfileChange} placeholder="e.g., 2–3 years" />
-                      : <p className="wp-value">📅 {savedProfile.experienceRequired || <span className="wp-empty">Not provided</span>}</p>}
+                      : <p className="wp-value">📅 {profileData.experienceRequired || <span className="wp-empty">Not provided</span>}</p>}
                   </div>
-
-                  {/* ── NEW: Available From ── */}
                   <div className="wp-field">
                     <label>Available From</label>
                     {isEditing
                       ? <input className="wp-input" type="date" name="availableFrom" value={profileData.availableFrom} onChange={handleProfileChange} />
-                      : <p className="wp-value">📆 {savedProfile.availableFrom ? new Date(savedProfile.availableFrom).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : <span className="wp-empty">Not provided</span>}</p>}
+                      : <p className="wp-value">📆 {profileData.availableFrom ? new Date(profileData.availableFrom).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }) : <span className="wp-empty">Not provided</span>}</p>}
                   </div>
-
-                  {/* ── NEW: Skills tag input ── */}
                   <div className="wp-field wp-field-full">
                     <label>Skills</label>
                     {isEditing
@@ -484,16 +498,15 @@ function WorkerProfile() {
                           <small className="wp-hint">e.g. Harvesting, Irrigation, Tractor Operation, Pruning</small>
                         </div>
                       : <div className="wp-skills-tags wp-skills-tags--readonly">
-                          {savedProfile.skills.length === 0
+                          {profileData.skills.length === 0
                             ? <span className="wp-empty">No skills added yet</span>
-                            : savedProfile.skills.map((skill, i) => (
+                            : profileData.skills.map((skill, i) => (
                                 <span key={i} className="wp-skill-tag">{skill}</span>
                               ))
                           }
                         </div>
                     }
                   </div>
-
                 </div>
               </div>
 
@@ -501,7 +514,7 @@ function WorkerProfile() {
                 <div className="wp-card-title">📝 About Me</div>
                 {isEditing
                   ? <textarea className="wp-input wp-textarea" name="bio" value={profileData.bio} onChange={handleProfileChange} rows={4} placeholder="Tell employers about yourself..." />
-                  : <p className="wp-bio-text">{savedProfile.bio}</p>}
+                  : <p className="wp-bio-text">{profileData.bio}</p>}
               </div>
 
               <div className="wp-card wp-card-full wp-completion-card">
@@ -530,10 +543,10 @@ function WorkerProfile() {
 
             </div>
           </div>
-        )}
-
-        {/* ════════ TAB: UPLOAD JOB APPLICATION ════════ */}
-        {activeTab === "upload" && (
+        ) : (
+          // ╔═══════════════════════════════════════════════════════════╗
+          // ║ UPLOAD FORM — when workerProfile is null (new user)       ║
+          // ╚═══════════════════════════════════════════════════════════╝
           <div className="wp-tab-content">
 
             <div className="wp-section-topbar">
@@ -543,122 +556,52 @@ function WorkerProfile() {
 
             <form onSubmit={handleJobSubmit} className="wp-upload-form">
 
-              {/* ── NEW: Personal Details card added to job application form ──
-                  Mirrors the same fields shown in the My Profile tab reference image */}
               <div className="wp-card wp-card-full">
                 <div className="wp-card-title">🪪 Personal Details</div>
                 <div className="wp-field-grid">
-                  {/* ── NEW: First Name input ── */}
                   <div className="wp-field">
                     <label>First Name <span className="wp-req">*</span></label>
-                    <input
-                      className="wp-input"
-                      type="text"
-                      name="firstName"
-                      value={jobData.firstName}
-                      onChange={handleJobChange}
-                      placeholder="e.g., John"
-                      required
-                    />
+                    <input className="wp-input" type="text" name="firstName" value={jobData.firstName} onChange={handleJobChange} placeholder="e.g., John" required />
                   </div>
-                  {/* ── NEW: Last Name input ── */}
                   <div className="wp-field">
                     <label>Last Name <span className="wp-req">*</span></label>
-                    <input
-                      className="wp-input"
-                      type="text"
-                      name="lastName"
-                      value={jobData.lastName}
-                      onChange={handleJobChange}
-                      placeholder="e.g., Doe"
-                      required
-                    />
+                    <input className="wp-input" type="text" name="lastName" value={jobData.lastName} onChange={handleJobChange} placeholder="e.g., Doe" required />
                   </div>
-                  {/* ── NEW: Date of Birth input ── */}
                   <div className="wp-field">
                     <label>Date of Birth</label>
-                    <input
-                      className="wp-input"
-                      type="date"
-                      name="dateOfBirth"
-                      value={jobData.dateOfBirth}
-                      onChange={handleJobChange}
-                    />
+                    <input className="wp-input" type="date" name="dateOfBirth" value={jobData.dateOfBirth} onChange={handleJobChange} />
                   </div>
-                  {/* ── NEW: Gender select dropdown ── */}
                   <div className="wp-field">
                     <label>Gender</label>
-                    <select
-                      className="wp-input wp-select"
-                      name="gender"
-                      value={jobData.gender}
-                      onChange={handleJobChange}
-                    >
+                    <select className="wp-input wp-select" name="gender" value={jobData.gender} onChange={handleJobChange}>
                       {genders.map(g => <option key={g}>{g}</option>)}
                     </select>
                   </div>
-                  {/* ── NEW: Nationality input ── */}
                   <div className="wp-field">
                     <label>Nationality</label>
-                    <input
-                      className="wp-input"
-                      type="text"
-                      name="nationality"
-                      value={jobData.nationality}
-                      onChange={handleJobChange}
-                      placeholder="e.g., American"
-                    />
+                    <input className="wp-input" type="text" name="nationality" value={jobData.nationality} onChange={handleJobChange} placeholder="e.g., American" />
                   </div>
                 </div>
               </div>
 
-              {/* ── NEW: Contact Information card added to job application form ──
-                  Mirrors the same fields shown in the My Profile tab reference image */}
               <div className="wp-card wp-card-full">
                 <div className="wp-card-title">📞 Contact Information</div>
                 <div className="wp-field-grid">
-                  {/* ── NEW: Email Address input ── */}
                   <div className="wp-field wp-field-full">
                     <label>Email Address <span className="wp-req">*</span></label>
-                    <input
-                      className="wp-input"
-                      type="email"
-                      name="email"
-                      value={jobData.email}
-                      onChange={handleJobChange}
-                      placeholder="john.doe@email.com"
-                      required
-                    />
+                    <input className="wp-input" type="email" name="email" value={jobData.email} onChange={handleJobChange} placeholder="john.doe@email.com" required />
                   </div>
-                  {/* ── NEW: Phone Number input ── */}
                   <div className="wp-field wp-field-full">
                     <label>Phone Number <span className="wp-req">*</span></label>
-                    <input
-                      className="wp-input"
-                      type="tel"
-                      name="phone"
-                      value={jobData.phone}
-                      onChange={handleJobChange}
-                      placeholder="+1 (555) 000-0000"
-                      required
-                    />
+                    <input className="wp-input" type="tel" name="phone" value={jobData.phone} onChange={handleJobChange} placeholder="+1 (555) 000-0000" required />
                   </div>
-                  {/* ── NEW: Emergency Contact input ── */}
                   <div className="wp-field wp-field-full">
                     <label>Emergency Contact</label>
-                    <input
-                      className="wp-input"
-                      type="text"
-                      name="emergencyContact"
-                      value={jobData.emergencyContact}
-                      onChange={handleJobChange}
-                      placeholder="Name — Phone"
-                    />
+                    <input className="wp-input" type="text" name="emergencyContact" value={jobData.emergencyContact} onChange={handleJobChange} placeholder="Name — Phone" />
                   </div>
                 </div>
               </div>
 
-              {/* ── Existing: Job Details card (unchanged) ── */}
               <div className="wp-card wp-card-full">
                 <div className="wp-card-title">💼 Job Details</div>
                 <div className="wp-field-grid">
@@ -708,7 +651,7 @@ function WorkerProfile() {
                 <div className="wp-card-title">🛠️ Your Skills <span className="wp-req">*</span></div>
                 <div className="wp-skills-box">
                   <div className="wp-skills-tags">
-                    {jobData.skills.length === 50
+                    {jobData.skills.length === 0
                       ? <span className="wp-skills-placeholder">Your skills will appear here…</span>
                       : jobData.skills.map((skill, i) => (
                           <span key={i} className="wp-skill-tag">
@@ -731,14 +674,11 @@ function WorkerProfile() {
                 <textarea className="wp-input wp-textarea" name="description" value={jobData.description} onChange={handleJobChange} rows={5} required placeholder="Describe your experience, availability, and what kind of work you're looking for…" />
               </div>
 
-              {/* ── REMOVED: "Add Photos" card deleted per requirements ── */}
-              {/* ── REMOVED: "Add Videos" card deleted per requirements ── */}
-
               <div className="wp-form-actions">
-                <button type="submit" className="wp-submit-btn" disabled={loading}>
-                  {loading ? "Posting…" : "📤 Post Job Application"}
+                <button type="submit" className="wp-submit-btn" disabled={submitting}>
+                  {submitting ? "Posting…" : "📤 Post Job Application"}
                 </button>
-                <button type="button" className="wp-cancel-btn" onClick={() => setActiveTab("profile")}>
+                <button type="button" className="wp-cancel-btn">
                   Cancel
                 </button>
               </div>
