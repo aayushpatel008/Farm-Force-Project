@@ -5,6 +5,8 @@ const workerApplicationSchema = new mongoose.Schema({
   worker: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
+    required: true,
+    unique: true // ✅ IMPORTANT (prevents multiple profiles)
   },
   // ── Personal Details ──
   firstName: { type: String, required: true },

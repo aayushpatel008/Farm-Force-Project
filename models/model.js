@@ -13,4 +13,4 @@ const userSchma=mongoose.Schema({
     
 })
 
-module.exports=mongoose.model("user",userSchma);
+module.exports=mongoose.model("User",userSchma);
