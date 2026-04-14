@@ -43,7 +43,7 @@ router.get("/invitations", protect, controller.getInvitations);
 // Endpoint: GET /api/applications/job/:jobId
 // Shows workers who applied to a job
 // ─────────────────────────────────────────────
-router.get("/job/:jobId", protect, controller.getApplicantsForJob);
+router.get("/provider", protect, controller.getMyApplicants);
 
 
 // ─────────────────────────────────────────────
@@ -51,7 +51,7 @@ router.get("/job/:jobId", protect, controller.getApplicantsForJob);
 // Endpoint: GET /api/applications/job/:jobId/invited
 // Shows workers invited by provider
 // ─────────────────────────────────────────────
-router.get("/job/:jobId/invited", protect, controller.getInvitedWorkers);
+router.get("/provider/invites", protect, controller.getMyInvitedWorkers);
 
 
 // ─────────────────────────────────────────────

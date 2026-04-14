@@ -9,42 +9,53 @@ const workerapplication = require('../models/Workerposting');
 // ─────────────────────────────────────────────
 exports.applyJob = async (req, res) => {
   console.log('API HIT applyJob', req.method, req.originalUrl);
+
   try {
-    // 🔹 Extract jobId from URL params
     const { jobId } = req.params;
 
-    // 🔹 Check if job exists
     const job = await Job.findById(jobId);
     if (!job) {
-      console.log('RESPONSE SENT applyJob NOT FOUND');
       return res.status(404).json({ message: 'Job not found' });
     }
 
-    // 🔹 Check if worker already applied
+    // 🔥 Get worker profile
+    const workerprofile = await workerapplication.findOne({
+      worker: req.user._id
+    });
+    console.log("Worker Profile Found:", workerprofile);
+
+    if (!workerprofile) {
+      return res.status(404).json({ message: "Worker profile not found" });
+    }
+
+    // 🔥 Check duplicate
     const existingApplication = await Application.findOne({
       job: jobId,
-      worker: req.user._id,
+      worker: workerprofile._id, // ✅ FIXED
       initiatedBy: 'worker'
     });
 
     if (existingApplication) {
-      console.log('RESPONSE SENT applyJob DUPLICATE');
       return res.status(409).json({ message: 'Already applied to this job' });
     }
 
-    // 🔹 Create new application
+    // 🔥 Create application with workerprofile ID
     const application = await Application.create({
       job: jobId,
-      worker: req.user._id,
+      worker: workerprofile._id, // ✅ FIXED
       provider: job.provider,
       initiatedBy: 'worker',
       status: 'pending'
     });
 
-    console.log('RESPONSE SENT applyJob');
+    // 🔥 Populate before sending response
+    const populatedApplication = await Application.findById(application._id)
+      .populate('worker')   // ✅ full worker details
+      .populate('job');
+
     return res.status(201).json({
       message: 'Application submitted successfully',
-      application
+      application: populatedApplication
     });
 
   } catch (error) {
@@ -60,56 +71,85 @@ exports.applyJob = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.inviteWorker = async (req, res) => {
   console.log('API HIT inviteWorker', req.method, req.originalUrl);
+
   try {
     const { jobId, workerId } = req.body;
 
-    // 🔹 Validate input
     if (!jobId || !workerId) {
       return res.status(400).json({ message: 'jobId and workerId are required' });
     }
 
-    // 🔹 Check if job exists
+    console.log("Incoming workerId:", workerId);
+
+    // 🔹 Check job
     const job = await Job.findById(jobId);
     if (!job) {
-      console.log('RESPONSE SENT inviteWorker JOB NOT FOUND');
       return res.status(404).json({ message: 'Job not found' });
     }
 
-    // 🔹 Authorization: only provider can invite
+    // 🔹 Auth check
     if (job.provider.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         message: 'Only the provider can invite workers for this job'
       });
     }
 
-    // 🔹 Prevent duplicate invite
+    // 🔥 HANDLE BOTH CASES (IMPORTANT FINAL FIX)
+    const workerprofile = await workerapplication.findOne({
+      $or: [
+        { worker: workerId },  // if frontend sends USER ID
+        { _id: workerId }      // if frontend sends workerProfile ID
+      ]
+    });
+
+    if (!workerprofile) {
+      console.log("❌ Worker profile NOT FOUND for:", workerId);
+      return res.status(404).json({ message: "Worker profile not found" });
+    }
+
+    console.log("✅ Worker Profile:", workerprofile._id);
+
+    // 🔥 Prevent duplicate
     const existingInvite = await Application.findOne({
       job: jobId,
-      worker: workerId,
+      worker: workerprofile._id,
       provider: req.user._id,
       initiatedBy: 'provider'
     });
 
     if (existingInvite) {
-      console.log('RESPONSE SENT inviteWorker ALREADY INVITED');
       return res.status(409).json({
         message: 'Worker already invited for this job'
       });
     }
 
-    // 🔹 Create invitation
+    // 🔥 Create invite
     const invitation = await Application.create({
       job: jobId,
-      worker: workerId,
+      worker: workerprofile._id,   // ALWAYS store workerProfile ID
       provider: req.user._id,
       initiatedBy: 'provider',
       status: 'pending'
     });
-    console.log("Invited workerId:", workerId);
-    console.log('RESPONSE SENT inviteWorker');
+
+    // 🔥 Populate FULL DATA (VERY IMPORTANT)
+    const populatedInvitation = await Application.findById(invitation._id)
+      .populate({
+        path: 'worker',
+        select: '-__v'
+      })
+      .populate({
+        path: 'job',
+        populate: {
+          path: 'provider',
+          model: 'User',
+          select: 'name email'
+        }
+      });
+
     return res.status(201).json({
       message: 'Worker invited successfully',
-      invitation
+      invitation: populatedInvitation
     });
 
   } catch (error) {
@@ -125,11 +165,34 @@ exports.inviteWorker = async (req, res) => {
 // ─────────────────────────────────────────────
 exports.getMyApplications = async (req, res) => {
   console.log('API HIT getMyApplications', req.method, req.originalUrl);
+
   try {
-    // 🔹 Find all applications for logged-in worker
-    const applications = await Application.find({
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    // 🔥 STEP 1: get worker profile
+    const workerprofile = await workerapplication.findOne({
       worker: req.user._id
-    }).populate('job provider', 'title name email role');
+    });
+
+    if (!workerprofile) {
+      return res.status(404).json({ message: "Worker profile not found" });
+    }
+
+    // 🔥 STEP 2: use workerprofile._id
+    const applications = await Application.find({
+      worker: workerprofile._id,
+      initiatedBy: 'worker'   // optional but recommended
+    })
+      .populate({
+        path: "job",
+        populate: {
+          path: "provider",
+          model: "User",
+          select: "name email role"
+        }
+      });
 
     console.log('RESPONSE SENT getMyApplications');
     return res.status(200).json(applications);
@@ -139,24 +202,47 @@ exports.getMyApplications = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
-
 // ─────────────────────────────────────────────
 // 4. GET INVITATIONS (Worker)
 // Get jobs where worker is invited
 // ─────────────────────────────────────────────
 exports.getInvitations = async (req, res) => {
   console.log('API HIT getInvitations', req.method, req.originalUrl);
-//   main function to get invitations for logged-in worker
-  const workerprofile = await workerapplication.findOne({ worker: req.user._id });
+
   try {
-    // 🔹 Fetch only provider-initiated applications
+    // ✅ Safety check
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
+    }
+
+    // ✅ Find worker profile
+    const workerprofile = await workerapplication.findOne({
+      worker: req.user._id
+    });
+
+    if (!workerprofile) {
+      return res.status(404).json({ message: "Worker profile not found" });
+    }
+
+    console.log("Worker Profile ID:", workerprofile._id);
+
+    // ✅ Fetch invitations with deep populate
     const invites = await Application.find({
       worker: workerprofile._id,
       initiatedBy: "provider"
-    }).populate('job provider', 'title name email role');
+    })
+      .populate({
+        path: "job",
+        populate: {
+          path: "provider",
+          model: "User",
+          select: "name email role"
+        }
+      });
+
     console.log("Logged user:", req.user._id);
     console.log('RESPONSE SENT getInvitations');
+
     return res.status(200).json(invites);
 
   } catch (error) {
@@ -170,36 +256,34 @@ exports.getInvitations = async (req, res) => {
 // 5. GET APPLICANTS (Provider)
 // Get workers who applied to a job
 // ─────────────────────────────────────────────
-exports.getApplicantsForJob = async (req, res) => {
-  console.log('API HIT getApplicantsForJob', req.method, req.originalUrl);
+exports.getMyApplicants = async (req, res) => {
+  console.log('API HIT getMyApplicants', req.method, req.originalUrl);
+
   try {
-    const { jobId } = req.params;
-
-    // 🔹 Validate job
-    const job = await Job.findById(jobId);
-    if (!job) {
-      console.log('RESPONSE SENT getApplicantsForJob JOB NOT FOUND');
-      return res.status(404).json({ message: 'Job not found' });
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
     }
 
-    // 🔹 Authorization
-    if (job.provider.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        message: 'Not authorized to view applicants for this job'
-      });
-    }
+    // 🔥 Step 1: Get all jobs of this provider
+    const jobs = await Job.find({ provider: req.user._id });
 
-    // 🔹 Get worker applications
+    // 🔥 Step 2: Extract job IDs
+    const jobIds = jobs.map(job => job._id);
+
+    // 🔥 Step 3: Get all applications (workers applied)
     const applications = await Application.find({
-      job: jobId,
+      job: { $in: jobIds },
       initiatedBy: 'worker'
-    }).populate('worker', 'name email role');
-
-    console.log('RESPONSE SENT getApplicantsForJob');
+    })
+    
+      .populate('worker')
+      .populate('job');
+      
+    
     return res.status(200).json(applications);
 
   } catch (error) {
-    console.error('getApplicantsForJob ERROR:', error);
+    console.error('getMyApplicants ERROR:', error);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -209,34 +293,32 @@ exports.getApplicantsForJob = async (req, res) => {
 // 6. GET INVITED WORKERS (Provider)
 // Get workers invited by provider
 // ─────────────────────────────────────────────
-exports.getInvitedWorkers = async (req, res) => {
-  console.log('API HIT getInvitedWorkers', req.method, req.originalUrl);
+exports.getMyInvitedWorkers = async (req, res) => {
+  console.log('API HIT getMyInvitedWorkers', req.method, req.originalUrl);
+
   try {
-    const { jobId } = req.params;
-
-    const job = await Job.findById(jobId);
-    if (!job) {
-      console.log('RESPONSE SENT getInvitedWorkers JOB NOT FOUND');
-      return res.status(404).json({ message: 'Job not found' });
+    if (!req.user) {
+      return res.status(401).json({ message: "User not authenticated" });
     }
 
-    if (job.provider.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        message: 'Not authorized to view invited workers for this job'
-      });
-    }
+    // 🔥 Step 1: Get all jobs of this provider
+    const jobs = await Job.find({ provider: req.user._id });
 
-    // 🔹 Fetch invited workers
+    // 🔥 Step 2: Extract job IDs
+    const jobIds = jobs.map(job => job._id);
+
+    // 🔥 Step 3: Get all invites (provider invited)
     const invites = await Application.find({
-      job: jobId,
+      job: { $in: jobIds },
       initiatedBy: 'provider'
-    }).populate('worker', 'name email role');
+    })
+      .populate('worker')
+      .populate('job');
 
-    console.log('RESPONSE SENT getInvitedWorkers');
     return res.status(200).json(invites);
 
   } catch (error) {
-    console.error('getInvitedWorkers ERROR:', error);
+    console.error('getMyInvitedWorkers ERROR:', error);
     return res.status(500).json({ message: error.message });
   }
 };
