@@ -28,6 +28,7 @@ import WorkerProfile from "./Pages/Worker/Profile/profile";
 import WorkerAttendance from "./Pages/Worker/Attendance/Attendance";
 import Browsejob from "./Pages/Worker/Browse/BrowseWorker";
 import ApplicationWorker from "./Pages/Worker/Application/ApplicationWorker";
+import Applicationprovider from "./Pages/Jobprovider/Applicationprovider";
 
 
 function App() {
@@ -74,6 +75,7 @@ function App() {
         <Route path="/worker" element={<WorkerHome/>} />
         <Route path="/jobprovider/jobpDashboard" element={<JobpDashboard />} />
         <Route path="/jobprovider/jobposting" element={<Jobposting/>}/>
+        <Route path="/jobprovider/Applicationprovider" element={<Applicationprovider/>}/>
         <Route path="/jobprovider/Browse" element={<BrowseWorkers/>}/>
         <Route path='/jobprovider/attendance' element={<Attendance/>}/>
         <Route path='/Worker/Profile/profile' element={<WorkerProfile/>}/>

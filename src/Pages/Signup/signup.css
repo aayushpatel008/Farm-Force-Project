@@ -257,26 +257,97 @@ h2 {
   }
 }
 
-.required{
-   color: #e53935;   /* modern red */
-   margin-left: 3px;
-   font-weight: bold;
+.required {
+  color: #e53935;
+  margin-left: 3px;
+  font-weight: bold;
 }
 
-.password-group{
+.password-group {
   position: relative;
 }
 
-.password-tooltip{
-  position: absolute;
-  top: 75px;
-  left: 0;
-  width: 320px;
-  background: #111;
-  color: #fff;
-  padding: 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  z-index: 100;
+/* Info icon next to Password label */
+.info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 6px;
+  font-size: 14px;
+  color: #888;
+  cursor: default;
+  vertical-align: middle;
+  user-select: none;
 }
 
+.info-icon:hover {
+  color: #4CAF50;
+}
+
+/* Tooltip box */
+.password-tooltip-box {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  background: #111;
+  color: #fff;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  z-index: 100;
+  animation: fadeInTip 0.18s ease;
+}
+
+@keyframes fadeInTip {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltip-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #aaa;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Each rule row */
+.tooltip-rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #bbb;
+  margin-bottom: 5px;
+  transition: color 0.2s;
+}
+
+.tooltip-rule:last-child {
+  margin-bottom: 0;
+}
+
+.rule-icon {
+  width: 16px;
+  text-align: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  color: #666;
+  transition: color 0.2s;
+}
+
+/* Satisfied rule */
+.tooltip-rule.rule-ok {
+  color: #81c784;
+}
+
+.tooltip-rule.rule-ok .rule-icon {
+  color: #66bb6a;
+}

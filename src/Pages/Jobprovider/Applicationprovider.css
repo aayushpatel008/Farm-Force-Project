@@ -1,10 +1,4 @@
-/* =====================================================
-   ApplicationManagement.css
-   Card styles are a direct structural copy of
-   wja-card (worker.css) with amc- prefix.
-   Only addition: .amc-card__footer with applied
-   date + status badge.
-   ===================================================== */
+/* Applicationprovider.css */
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap');
 
@@ -372,7 +366,7 @@
 .amc-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--g400); }
 .amc-card:hover::before { opacity: 1; }
 
-/* Invite card — teal accent */
+/* Offer card — teal accent */
 .amc-card--invite { border-color: #a2ded0; }
 .amc-card--invite::before { background: linear-gradient(90deg, #0f6e56, #1d9e75); }
 .amc-card--invite:hover   { border-color: #5dcaa5; }
@@ -456,7 +450,7 @@
   flex-shrink: 0;
 }
 
-/* Invite footer: badge left + action buttons right */
+/* Offer footer: badge left + action buttons right */
 .amc-card__footer--invite {
   flex-wrap: wrap;
   gap: 10px;
@@ -508,7 +502,7 @@
   border: 1px solid #99f6e4;
 }
 
-/* ── Invite action buttons ───────────────────────────── */
+/* ── Offer action buttons ───────────────────────────── */
 .amc-card__actions {
   display: flex; gap: 8px; flex-shrink: 0;
 }
@@ -556,8 +550,7 @@
 .amc-spinner--red   { border-color: rgba(153,27,27,0.15); border-top-color: #991b1b; }
 @keyframes amc-spin { to { transform: rotate(360deg); } }
 
-/* ── Skeleton shimmer (reuses skel- classes from worker.css) ─ */
-/* If worker.css is NOT imported, these are needed: */
+/* ── Skeleton shimmer ───────────────────────────────── */
 .skel {
   background: linear-gradient(90deg, #e8f0e8 25%, #d6ead6 50%, #e8f0e8 75%);
   background-size: 200% 100%;
@@ -572,7 +565,7 @@
 .skel--sm     { width: 85%; height: 11px; }
 .skel--pill   { width: 70px; height: 22px; border-radius: 20px; }
 
-/* ── Avatar color classes (same values as worker.css) ── */
+/* ── Avatar color classes ────────────────────────────── */
 .avatar--green  { background: var(--g100); color: var(--g700); }
 .avatar--teal   { background: #d4f0e8; color: #085041; }
 .avatar--amber  { background: #faeeda; color: #633806; }
@@ -581,7 +574,7 @@
 .avatar--purple { background: #eeedfe; color: #3c3489; }
 
 /* ══════════════════════════════════════════════════════
-   MODAL STYLES (keep your existing ones)
+   MODAL STYLES
 ══════════════════════════════════════════════════════ */
 .modal-overlay {
   position: fixed; inset: 0;

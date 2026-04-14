@@ -58,6 +58,10 @@ const Sidebar = () => {
           <FaUsers className="sidebar-icon" />
           <span className='text'>Browse Workers</span>
         </Link>
+          <Link to="/jobprovider/Applicationprovider" className='Dashboard'>
+          <FaBriefcase className="sidebar-icon" />
+          <span className='text'>Applications</span>
+        </Link>
         {/* Logout button — unchanged visually, now opens modal */}
         <button className='logout' onClick={handleLogoutClick}>
           <FiLogOut className="logout-icon" />

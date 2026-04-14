@@ -16,7 +16,9 @@ const FarmForceSignup = () => {
   
   const [errors, setErrors] = useState({});
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [isEmailexist,SetIsEmailexist]=useState(false);
+  const [isEmailexist, SetIsEmailexist] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
 
   const handleChange = (e) => {
@@ -198,15 +200,18 @@ const FarmForceSignup = () => {
                 placeholder="Enter your email"
                 className={errors.email ? 'error' : ''}
               />
-           
-
               {errors.email && <span className="error-message">{errors.email}</span>}
             </div>
             
             {/* Password Field */}
-            <div className="form-group">
-              <label htmlFor="password">Password
-                <span className="required">*</span>
+            <div className="form-group password-group">
+              <label htmlFor="password">
+                Password<span className="required">*</span>
+                <span
+                  className="info-icon"
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => !passwordFocused && setShowTooltip(false)}
+                >ⓘ</span>
               </label>
               <input
                 type="password"
@@ -216,8 +221,38 @@ const FarmForceSignup = () => {
                 onChange={handleChange}
                 placeholder="Create a strong password"
                 className={errors.password ? 'error' : ''}
+                onFocus={() => { setPasswordFocused(true); setShowTooltip(true); }}
+                onBlur={() => { setPasswordFocused(false); setShowTooltip(false); }}
               />
               {errors.password && <span className="error-message">{errors.password}</span>}
+
+              {showTooltip && (
+                <div className="password-tooltip-box">
+                  <p className="tooltip-title">Password must:</p>
+                  {[
+                    { key: 'length',    label: 'Be between 8 and 15 characters' },
+                    { key: 'uppercase', label: 'Include at least one uppercase letter' },
+                    { key: 'lowercase', label: 'Include at least one lowercase letter' },
+                    { key: 'number',    label: 'Include at least one number' },
+                    { key: 'special',   label: 'Include one special character (@, #, %, &, !, $, *)' },
+                  ].map(({ key, label }) => {
+                    const validations = {
+                      length:    formData.password.length >= 8 && formData.password.length <= 15,
+                      uppercase: /[A-Z]/.test(formData.password),
+                      lowercase: /[a-z]/.test(formData.password),
+                      number:    /[0-9]/.test(formData.password),
+                      special:   /[@#%&!$*]/.test(formData.password),
+                    };
+                    const ok = validations[key];
+                    return (
+                      <div key={key} className={`tooltip-rule ${ok ? 'rule-ok' : ''}`}>
+                        <span className="rule-icon">{ok ? '✔' : '○'}</span>
+                        <span>{label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
             
             {/* Confirm Password Field */}
