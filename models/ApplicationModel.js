@@ -9,7 +9,7 @@ const applicationSchema = new mongoose.Schema({
 
   worker: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "WorkerApplication",
+    ref: "WorkerApplication", // ✅ matches your worker model
     required: true,
   },
 
@@ -32,5 +32,8 @@ const applicationSchema = new mongoose.Schema({
   },
 
 }, { timestamps: true });
+
+/* 🔒 Prevent duplicate apply */
+applicationSchema.index({ job: 1, worker: 1 }, { unique: true });
 
 module.exports = mongoose.model("Application", applicationSchema);

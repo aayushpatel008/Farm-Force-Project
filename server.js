@@ -15,6 +15,8 @@ const myjobRoutes = require("./Routes/MyApiJobsroutes"); // ✅ ADDED
 
 const applicationRoutes = require('./Routes/applicationRoutes');
 
+const applicationCancelRoutes = require('./Routes/applicationCancelRoutes'); // ✅ NEW (cancel + get applied)
+
 
 // 🔥 NEW: Application Routes IMPORT
 
@@ -57,6 +59,8 @@ app.use("/api", myjobRoutes); // ✅ ADDED (My Jobs route)
 // 🔥 NEW: Application System Routes
 
 app.use("/api/applications", applicationRoutes);
+
+app.use("/api/applications", applicationCancelRoutes);
 
 
 

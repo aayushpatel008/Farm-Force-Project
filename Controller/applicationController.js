@@ -329,28 +329,32 @@ exports.getMyInvitedWorkers = async (req, res) => {
 // Used by both Worker & Provider
 // ─────────────────────────────────────────────
 exports.updateApplicationStatus = async (req, res) => {
-  console.log('API HIT updateApplicationStatus', req.method, req.originalUrl);
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    // 🔹 Validate status
     if (!['accepted', 'rejected'].includes(status)) {
       return res.status(400).json({
         message: 'Status must be accepted or rejected'
       });
     }
 
-    // 🔹 Find application
     const application = await Application.findById(id);
     if (!application) {
-      console.log('RESPONSE SENT updateApplicationStatus NOT FOUND');
       return res.status(404).json({ message: 'Application not found' });
     }
 
-    // 🔹 Authorization check
-    const isProvider = application.provider.toString() === req.user._id.toString();
-    const isWorker = application.worker.toString() === req.user._id.toString();
+    // ✅ FIXED AUTH LOGIC
+    const isProvider =
+      application.provider.toString() === req.user._id.toString();
+
+    const workerprofile = await workerapplication.findOne({
+      worker: req.user._id
+    });
+
+    const isWorker =
+      workerprofile &&
+      application.worker.toString() === workerprofile._id.toString();
 
     if (!isProvider && !isWorker) {
       return res.status(403).json({
@@ -358,15 +362,12 @@ exports.updateApplicationStatus = async (req, res) => {
       });
     }
 
-    // 🔹 Update status
     application.status = status;
     await application.save();
 
-    console.log('RESPONSE SENT updateApplicationStatus');
     return res.status(200).json(application);
 
   } catch (error) {
-    console.error('updateApplicationStatus ERROR:', error);
     return res.status(500).json({ message: error.message });
   }
 };
