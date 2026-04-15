@@ -166,6 +166,9 @@ export default function BrowseWorkers() {
   const [providerJobs,    setProviderJobs]    = useState([]);
   const [loadingJobs,     setLoadingJobs]     = useState(false);
 
+  // ── STEP 1: Add hired workers state ───────────────────────────────────────
+  const [hiredWorkers, setHiredWorkers] = useState([]);
+
   // ── Fetch workers ──────────────────────────────────────────────────────────
   useEffect(() => {
     const fetchWorkers = async () => {
@@ -193,6 +196,24 @@ export default function BrowseWorkers() {
       }
     };
     fetchWorkers();
+  }, []);
+
+  // ── STEP 2: Add fetchHiredWorkers function ─────────────────────────────────
+  const fetchHiredWorkers = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:5000/api/applications/my-hires",
+        { withCredentials: true }
+      );
+      setHiredWorkers(res.data);
+    } catch (err) {
+      console.error("Failed to fetch hired workers", err);
+    }
+  };
+
+  // ── STEP 3: Call fetchHiredWorkers in useEffect ────────────────────────────
+  useEffect(() => {
+    fetchHiredWorkers();
   }, []);
 
   // ── Step 1: Provider clicks "Hire" — fetch MY jobs fresh, then open modal ─
@@ -272,6 +293,9 @@ export default function BrowseWorkers() {
 
       setInviteStatus((prev) => ({ ...prev, [workerId]: "invited" }));    // FIX 4: keyed by _id
       toast.success("Worker invited successfully!");
+      
+      // Refresh hired workers after successful invite
+      await fetchHiredWorkers();
 
     } catch (err) {
       const status = err.response?.status;
@@ -284,6 +308,33 @@ export default function BrowseWorkers() {
 
       setInviteStatus((prev) => ({ ...prev, [workerId]: "error" }));      // FIX 4: keyed by _id
       toast.error(msg);
+    }
+  };
+
+  // ── STEP 4: Add revoke function ───────────────────────────────────────────
+  const handleRevoke = async (jobId, workerId) => {
+    try {
+      await axios.delete(
+        "http://localhost:5000/api/applications/revoke",
+        {
+          data: { jobId, workerId },
+          withCredentials: true
+        }
+      );
+
+      toast.success("Revoked successfully");
+
+      // Update hiredWorkers state
+      setHiredWorkers(prev =>
+        prev.filter(h => !(h.jobId === jobId && h.workerId === workerId))
+      );
+
+      // Also reset inviteStatus for this worker
+      setInviteStatus(prev => ({ ...prev, [workerId]: "idle" }));
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to revoke");
     }
   };
 
@@ -522,86 +573,100 @@ export default function BrowseWorkers() {
                     currentPage       * ITEMS_PER_PAGE
                   );
 
-                  return paginated.map((w) => (
-                    <div className="bw-card" key={w._id}>  {/* FIX 2: use w._id as key */}
-                      <div className="bw-card-left">
-                        <div className="bw-card-avatar" style={{ background: w.color }}>
-                          {w.initials}
+                  return paginated.map((w) => {
+                    // ── STEP 5: Check if worker is hired ──────────────────────
+                    const hired = hiredWorkers.find(h => h.workerId === w._id);
+                    
+                    return (
+                      <div className="bw-card" key={w._id}>
+                        <div className="bw-card-left">
+                          <div className="bw-card-avatar" style={{ background: w.color }}>
+                            {w.initials}
+                          </div>
+                          {w.available && (
+                            <span className="bw-avail-dot" title="Available Now" />
+                          )}
                         </div>
-                        {w.available && (
-                          <span className="bw-avail-dot" title="Available Now" />
-                        )}
-                      </div>
 
-                      <div className="bw-card-body">
-                        <div className="bw-card-top">
-                          <div>
-                            <h3 className="bw-card-name">{w.name}</h3>
-                            <div className="bw-card-meta">
-                              <span className="bw-card-loc">📍 {w.location}</span>
-                              <span className="bw-card-exp">🌾 {w.experience}</span>
-                              <span className={`bw-avail-badge ${w.available ? "yes" : "no"}`}>
-                                {w.available ? "● Available Now" : "● Within a week"}
-                              </span>
+                        <div className="bw-card-body">
+                          <div className="bw-card-top">
+                            <div>
+                              <h3 className="bw-card-name">{w.name}</h3>
+                              <div className="bw-card-meta">
+                                <span className="bw-card-loc">📍 {w.location}</span>
+                                <span className="bw-card-exp">🌾 {w.experience}</span>
+                                <span className={`bw-avail-badge ${w.available ? "yes" : "no"}`}>
+                                  {w.available ? "● Available Now" : "● Within a week"}
+                                </span>
+                              </div>
                             </div>
+                            <div className="bw-card-wage">{w.wage}</div>
                           </div>
-                          <div className="bw-card-wage">{w.wage}</div>
-                        </div>
 
-                        {w.rating > 0 && (
-                          <div className="bw-card-rating">
-                            <div className="bw-stars">{renderStars(w.rating)}</div>
-                            <span className="bw-rating-val">{w.rating}</span>
-                            <span className="bw-reviews">({w.reviews} reviews)</span>
+                          {w.rating > 0 && (
+                            <div className="bw-card-rating">
+                              <div className="bw-stars">{renderStars(w.rating)}</div>
+                              <span className="bw-rating-val">{w.rating}</span>
+                              <span className="bw-reviews">({w.reviews} reviews)</span>
+                            </div>
+                          )}
+
+                          {w.bio && <p className="bw-card-bio">{w.bio}</p>}
+
+                          <div className="bw-card-skills">
+                            {w.skills.map((s) => (
+                              <span key={s} className="bw-skill-tag">{s}</span>
+                            ))}
                           </div>
-                        )}
 
-                        {w.bio && <p className="bw-card-bio">{w.bio}</p>}
+                          {/* ── CARD ACTIONS ── */}
+                          <div className="bw-card-actions">
 
-                        <div className="bw-card-skills">
-                          {w.skills.map((s) => (
-                            <span key={s} className="bw-skill-tag">{s}</span>
-                          ))}
-                        </div>
+                            {/* STEP 5: Replace button with conditional Hire/Revoke */}
+                            {hired ? (
+                              <button
+                                className="bw-btn-hire bw-btn-hire--error"
+                                onClick={() => handleRevoke(hired.jobId, w._id)}
+                              >
+                                Revoke
+                              </button>
+                            ) : (
+                              <button
+                                className={`bw-btn-hire${
+                                  inviteStatus[w._id] === "invited"
+                                    ? " bw-btn-hire--done"
+                                    : inviteStatus[w._id] === "error"
+                                    ? " bw-btn-hire--error"
+                                    : ""
+                                }`}
+                                onClick={() => handleHireClick(w._id)}
+                                disabled={
+                                  inviteStatus[w._id] === "loading"   ||
+                                  inviteStatus[w._id] === "invited"   ||
+                                  inviteStatus[w._id] === "selecting"
+                                }
+                              >
+                                {inviteStatus[w._id] === "loading"
+                                  ? "Inviting…"
+                                  : inviteStatus[w._id] === "invited"
+                                  ? "✓ Invited"
+                                  : inviteStatus[w._id] === "selecting"
+                                  ? "Selecting…"
+                                  : "Hire"}
+                              </button>
+                            )}
 
-                        {/* ── CARD ACTIONS ── */}
-                        <div className="bw-card-actions">
-
-                          {/* FIX 3 + FIX 4: Use w._id exclusively for hire button */}
-                          <button
-                            className={`bw-btn-hire${
-                              inviteStatus[w._id] === "invited"
-                                ? " bw-btn-hire--done"
-                                : inviteStatus[w._id] === "error"
-                                ? " bw-btn-hire--error"
-                                : ""
-                            }`}
-                            onClick={() => handleHireClick(w._id)}          // FIX 3
-                            disabled={
-                              inviteStatus[w._id] === "loading"   ||         // FIX 4
-                              inviteStatus[w._id] === "invited"   ||         // FIX 4
-                              inviteStatus[w._id] === "selecting"             // FIX 4
-                            }
-                          >
-                            {inviteStatus[w._id] === "loading"               // FIX 4
-                              ? "Inviting…"
-                              : inviteStatus[w._id] === "invited"            // FIX 4
-                              ? "✓ Invited"
-                              : inviteStatus[w._id] === "selecting"          // FIX 4
-                              ? "Selecting…"
-                              : "Hire"}
-                          </button>
-
-                          <button
-                            className="bw-btn-view"
-                            onClick={() => setViewWorker(w)}
-                          >
-                            View Profile
-                          </button>
+                            <button
+                              className="bw-btn-view"
+                              onClick={() => setViewWorker(w)}
+                            >
+                              View Profile
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ));
+                    );
+                  });
                 })()
               )}
             </div>

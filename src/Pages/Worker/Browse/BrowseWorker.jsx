@@ -294,6 +294,9 @@ export default function Browsejob() {
   // ── Apply state — keyed by job._id
   // applyStatus[id]: 'idle' | 'loading' | 'applied' | 'error'
   const [applyStatus, setApplyStatus] = useState({});
+  
+  // ── Applied jobs state (stores job IDs that user has applied to)
+  const [appliedJobs, setAppliedJobs] = useState([]);
 
   // ── Job detail modal
   const [selectedJob, setSelectedJob] = useState(null);
@@ -311,7 +314,46 @@ export default function Browsejob() {
       .finally(() => setLoadingJobs(false));
   }, []);
 
-  // ── Apply handler
+  // ── Fetch applied jobs from backend
+  const fetchAppliedJobs = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/applications/my-applied", { 
+        withCredentials: true 
+      });
+      const raw = res.data?.data ?? res.data;
+      setAppliedJobs(Array.isArray(raw) ? raw : []);
+    } catch (err) {
+      console.error("Failed to load applied jobs:", err);
+      toast.error("Failed to load applied jobs.");
+    }
+  };
+
+  // ── Cancel application handler
+  const handleCancel = async (jobId) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/applications/cancel/${jobId}`, { 
+        withCredentials: true 
+      });
+      
+      // Update appliedJobs state after successful cancellation
+      setAppliedJobs(prev => prev.filter(id => id !== jobId));
+      
+      // Update applyStatus for this job
+      setApplyStatus(prev => ({ ...prev, [jobId]: "idle" }));
+      
+      toast.success("Application cancelled successfully.");
+    } catch (err) {
+      console.error("Failed to cancel application:", err);
+      toast.error("Failed to cancel application.");
+    }
+  };
+
+  // ── Load applied jobs on component mount
+  useEffect(() => {
+    fetchAppliedJobs();
+  }, []);
+
+  // ── Apply handler (updated to refresh applied jobs)
   const handleApply = async (jobId) => {
     if (applyStatus[jobId] === "loading" || applyStatus[jobId] === "applied") return;
 
@@ -326,6 +368,9 @@ export default function Browsejob() {
 
       setApplyStatus((prev) => ({ ...prev, [jobId]: "applied" }));
       toast.success("Applied successfully!");
+      
+      // Refresh applied jobs list
+      await fetchAppliedJobs();
 
     } catch (err) {
       const status = err.response?.status;
@@ -614,30 +659,41 @@ export default function Browsejob() {
                   </div>
                 </div>
 
-                {/* BOTTOM ROW — Apply button */}
+                {/* BOTTOM ROW — Apply/Cancel buttons */}
                 <div className="agri-jm__card-actions">
-
-                  {/* Apply button */}
-                  <button
-                    className={`agri-jm__contact-action-btn${
-                      applyStatus[job._id] === "applied"
-                        ? " agri-jm__contact-action-btn--done"
-                        : applyStatus[job._id] === "error"
-                        ? " agri-jm__contact-action-btn--error"
-                        : ""
-                    }`}
-                    onClick={() => handleApply(job._id)}
-                    disabled={
-                      applyStatus[job._id] === "loading" ||
-                      applyStatus[job._id] === "applied"
-                    }
-                  >
-                    {applyStatus[job._id] === "loading"
-                      ? "Applying…"
-                      : applyStatus[job._id] === "applied"
-                      ? "✓ Applied"
-                      : "Apply"}
-                  </button>
+                  {/* Show Cancel button if already applied, otherwise Show Apply button */}
+                  {appliedJobs.includes(job._id) ? (
+                    <button
+                      className="agri-jm__cancel-action-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancel(job._id);
+                      }}
+                    >
+                      Revoke
+                    </button>
+                  ) : (
+                    <button
+                      className={`agri-jm__contact-action-btn${
+                        applyStatus[job._id] === "applied"
+                          ? " agri-jm__contact-action-btn--done"
+                          : applyStatus[job._id] === "error"
+                          ? " agri-jm__contact-action-btn--error"
+                          : ""
+                      }`}
+                      onClick={() => handleApply(job._id)}
+                      disabled={
+                        applyStatus[job._id] === "loading" ||
+                        applyStatus[job._id] === "applied"
+                      }
+                    >
+                      {applyStatus[job._id] === "loading"
+                        ? "Applying…"
+                        : applyStatus[job._id] === "applied"
+                        ? "✓ Applied"
+                        : "Apply"}
+                    </button>
+                  )}
 
                   {/* View Profile button — unchanged */}
                   <button
@@ -690,24 +746,33 @@ export default function Browsejob() {
                             </div>
                           ))}
                         </div>
-                        <button
-                          className={`agri-jm__apply-btn-large${
-                            applyStatus[job._id] === "applied"
-                              ? " agri-jm__apply-btn--done"
-                              : ""
-                          }`}
-                          onClick={() => handleApply(job._id)}
-                          disabled={
-                            applyStatus[job._id] === "loading" ||
-                            applyStatus[job._id] === "applied"
-                          }
-                        >
-                          {applyStatus[job._id] === "loading"
-                            ? "Applying…"
-                            : applyStatus[job._id] === "applied"
-                            ? "✓ Applied"
-                            : "Apply Now"}
-                        </button>
+                        {appliedJobs.includes(job._id) ? (
+                          <button
+                            className="agri-jm__cancel-btn-large"
+                            onClick={() => handleCancel(job._id)}
+                          >
+                            Revoke
+                          </button>
+                        ) : (
+                          <button
+                            className={`agri-jm__apply-btn-large${
+                              applyStatus[job._id] === "applied"
+                                ? " agri-jm__apply-btn--done"
+                                : ""
+                            }`}
+                            onClick={() => handleApply(job._id)}
+                            disabled={
+                              applyStatus[job._id] === "loading" ||
+                              applyStatus[job._id] === "applied"
+                            }
+                          >
+                            {applyStatus[job._id] === "loading"
+                              ? "Applying…"
+                              : applyStatus[job._id] === "applied"
+                              ? "✓ Applied"
+                              : "Apply Now"}
+                          </button>
+                        )}
                         <button className="agri-jm__contact-btn">Contact Farm</button>
                       </div>
                     </div>

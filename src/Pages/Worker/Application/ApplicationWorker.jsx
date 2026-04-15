@@ -301,29 +301,43 @@ function InviteCard({ inv, responding, onRespond, onCardClick }) {
         ))}
       </div>
 
-      {/* FOOTER — invite variant */}
+      {/* FOOTER — invite variant with dynamic status rendering */}
       <div className="amc-card__footer amc-card__footer--invite" onClick={e => e.stopPropagation()}>
-        <span className="amc-status-badge amc-status-badge--invited">Invited</span>
-        <div className="amc-card__actions">
-          <button
-            className="amc-btn amc-btn--accept"
-            onClick={() => onRespond(id, "accept")}
-            disabled={isBusy}
-          >
-            {isAccepting
-              ? <span className="amc-spinner amc-spinner--green" />
-              : <><CheckIcon /> Accept</>}
-          </button>
-          <button
-            className="amc-btn amc-btn--decline"
-            onClick={() => onRespond(id, "reject")}
-            disabled={isBusy}
-          >
-            {isRejecting
-              ? <span className="amc-spinner amc-spinner--red" />
-              : <><XIcon /> Decline</>}
-          </button>
-        </div>
+
+        {inv.status === "pending" ? (
+          <>
+            <span className="amc-status-badge amc-status-badge--invited">
+              Invited
+            </span>
+
+            <div className="amc-card__actions">
+              <button
+                className="amc-btn amc-btn--accept"
+                onClick={() => onRespond(id, "accept")}
+                disabled={isBusy}
+              >
+                {isAccepting
+                  ? <span className="amc-spinner amc-spinner--green" />
+                  : <><CheckIcon /> Accept</>}
+              </button>
+
+              <button
+                className="amc-btn amc-btn--decline"
+                onClick={() => onRespond(id, "reject")}
+                disabled={isBusy}
+              >
+                {isRejecting
+                  ? <span className="amc-spinner amc-spinner--red" />
+                  : <><XIcon /> Reject</>}
+              </button>
+            </div>
+          </>
+        ) : (
+          <span className={`amc-status-badge amc-status-badge--${inv.status}`}>
+            {inv.status === "accepted" ? "Accepted" : "Rejected"}
+          </span>
+        )}
+
       </div>
 
     </div>
@@ -490,19 +504,53 @@ const ApplicationManagement = () => {
     loadData();
   }, [fetchApplications, fetchInvitations]);
 
+  // ── FIXED handleRespond with instant UI update ──────────────────────────
   const handleRespond = async (invitationId, action) => {
     setResponding(p => ({ ...p, [invitationId]: action }));
+    
     try {
       await axios.put(
         `http://localhost:5000/api/applications/${invitationId}/status`,
         { status: action === "accept" ? "accepted" : "rejected" },
         { withCredentials: true }
       );
+      
       toast[action === "accept" ? "success" : "info"](
-        action === "accept" ? "🎉 Invitation accepted!" : "Invitation declined."
+        action === "accept" ? "🎉 Invitation accepted!" : "Invitation rejected."
       );
+      
+      // Update UI instantly without refresh
+      if (action === "accept") {
+        // Find the accepted invitation
+        const acceptedInv = invitations.find(inv => inv._id === invitationId);
+        
+        if (acceptedInv) {
+          // Move accepted invite to applications with status "accepted"
+          setApplications(prev => [
+            ...prev,
+            { ...acceptedInv, status: "accepted" }
+          ]);
+        }
+        
+        // Remove from invitations
+        setInvitations(prev =>
+          prev.filter(inv => inv._id !== invitationId)
+        );
+      } else if (action === "reject") {
+        // For reject: just update status in invitations
+        setInvitations(prev =>
+          prev.map(inv =>
+            inv._id === invitationId
+              ? { ...inv, status: "rejected" }
+              : inv
+          )
+        );
+      }
+      
+      // Optional: Background refresh to ensure consistency
       await fetchInvitations();
-      if (action === "accept") fetchApplications();
+      if (action === "accept") await fetchApplications();
+      
     } catch (err) {
       console.error("Failed to respond:", err);
       toast.error("Something went wrong. Please try again.");
@@ -523,8 +571,14 @@ const ApplicationManagement = () => {
     switch (activeFilter) {
       case "applied":  return { apps: apps.filter(a => a.status?.toLowerCase() !== "invited"), invs: [] };
       case "invited":  return { apps: [], invs };
-      case "accepted": return { apps: apps.filter(a => a.status?.toLowerCase() === "accepted"), invs: [] };
-      case "rejected": return { apps: apps.filter(a => a.status?.toLowerCase() === "rejected"), invs: [] };
+      case "accepted": return {
+        apps: apps.filter(a => a.status?.toLowerCase() === "accepted"),
+        invs: invs.filter(i => i.status?.toLowerCase() === "accepted")
+      };
+      case "rejected": return {
+        apps: apps.filter(a => a.status?.toLowerCase() === "rejected"),
+        invs: invs.filter(i => i.status?.toLowerCase() === "rejected")
+      };
       default:         return { apps, invs };
     }
   };

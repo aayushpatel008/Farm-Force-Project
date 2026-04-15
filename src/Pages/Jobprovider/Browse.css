@@ -1376,3 +1376,16 @@
   .bw-job-selector-inner { flex-direction: column; align-items: flex-start; gap: 8px; }
   .bw-job-selector-select { max-width: 100%; width: 100%; }
 }
+
+.bw-btn-hire--error {
+  background: #ffe5e5;
+  color: #ffffff;
+  border: 1px solid #f5c2c2;
+  transition: all 0.2s ease;
+}
+
+.bw-btn-hire--error:hover {
+  background: #ffd6d6;
+  border-color: #e57373;
+  color: #b71c1c;
+}

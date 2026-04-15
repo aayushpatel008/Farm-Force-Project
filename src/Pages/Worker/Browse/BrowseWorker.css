@@ -1413,3 +1413,32 @@ body:has(.Side-bar.expanded) .agri-jm__root {
 }
 .agri-jm__apply-msg--success { color: #065f46; }
 .agri-jm__apply-msg--error   { color: #b91c1c; }
+
+/* Cancel Button Styles */
+.agri-jm__cancel-action-btn {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+.agri-jm__cancel-action-btn:hover {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+.agri-jm__cancel-action-btn:active {
+  transform: translateY(0);
+}
+
+.agri-jm__cancel-btn-large {
+  background: #dc2626;
+  color: white;
+  border: none;
+}
