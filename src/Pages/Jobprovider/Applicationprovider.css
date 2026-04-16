@@ -575,6 +575,8 @@
 
 /* ══════════════════════════════════════════════════════
    MODAL STYLES
+   Improved scrollbar UX with right-side alignment
+   and clean spacing without breaking modal behavior
 ══════════════════════════════════════════════════════ */
 .modal-overlay {
   position: fixed; inset: 0;
@@ -585,13 +587,44 @@
 @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
 
 .modal-card {
-  background: #fff; border-radius: 24px;
-  width: min(580px, 92vw); max-height: 88vh;
+  background: #fff;
+  border-radius: 24px;
+  width: min(580px, 92vw);
+  max-height: 88vh;
   overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 10px; /* ✅ key fix: push content away from scrollbar */
   box-shadow: 0 24px 64px rgba(13,46,20,0.35);
   border: 1.5px solid var(--g200);
-  display: flex; flex-direction: column;
+  display: flex;
+  flex-direction: column;
   animation: fadeUp 0.25s ease;
+}
+
+/* Custom scrollbar styling — clean, aligned with right border */
+.modal-card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-card::-webkit-scrollbar-track {
+  background: transparent;
+  margin-top: 10px;     /* keeps space from top rounded corner */
+  margin-bottom: 10px;  /* keeps space from bottom rounded corner */
+}
+
+.modal-card::-webkit-scrollbar-thumb {
+  background: rgba(26, 58, 26, 0.18);
+  border-radius: 20px;
+}
+
+.modal-card::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 58, 26, 0.35);
+}
+
+/* Firefox scrollbar support */
+.modal-card {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(26, 58, 26, 0.18) transparent;
 }
 
 .modal-card-view { width: min(660px, 94vw); }

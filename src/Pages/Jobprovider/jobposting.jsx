@@ -5,27 +5,23 @@ import axios from 'axios';
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-// Combines employment type and duration into one string e.g. "Full-time · 3 months"
 const formatType = (type, duration) => {
   const parts = [type, duration].filter(Boolean);
   return parts.join(" · ");
 };
 
-// Formats a date string into "Posted Jun 5"
 const formatPostedDate = (dateStr) => {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   return "Posted " + d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-// Formats a date string into "Jun 5, 2025" — used for deadline display
 const formatDate = (dateStr) => {
   if (!dateStr) return "Flexible";
   const d = new Date(dateStr);
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
-// Returns an emoji icon based on keywords in the job title
 const getJobIcon = (title = "") => {
   const t = title.toLowerCase();
   if (t.includes("tractor")) return "🚜";
@@ -38,7 +34,6 @@ const getJobIcon = (title = "") => {
 
 /* ─────────────────────────────────────────
    JOB DETAIL MODAL
-   Read-only popup shown when a job card is clicked
 ───────────────────────────────────────── */
 const JobDetailModal = ({ job, onClose }) => {
   if (!job) return null;
@@ -50,12 +45,11 @@ const JobDetailModal = ({ job, onClose }) => {
   const status = job.status || "open";
 
   return (
-    // Clicking the overlay background closes the modal
     <div className="jp-modal-overlay" onClick={onClose}>
       <div className="jp-modal" onClick={(e) => e.stopPropagation()}>
-
         <button className="jp-modal-close" onClick={onClose}>✕</button>
 
+        <div className="jp-modal-content">
         <div className="jp-modal-header">
           <div className="job-icon-wrap" style={{ width: 56, height: 56, fontSize: 26 }}>
             {icon}
@@ -72,7 +66,6 @@ const JobDetailModal = ({ job, onClose }) => {
           </div>
         </div>
 
-        {/* Grid of job details */}
         <div className="jp-modal-grid">
           <div className="jp-modal-field">
             <label>🏢 Farm / Company</label>
@@ -128,7 +121,6 @@ const JobDetailModal = ({ job, onClose }) => {
           </div>
         </div>
 
-        {/* Farm Address */}
         {job.farmAddress && (
           <div className="jp-modal-desc" style={{ marginBottom: 16 }}>
             <label>🗺️ Farm Address</label>
@@ -136,28 +128,25 @@ const JobDetailModal = ({ job, onClose }) => {
           </div>
         )}
 
-        {/* Only shows description section if description exists */}
         {job.description && (
           <div className="jp-modal-desc">
             <label>📝 Description & Skills Required</label>
             <p>{job.description}</p>
           </div>
         )}
-
+        </div>
       </div>
     </div>
   );
 };
 
 /* ─────────────────────────────────────────
-   THREE-DOT MENU (⋮)
-   Dropdown on each job card with Edit and Delete options
+   THREE-DOT MENU
 ───────────────────────────────────────── */
 const ThreeDotMenu = ({ onEdit, onDelete }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
-  // Closes dropdown if user clicks anywhere outside of it
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -168,20 +157,17 @@ const ThreeDotMenu = ({ onEdit, onDelete }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
 
-  // Toggles dropdown open/closed — stopPropagation prevents card click (view modal) from firing
   const handleToggle = (e) => {
     e.stopPropagation();
     setOpen((prev) => !prev);
   };
 
-  // Closes dropdown then fires the edit handler passed from parent
   const handleEdit = (e) => {
     e.stopPropagation();
     setOpen(false);
     onEdit();
   };
 
-  // Closes dropdown then fires the delete handler passed from parent
   const handleDelete = (e) => {
     e.stopPropagation();
     setOpen(false);
@@ -205,9 +191,6 @@ const ThreeDotMenu = ({ onEdit, onDelete }) => {
 
 /* ─────────────────────────────────────────
    JOB CARD
-   Displays a single job posting in the grid.
-   Clicking the card opens the view modal.
-   The ⋮ menu handles edit and delete.
 ───────────────────────────────────────── */
 const JobCard = ({ job, onDelete, onView, onEdit }) => {
   const icon = getJobIcon(job.title);
@@ -215,7 +198,6 @@ const JobCard = ({ job, onDelete, onView, onEdit }) => {
   const postedDate = formatPostedDate(job.createdAt);
   const startDate = formatDate(job.deadline);
   const status = job.status || "open";
-  const applicants = job.applicantsCount ?? job.applicants ?? 0;
   const wage = job.salary || "N/A";
   const location = job.city && job.state ? `${job.city}, ${job.state}` : job.city || job.state || "N/A";
 
@@ -233,7 +215,6 @@ const JobCard = ({ job, onDelete, onView, onEdit }) => {
           <span className={`status ${status}`}>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </span>
-          {/* Pass the full job object to onEdit, and just the id to onDelete */}
           <ThreeDotMenu
             onEdit={() => onEdit(job)}
             onDelete={() => onDelete(job._id)}
@@ -261,22 +242,24 @@ const JobCard = ({ job, onDelete, onView, onEdit }) => {
 
 /* ─────────────────────────────────────────
    MAIN COMPONENT — Jobposting
-   Manages all state, API calls, and renders
-   the full dashboard page
 ───────────────────────────────────────── */
 const Jobposting = () => {
-  const [jobPostings, setJobPostings] = useState([]);   // All fetched job listings
-  const [loadingJobs, setLoadingJobs] = useState(true); // Loading state for job list
-  const [selectedJob, setSelectedJob] = useState(null); // Job open in the view modal
+  const [jobPostings, setJobPostings] = useState([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Edit state — editJob holds the original job, editForm holds the live form values
+  // Create modal state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Edit state
   const [editJob, setEditJob] = useState(null);
   const [editForm, setEditForm] = useState(null);
 
-  // Delete confirmation modal — holds the jobId pending deletion, null when closed
+  // Delete confirmation modal
   const [deleteJobId, setDeleteJobId] = useState(null);
 
-  // Form state for creating a new job
+  // New job form state
   const [formData, setFormData] = useState({
     title: "",
     duration: "",
@@ -296,10 +279,21 @@ const Jobposting = () => {
     description: "",
   });
 
-  // Fetches all active job postings from the backend
+  // Prevent background scroll when create modal is open
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isCreateModalOpen]);
+
   const fetchJobs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/active/ActiveJobPosting", {
+      const res = await axios.get("http://localhost:5000/api/jobs/my", {
         withCredentials: true,
       });
       setJobPostings(res.data);
@@ -311,17 +305,14 @@ const Jobposting = () => {
     }
   };
 
-  // Fetch jobs on initial page load
   useEffect(() => {
     fetchJobs();
   }, []);
 
-  // Updates the new-job form fields as the user types
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Submits the new job form — POST /api/jobpost
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -349,7 +340,6 @@ const Jobposting = () => {
         withCredentials: true,
       });
       toast.success("Job Published Successfully");
-      // Reset form after successful publish
       setFormData({
         title: "",
         duration: "",
@@ -368,19 +358,18 @@ const Jobposting = () => {
         state: "",
         description: "",
       });
-      fetchJobs(); // Refresh job list
+      setIsCreateModalOpen(false);
+      fetchJobs();
     } catch (error) {
       console.error(error);
       toast.error("Error creating job");
     }
   };
 
-  // Opens the delete confirmation modal for the given jobId
   const handleDelete = (jobId) => {
     setDeleteJobId(jobId);
   };
 
-  // Confirmed delete — called when user clicks "Delete" in the modal
   const handleConfirmDelete = async () => {
     try {
       await axios.delete(`http://localhost:5000/api/jobs/${deleteJobId}`, {
@@ -392,16 +381,14 @@ const Jobposting = () => {
       console.error(error);
       toast.error("Failed to delete job");
     } finally {
-      setDeleteJobId(null); // Close modal regardless of outcome
+      setDeleteJobId(null);
     }
   };
 
-  // Cancels the delete — closes modal without doing anything
   const handleCancelDelete = () => {
     setDeleteJobId(null);
   };
 
-  // Opens the edit modal and pre-fills the form with the selected job's current data
   const handleEditOpen = (job) => {
     setEditJob(job);
     setEditForm({
@@ -414,7 +401,6 @@ const Jobposting = () => {
       salary: job.salary || "",
       payType: job.payType || "Per Day",
       experienceRequired: job.experienceRequired || "",
-      // Strip time from ISO date string so the date input works correctly
       deadline: job.deadline ? job.deadline.split("T")[0] : "",
       startDate: job.startDate ? job.startDate.split("T")[0] : "",
       endDate: job.endDate ? job.endDate.split("T")[0] : "",
@@ -425,12 +411,10 @@ const Jobposting = () => {
     });
   };
 
-  // Updates edit form fields as the user types
   const handleEditChange = (e) => {
     setEditForm({ ...editForm, [e.target.name]: e.target.value });
   };
 
-  // Saves the edited job — PATCH /api/jobs/:id
   const handleEditSubmit = async () => {
     try {
       await axios.patch(
@@ -439,26 +423,36 @@ const Jobposting = () => {
         { withCredentials: true }
       );
       toast.success("Job updated successfully");
-      setEditJob(null);   // Close modal
+      setEditJob(null);
       setEditForm(null);
-      fetchJobs();        // Refresh job list with updated data
+      fetchJobs();
     } catch (error) {
       console.error(error);
       toast.error("Failed to update job");
     }
   };
 
-  // Opens the view (read-only) modal for a job card click
   const handleView = (job) => {
     setSelectedJob(job);
   };
 
-  // Closes the view modal
   const handleCloseModal = () => {
     setSelectedJob(null);
   };
 
-  // Derived stats shown in the header and postings section
+  // Filtered jobs based on search query
+  const filteredJobs = jobPostings.filter((job) => {
+    const q = searchQuery.toLowerCase();
+    if (!q) return true;
+    return (
+      (job.title || "").toLowerCase().includes(q) ||
+      (job.city || "").toLowerCase().includes(q) ||
+      (job.state || "").toLowerCase().includes(q) ||
+      (job.jobCategory || "").toLowerCase().includes(q) ||
+      (job.farmName || "").toLowerCase().includes(q)
+    );
+  });
+
   const activeListings = jobPostings.filter((j) => (j.status || "open") === "open").length;
   const totalApplicants = jobPostings.reduce(
     (sum, j) => sum + (j.applicantsCount ?? j.applicants ?? 0), 0
@@ -469,17 +463,303 @@ const Jobposting = () => {
       <Sidebar />
       <ToastContainer />
 
-      {/* View Modal — opens when a job card is clicked */}
+      {/* ── VIEW MODAL ── */}
       {selectedJob && (
         <JobDetailModal job={selectedJob} onClose={handleCloseModal} />
       )}
 
-      {/* Edit Modal — opens when ✏️ Edit is clicked in the three-dot menu */}
+      {/* ── CREATE JOB MODAL ── */}
+      {isCreateModalOpen && (
+        <div
+          className="jp-modal-overlay"
+          onClick={() => setIsCreateModalOpen(false)}
+        >
+          <div
+            className="jp-modal jp-create-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="jp-modal-close"
+              onClick={() => setIsCreateModalOpen(false)}
+            >
+              ✕
+            </button>
+
+            <div className="jp-modal-content">
+            {/* Modal Header */}
+            <div className="jp-modal-header">
+              <div className="icon-wrap">🌾</div>
+              <div className="jp-card-header-text">
+                <h2>Post a New Job</h2>
+                <p>Fill in the details to publish a new agricultural position</p>
+              </div>
+            </div>
+
+            {/* ── SECTION 1: Role Overview ── */}
+            <div className="jp-modal-section">
+              <div className="jp-section-header">
+                <span className="jp-section-icon">💼</span>
+                <span className="jp-section-title">Role Overview</span>
+              </div>
+              <div className="jp-section-divider" />
+
+              <div className="jp-form">
+                <div className="jp-row">
+                  <div className="jp-field">
+                    <label>Job Title</label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="e.g. Tractor Operator"
+                    />
+                  </div>
+                  <div className="jp-field">
+                    <label>Job Duration</label>
+                    <input
+                      type="text"
+                      name="duration"
+                      value={formData.duration}
+                      onChange={handleChange}
+                      placeholder="e.g. 3 months"
+                    />
+                  </div>
+                </div>
+
+                <div className="jp-row">
+                  <div className="jp-field">
+                    <label>Employment Type</label>
+                    <select
+                      name="employmentType"
+                      value={formData.employmentType}
+                      onChange={handleChange}
+                    >
+                      <option value="Full-time">Full-time</option>
+                      <option value="Part-time">Part-time</option>
+                      <option value="Seasonal">Seasonal</option>
+                    </select>
+                  </div>
+                  <div className="jp-field">
+                    <label>Workers Needed</label>
+                    <input
+                      type="number"
+                      name="workersNeeded"
+                      value={formData.workersNeeded}
+                      onChange={handleChange}
+                      placeholder="Number of workers"
+                      min="1"
+                    />
+                  </div>
+                </div>
+
+                <div className="jp-row">
+                  <div className="jp-field">
+                    <label>Job Category / Tag</label>
+                    <input
+                      type="text"
+                      name="jobCategory"
+                      value={formData.jobCategory}
+                      onChange={handleChange}
+                      placeholder="e.g. Harvesting, Irrigation"
+                    />
+                  </div>
+                  <div className="jp-field">
+                    <label>Farm / Company Name</label>
+                    <input
+                      type="text"
+                      name="farmName"
+                      value={formData.farmName}
+                      onChange={handleChange}
+                      placeholder="e.g. Green Acres Farm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── SECTION 2: Pay & Compensation ── */}
+            <div className="jp-modal-section">
+              <div className="jp-section-header">
+                <span className="jp-section-icon">💰</span>
+                <span className="jp-section-title">Pay &amp; Compensation</span>
+              </div>
+              <div className="jp-section-divider" />
+
+              <div className="jp-form">
+                <div className="jp-row">
+                  <div className="jp-field">
+                    <label>Salary Range</label>
+                    <input
+                      type="text"
+                      name="salary"
+                      value={formData.salary}
+                      onChange={handleChange}
+                      placeholder="e.g. $18–$24"
+                    />
+                  </div>
+                  <div className="jp-field">
+                    <label>Pay Type</label>
+                    <select
+                      name="payType"
+                      value={formData.payType}
+                      onChange={handleChange}
+                    >
+                      <option value="Per Day">Per Day</option>
+                      <option value="Per Hour">Per Hour</option>
+                      <option value="Per Task">Per Task</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── SECTION 3: Work Schedule ── */}
+            <div className="jp-modal-section">
+              <div className="jp-section-header">
+                <span className="jp-section-icon">📅</span>
+                <span className="jp-section-title">Work Schedule</span>
+              </div>
+              <div className="jp-section-divider" />
+
+              <div className="jp-form">
+                <div className="jp-row">
+                  <div className="jp-field">
+                    <label>Experience Required</label>
+                    <input
+                      type="text"
+                      name="experienceRequired"
+                      value={formData.experienceRequired}
+                      onChange={handleChange}
+                      placeholder="e.g. 2+ years"
+                    />
+                  </div>
+                  <div className="jp-field">
+                    <label>Application Deadline</label>
+                    <input
+                      type="date"
+                      name="deadline"
+                      value={formData.deadline || ""}
+                      onChange={handleChange}
+                      min={new Date().toISOString().split("T")[0]}
+                    />
+                  </div>
+                </div>
+
+                <div className="jp-row">
+                  <div className="jp-field">
+                    <label>Start Date</label>
+                    <input
+                      type="date"
+                      name="startDate"
+                      value={formData.startDate || ""}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div className="jp-field">
+                    <label>End Date</label>
+                    <input
+                      type="date"
+                      name="endDate"
+                      value={formData.endDate || ""}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* ── SECTION 4: Work Location ── */}
+            <div className="jp-modal-section">
+              <div className="jp-section-header">
+                <span className="jp-section-icon">📍</span>
+                <span className="jp-section-title">Work Location</span>
+              </div>
+              <div className="jp-section-divider" />
+
+              <div className="jp-form">
+                <div className="jp-row">
+                  <div className="jp-field">
+                    <label>City / Village</label>
+                    <input
+                      type="text"
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      placeholder="e.g. Oakfield"
+                    />
+                  </div>
+                  <div className="jp-field">
+                    <label>State</label>
+                    <input
+                      type="text"
+                      name="state"
+                      value={formData.state}
+                      onChange={handleChange}
+                      placeholder="e.g. Iowa"
+                    />
+                  </div>
+                </div>
+
+                <div className="jp-field jp-full">
+                  <label>Farm Address</label>
+                  <input
+                    type="text"
+                    name="farmAddress"
+                    value={formData.farmAddress}
+                    onChange={handleChange}
+                    placeholder="e.g. 1234 County Road 12, Township Name"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* ── SECTION 5: About the Role ── */}
+            <div className="jp-modal-section">
+              <div className="jp-section-header">
+                <span className="jp-section-icon">📝</span>
+                <span className="jp-section-title">About the Role</span>
+              </div>
+              <div className="jp-section-divider" />
+
+              <div className="jp-form">
+                <div className="jp-field jp-full">
+                  <label>Short Description &amp; Skills Required</label>
+                  <textarea
+                    rows="4"
+                    name="description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Describe the role, responsibilities, and required skills..."
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Action Buttons */}
+            <div className="jp-buttons">
+              <button
+                className="jp-btn light"
+                onClick={() => setIsCreateModalOpen(false)}
+              >
+                Cancel
+              </button>
+              <button className="jp-btn dark" onClick={(e) => handleSubmit(e)}>
+                <i className="fas fa-plus-circle"></i> Publish Job
+              </button>
+            </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── EDIT MODAL ── */}
       {editJob && editForm && (
         <div className="jp-modal-overlay" onClick={() => setEditJob(null)}>
           <div className="jp-modal" onClick={(e) => e.stopPropagation()}>
             <button className="jp-modal-close" onClick={() => setEditJob(null)}>✕</button>
 
+            <div className="jp-modal-content">
             <div className="jp-modal-header">
               <div className="icon-wrap">✏️</div>
               <div className="jp-card-header-text">
@@ -488,9 +768,7 @@ const Jobposting = () => {
               </div>
             </div>
 
-            {/* Edit form — 2-column layout */}
             <div className="jp-form">
-              {/* Row 1: Job Title | Job Duration */}
               <div className="jp-row">
                 <div className="jp-field">
                   <label>Job Title</label>
@@ -502,7 +780,6 @@ const Jobposting = () => {
                 </div>
               </div>
 
-              {/* Row 2: Employment Type | Workers Needed */}
               <div className="jp-row">
                 <div className="jp-field">
                   <label>Employment Type</label>
@@ -518,7 +795,6 @@ const Jobposting = () => {
                 </div>
               </div>
 
-              {/* Row 3: Job Category | Farm / Company Name */}
               <div className="jp-row">
                 <div className="jp-field">
                   <label>Job Category</label>
@@ -526,11 +802,10 @@ const Jobposting = () => {
                 </div>
                 <div className="jp-field">
                   <label>Farm / Company Name</label>
-                  <input type="text" name="FarmName" value={editForm.farmName} onChange={handleEditChange} />
+                  <input type="text" name="farmName" value={editForm.farmName} onChange={handleEditChange} />
                 </div>
               </div>
 
-              {/* Row 4: Salary Range | Pay Type */}
               <div className="jp-row">
                 <div className="jp-field">
                   <label>Salary Range</label>
@@ -546,7 +821,6 @@ const Jobposting = () => {
                 </div>
               </div>
 
-              {/* Row 5: Experience Required | Application Deadline */}
               <div className="jp-row">
                 <div className="jp-field">
                   <label>Experience Required</label>
@@ -564,29 +838,17 @@ const Jobposting = () => {
                 </div>
               </div>
 
-              {/* Row 6: Start Date | End Date */}
               <div className="jp-row">
                 <div className="jp-field">
                   <label>Start Date</label>
-                  <input
-                    type="date"
-                    name="startDate"
-                    value={editForm.startDate}
-                    onChange={handleEditChange}
-                  />
+                  <input type="date" name="startDate" value={editForm.startDate} onChange={handleEditChange} />
                 </div>
                 <div className="jp-field">
                   <label>End Date</label>
-                  <input
-                    type="date"
-                    name="endDate"
-                    value={editForm.endDate}
-                    onChange={handleEditChange}
-                  />
+                  <input type="date" name="endDate" value={editForm.endDate} onChange={handleEditChange} />
                 </div>
               </div>
 
-              {/* Row 7: City / Village | State */}
               <div className="jp-row">
                 <div className="jp-field">
                   <label>City / Village</label>
@@ -598,18 +860,11 @@ const Jobposting = () => {
                 </div>
               </div>
 
-              {/* Row 8: Farm Address (full width) */}
               <div className="jp-field jp-full">
                 <label>Farm Address</label>
-                <input
-                  type="text"
-                  name="farmAddress"
-                  value={editForm.farmAddress}
-                  onChange={handleEditChange}
-                />
+                <input type="text" name="farmAddress" value={editForm.farmAddress} onChange={handleEditChange} />
               </div>
 
-              {/* Row 9: Short Description (full width) */}
               <div className="jp-field jp-full">
                 <label>Short Description &amp; Skills Required</label>
                 <textarea rows="4" name="description" value={editForm.description} onChange={handleEditChange}></textarea>
@@ -622,11 +877,12 @@ const Jobposting = () => {
                 <i className="fas fa-save"></i> Save Changes
               </button>
             </div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Delete Confirmation Modal — opens when 🗑️ Delete is clicked in the three-dot menu */}
+      {/* ── DELETE CONFIRMATION MODAL ── */}
       {deleteJobId && (
         <div className="logout-overlay" onClick={handleCancelDelete}>
           <div className="logout-modal" onClick={(e) => e.stopPropagation()}>
@@ -649,291 +905,26 @@ const Jobposting = () => {
         {/* ── PAGE HEADER ── */}
         <div className="header-box">
           <div className="header-left">
-            <h1>Job Provider Dashboard</h1>
-            <p>Farm overview — Oakfield, Iowa</p>
+            <h1>Job Provider</h1>
+            <p>Manage and add jobs</p>
           </div>
           <div className="header-right">
             <div className="badge-pill">
               <i className="fas fa-circle" style={{ fontSize: "8px" }}></i>{" "}
               {activeListings} Active Listings
             </div>
-            <button className="photo-btn">
-              <i className="fas fa-camera"></i> Agri Photo +
-            </button>
-          </div>
-        </div>
-
-        {/* ── CREATE NEW JOB FORM ── */}
-
-        {/* Top card: title + subtitle only */}
-        <div className="jp-card jp-form-title-card">
-          <div className="jp-card-header" style={{ marginBottom: 0, paddingBottom: 0, borderBottom: "none" }}>
-            <div className="icon-wrap">🌾</div>
-            <div className="jp-card-header-text">
-              <h2>Upload New Job</h2>
-              <p>Fill in the details to post a new agricultural position</p>
-            </div>
-          </div>
-        </div>
-
-        {/* ── SECTION 1: Role Overview ── */}
-        <div className="jp-form-section-card">
-          <div className="jp-section-header">
-            <span className="jp-section-icon">💼</span>
-            <span className="jp-section-title">Role Overview</span>
-          </div>
-          <div className="jp-section-divider" />
-
-          <div className="jp-form">
-            {/* Row 1: Job Title | Job Duration */}
-            <div className="jp-row">
-              <div className="jp-field">
-                <label>Job Title</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={formData.title}
-                  onChange={handleChange}
-                  placeholder="e.g. Tractor Operator"
-                />
-              </div>
-              <div className="jp-field">
-                <label>Job Duration</label>
-                <input
-                  type="text"
-                  name="duration"
-                  value={formData.duration}
-                  onChange={handleChange}
-                  placeholder="e.g. 3 months"
-                />
-              </div>
-            </div>
-
-            {/* Row 2: Employment Type | Workers Needed */}
-            <div className="jp-row">
-              <div className="jp-field">
-                <label>Employment Type</label>
-                <select
-                  name="employmentType"
-                  value={formData.employmentType}
-                  onChange={handleChange}
-                >
-                  <option value="Full-time">Full-time</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Seasonal">Seasonal</option>
-                </select>
-              </div>
-              <div className="jp-field">
-                <label>Workers Needed</label>
-                <input
-                  type="number"
-                  name="workersNeeded"
-                  value={formData.workersNeeded}
-                  onChange={handleChange}
-                  placeholder="Number of workers"
-                  min="1"
-                />
-              </div>
-            </div>
-
-            {/* Row 3: Job Category | Farm / Company Name */}
-            <div className="jp-row">
-              <div className="jp-field">
-                <label>Job Category / Tag</label>
-                <input
-                  type="text"
-                  name="jobCategory"
-                  value={formData.jobCategory}
-                  onChange={handleChange}
-                  placeholder="e.g. Harvesting, Irrigation"
-                />
-              </div>
-              <div className="jp-field">
-                <label>Farm / Company Name</label>
-                <input
-                  type="text"
-                  name="farmName"
-                  value={formData.farmName}
-                  onChange={handleChange}
-                  placeholder="e.g. Green Acres Farm"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── SECTION 2: Pay & Compensation ── */}
-        <div className="jp-form-section-card">
-          <div className="jp-section-header">
-            <span className="jp-section-icon">💰</span>
-            <span className="jp-section-title">Pay &amp; Compensation</span>
-          </div>
-          <div className="jp-section-divider" />
-
-          <div className="jp-form">
-            {/* Row 4: Salary Range | Pay Type */}
-            <div className="jp-row">
-              <div className="jp-field">
-                <label>Salary Range</label>
-                <input
-                  type="text"
-                  name="salary"
-                  value={formData.salary}
-                  onChange={handleChange}
-                  placeholder="e.g. $18–$24"
-                />
-              </div>
-              <div className="jp-field">
-                <label>Pay Type</label>
-                <select
-                  name="payType"
-                  value={formData.payType}
-                  onChange={handleChange}
-                >
-                  <option value="Per Day">Per Day</option>
-                  <option value="Per Hour">Per Hour</option>
-                  <option value="Per Task">Per Task</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── SECTION 3: Work Schedule ── */}
-        <div className="jp-form-section-card">
-          <div className="jp-section-header">
-            <span className="jp-section-icon">📅</span>
-            <span className="jp-section-title">Work Schedule</span>
-          </div>
-          <div className="jp-section-divider" />
-
-          <div className="jp-form">
-            {/* Row 5: Experience Required | Application Deadline */}
-            <div className="jp-row">
-              <div className="jp-field">
-                <label>Experience Required</label>
-                <input
-                  type="text"
-                  name="experienceRequired"
-                  value={formData.experienceRequired}
-                  onChange={handleChange}
-                  placeholder="e.g. 2+ years"
-                />
-              </div>
-              <div className="jp-field">
-                <label>Application Deadline</label>
-                <input
-                  type="date"
-                  name="deadline"
-                  value={formData.deadline || ""}
-                  onChange={handleChange}
-                  min={new Date().toISOString().split("T")[0]}
-                />
-              </div>
-            </div>
-
-            {/* Row 6: Start Date | End Date */}
-            <div className="jp-row">
-              <div className="jp-field">
-                <label>Start Date</label>
-                <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate || ""}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="jp-field">
-                <label>End Date</label>
-                <input
-                  type="date"
-                  name="endDate"
-                  value={formData.endDate || ""}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── SECTION 4: Work Location ── */}
-        <div className="jp-form-section-card">
-          <div className="jp-section-header">
-            <span className="jp-section-icon">📍</span>
-            <span className="jp-section-title">Work Location</span>
-          </div>
-          <div className="jp-section-divider" />
-
-          <div className="jp-form">
-            {/* Row 7: City / Village | State */}
-            <div className="jp-row">
-              <div className="jp-field">
-                <label>City / Village</label>
-                <input
-                  type="text"
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  placeholder="e.g. Oakfield"
-                />
-              </div>
-              <div className="jp-field">
-                <label>State</label>
-                <input
-                  type="text"
-                  name="state"
-                  value={formData.state}
-                  onChange={handleChange}
-                  placeholder="e.g. Iowa"
-                />
-              </div>
-            </div>
-
-            {/* Row 8: Farm Address (full width) */}
-            <div className="jp-field jp-full">
-              <label>Farm Address</label>
-              <input
-                type="text"
-                name="farmAddress"
-                value={formData.farmAddress}
-                onChange={handleChange}
-                placeholder="e.g. 1234 County Road 12, Township Name"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* ── SECTION 5: About the Role ── */}
-        <div className="jp-form-section-card">
-          <div className="jp-section-header">
-            <span className="jp-section-icon">📝</span>
-            <span className="jp-section-title">About the Role</span>
-          </div>
-          <div className="jp-section-divider" />
-
-          <div className="jp-form">
-            {/* Row 9: Short Description (full width) */}
-            <div className="jp-field jp-full">
-              <label>Short Description &amp; Skills Required</label>
-              <textarea
-                rows="4"
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Describe the role, responsibilities, and required skills..."
-              ></textarea>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom card: action buttons */}
-        <div className="jp-card jp-form-buttons-card">
-          <div className="jp-buttons" style={{ marginTop: 0, paddingTop: 0, borderTop: "none" }}>
-            <button className="jp-btn light">
-              <i className="fas fa-camera"></i> Add Photo
-            </button>
-            <button className="jp-btn dark" onClick={(e) => handleSubmit(e)}>
-              <i className="fas fa-plus-circle"></i> Publish Job
+            <input
+              type="text"
+              className="jp-search"
+              placeholder="Search jobs..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button
+              className="jp-btn dark jp-new-job-btn"
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              <i className="fas fa-plus"></i> New Job
             </button>
           </div>
         </div>
@@ -949,18 +940,17 @@ const Jobposting = () => {
             </div>
           </div>
 
-          {/* Renders up to 4 job cards; shows loading/empty states as needed */}
           <div className="job-cards-grid">
             {loadingJobs ? (
               <p style={{ color: "var(--jp-green-muted)", fontSize: "14px" }}>
                 Loading job postings...
               </p>
-            ) : jobPostings.length === 0 ? (
+            ) : filteredJobs.length === 0 ? (
               <p style={{ color: "var(--jp-green-muted)", fontSize: "14px" }}>
-                No job postings yet. Create your first one above!
+                {searchQuery ? "No jobs match your search." : "No job postings yet. Click '+ New Job' to create one!"}
               </p>
             ) : (
-              jobPostings.slice(0, 4).map((job) => (
+              filteredJobs.slice(0, 4).map((job) => (
                 <JobCard
                   key={job._id}
                   job={job}

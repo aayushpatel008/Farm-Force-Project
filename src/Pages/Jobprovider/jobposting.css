@@ -38,14 +38,11 @@
 
 /* ===== HEADER ===== */
 .jobposting-page .header-box {
-  background: var(--jp-white);
-  border-radius: 24px;
+  background: transparent;
   padding: 24px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 20px rgba(26, 61, 34, 0.07);
-  border: 1px solid var(--jp-green-border);
   animation: jp-slideDown 0.5s ease both;
 }
 
@@ -92,177 +89,33 @@
   gap: 5px;
 }
 
-.jobposting-page .photo-btn {
-  background: var(--jp-green-dark);
-  color: #fff;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 40px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: "DM Sans", sans-serif;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(26, 61, 34, 0.25);
-}
-
-.jobposting-page .photo-btn:hover {
-  background: var(--jp-green-mid);
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(39, 122, 46, 0.35);
-}
-
-/* ===== UPLOAD JOB CARD ===== */
-.jobposting-page .jp-card {
-  background: var(--jp-white);
-  border-radius: 28px;
-  padding: 36px;
-  box-shadow: 0 8px 30px rgba(26, 61, 34, 0.08);
-  border: 1px solid var(--jp-green-border);
-  animation: jp-fadeUp 0.5s ease 0.1s both;
-}
-
-.jobposting-page .jp-card-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--jp-green-pale);
-}
-
-.jobposting-page .icon-wrap {
-  width: 52px;
-  height: 52px;
-  background: linear-gradient(135deg, var(--jp-green-pale), #c8e6ca);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  box-shadow: 0 4px 12px rgba(39, 122, 46, 0.15);
-}
-
-.jobposting-page .jp-card-header-text h2 {
-  font-family: "Playfair Display", serif;
-  font-size: 22px;
-  color: var(--jp-green-dark);
-}
-
-.jobposting-page .jp-card-header-text p {
-  font-size: 13px;
-  color: var(--jp-green-muted);
-  margin-top: 2px;
-}
-
-/* ===== FORM ===== */
-.jobposting-page .jp-form {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-
-.jobposting-page .jp-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.jobposting-page .jp-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.jobposting-page .jp-field label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--jp-green-muted);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.jobposting-page .jp-field input,
-.jobposting-page .jp-field select,
-.jobposting-page .jp-field textarea {
-  padding: 13px 16px;
-  border-radius: 14px;
+/* ===== SEARCH BAR ===== */
+.jp-search {
+  padding: 10px 16px;
+  border-radius: 30px;
   border: 1.5px solid var(--jp-green-border);
   background: var(--jp-green-card);
   font-size: 14px;
   font-family: "DM Sans", sans-serif;
   color: var(--jp-text);
   outline: none;
+  width: 220px;
   transition: all 0.2s ease;
 }
 
-.jobposting-page .jp-field input::placeholder { color: #adc5af; }
+.jp-search::placeholder {
+  color: #adc5af;
+}
 
-.jobposting-page .jp-field input:focus,
-.jobposting-page .jp-field select:focus,
-.jobposting-page .jp-field textarea:focus {
+.jp-search:focus {
   background: var(--jp-white);
   border-color: var(--jp-green-mid);
   box-shadow: 0 0 0 3px rgba(39, 122, 46, 0.1);
 }
 
-.jobposting-page .jp-field textarea {
-  border-radius: 16px;
-  resize: none;
-  line-height: 1.6;
-}
-
-.jobposting-page .jp-full { grid-column: span 4; }
-
-/* ===== CUSTOM DATE PICKER ===== */
-.jobposting-page .date-picker-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--jp-green-card);
-  border: 1.5px solid var(--jp-green-border);
-  border-radius: 14px;
-  padding: 10px 14px;
-  transition: all 0.2s ease;
-}
-
-.jobposting-page .date-picker-row:focus-within {
-  background: var(--jp-white);
-  border-color: var(--jp-green-mid);
-  box-shadow: 0 0 0 3px rgba(39, 122, 46, 0.1);
-}
-
-.jobposting-page .date-select {
-  border: none !important;
-  background: transparent !important;
-  outline: none !important;
-  box-shadow: none !important;
-  padding: 2px 4px !important;
-  border-radius: 6px !important;
-  font-size: 14px !important;
-  font-family: "DM Sans", sans-serif !important;
-  color: var(--jp-text) !important;
-  cursor: pointer;
-  appearance: none;
-  -webkit-appearance: none;
-  font-weight: 500;
-}
-
-.jobposting-page .date-select:focus {
-  background: var(--jp-green-pale) !important;
-  border-radius: 6px !important;
-}
-
-.jobposting-page .year-select { flex: 1; }
-
-.jobposting-page .date-sep {
-  color: var(--jp-green-muted);
-  font-weight: 600;
-  font-size: 15px;
-  user-select: none;
+/* ===== NEW JOB BUTTON ===== */
+.jp-new-job-btn {
+  white-space: nowrap;
 }
 
 /* ===== FORM BUTTONS ===== */
@@ -514,42 +367,6 @@
   justify-content: center;
 }
 
-/* ACTION BUTTONS */
-.jobposting-page .jp-action-buttons {
-  display: flex;
-  gap: 6px;
-}
-
-.jobposting-page .jp-action-buttons button {
-  border: 1.5px solid var(--jp-green-border);
-  background: transparent;
-  padding: 6px 13px;
-  border-radius: 10px;
-  font-size: 12px;
-  font-weight: 600;
-  font-family: "DM Sans", sans-serif;
-  cursor: pointer;
-  color: var(--jp-green-dark);
-  transition: all 0.15s ease;
-}
-
-.jobposting-page .jp-action-buttons button:hover {
-  background: var(--jp-green-dark);
-  color: #fff;
-  border-color: var(--jp-green-dark);
-}
-
-.jobposting-page .jp-action-buttons button.btn-primary {
-  background: var(--jp-green-mid);
-  color: #fff;
-  border-color: var(--jp-green-mid);
-}
-
-.jobposting-page .jp-action-buttons button.btn-primary:hover {
-  background: var(--jp-green-dark);
-  border-color: var(--jp-green-dark);
-}
-
 /* ===== ANIMATIONS ===== */
 @keyframes jp-slideDown {
   from { opacity: 0; transform: translateY(-16px); }
@@ -578,15 +395,23 @@
   background: var(--jp-white);
   border-radius: 28px;
   padding: 36px;
+
   width: 620px;
   max-width: 95vw;
+
   max-height: 88vh;
-  overflow-y: auto;
-  overflow-x: hidden; /* ← prevents horizontal scroll */
+  overflow-y: auto;   /* ✅ MOVE SCROLL HERE */
+  overflow-x: hidden;
+
   box-shadow: 0 24px 60px rgba(26, 61, 34, 0.2);
   border: 1px solid var(--jp-green-border);
   position: relative;
-  animation: jp-fadeUp 0.3s ease both;
+}
+
+/* Create modal is wider to accommodate the form sections comfortably */
+.jp-create-modal {
+  width: 720px;
+  max-width: 96vw;
 }
 
 .jp-modal-close {
@@ -685,9 +510,42 @@
   line-height: 1.7;
 }
 
-/* ===== THREE-DOT MENU ===== */
+/* ===== MODAL SECTION BLOCKS (create modal) ===== */
+.jp-modal-section {
+  margin-bottom: 28px;
+}
 
-/* Top-right area grouping status badge + three-dot button */
+.jp-modal-section:last-of-type {
+  margin-bottom: 0;
+}
+
+/* ===== SECTION HEADER & DIVIDER ===== */
+.jp-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.jp-section-icon {
+  font-size: 18px;
+}
+
+.jp-section-title {
+  font-family: "Playfair Display", serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--jp-green-dark);
+}
+
+.jp-section-divider {
+  height: 1px;
+  background: var(--jp-green-pale);
+  margin-bottom: 20px;
+  margin-top: 8px;
+}
+
+/* ===== THREE-DOT MENU ===== */
 .jobposting-page .jp-card-top-right {
   display: flex;
   align-items: center;
@@ -695,12 +553,10 @@
   flex-shrink: 0;
 }
 
-/* Three-dot wrapper — positions the dropdown relative to itself */
 .jobposting-page .jp-three-dot-wrapper {
   position: relative;
 }
 
-/* The ⋮ trigger button */
 .jobposting-page .jp-three-dot-btn {
   background: transparent;
   border: none;
@@ -721,7 +577,6 @@
   color: var(--jp-green-dark);
 }
 
-/* Dropdown menu */
 .jobposting-page .jp-three-dot-dropdown {
   position: absolute;
   top: calc(100% + 6px);
@@ -765,8 +620,7 @@
   background: #fdecea;
 }
 
-/* ===== EDIT MODAL — additions only ===== */
-
+/* ===== SHARED MODAL INTERNALS (edit + create) ===== */
 .jp-modal .icon-wrap {
   width: 52px;
   height: 52px;
@@ -793,21 +647,22 @@
   margin-top: 2px;
 }
 
-/* Form layout inside the modal */
+/* Form layout inside modal */
 .jp-modal .jp-form {
   display: flex;
   flex-direction: column;
   gap: 22px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* ═══════════════════════════════════════
-   FIX: 2 columns (was 4) — prevents
-   horizontal scroll inside the modal
-═══════════════════════════════════════ */
+/* 2-column grid inside modal */
 .jp-modal .jp-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 @media (max-width: 480px) {
@@ -820,6 +675,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .jp-modal .jp-field label {
@@ -833,6 +691,8 @@
 .jp-modal .jp-field input,
 .jp-modal .jp-field select,
 .jp-modal .jp-field textarea {
+  width: 100%;
+  box-sizing: border-box;
   padding: 13px 16px;
   border-radius: 14px;
   border: 1.5px solid var(--jp-green-border);
@@ -859,10 +719,18 @@
 }
 
 .jp-modal .jp-full {
-  grid-column: span 2; /* matches 2-column grid */
+  grid-column: span 2;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-/* Buttons row inside the edit modal */
+@media (max-width: 480px) {
+  .jp-modal .jp-full {
+    grid-column: span 1;
+  }
+}
+
+/* Buttons row inside modal */
 .jp-modal .jp-buttons {
   margin-top: 28px;
   display: flex;
@@ -909,11 +777,7 @@
   box-shadow: 0 12px 28px rgba(26, 61, 34, 0.35);
 }
 
-
 /* ===== DELETE CONFIRMATION MODAL ===== */
-/* Reuses the same logout-overlay / logout-modal pattern from sidebar.css
-   so both modals look and behave identically */
-
 .logout-overlay {
   position: fixed;
   inset: 0;
@@ -999,74 +863,12 @@
   box-shadow: 0 10px 24px rgba(176, 48, 48, 0.35);
 }
 
-/* ============================================================
-   BOXED SECTION CARDS — jobposting-section-cards.css
-   Import this after jobposting.css and jobposting-sections.css,
-   or paste these rules at the bottom of jobposting.css.
-   All selectors are new — nothing existing is touched.
-   ============================================================ */
-
-/* Each section is its own card — mirrors .jp-card exactly */
-.jobposting-page .jp-form-section-card {
-  background: var(--jp-white);
-  border-radius: 28px;
-  padding: 28px 36px;
-  box-shadow: 0 8px 30px rgba(26, 61, 34, 0.08);
-  border: 1px solid var(--jp-green-border);
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  animation: jp-fadeUp 0.5s ease 0.1s both;
-}
-
-/* The section-header and divider already exist from jobposting-sections.css.
-   Inside a card they just need a little bottom breathing room. */
-.jobposting-page .jp-form-section-card .jp-section-header {
-  margin-bottom: 4px;
-}
-
-.jobposting-page .jp-form-section-card .jp-section-divider {
-  margin-bottom: 24px;
-}
-
-/* jp-form inside a section card — same gap as the original form */
-.jobposting-page .jp-form-section-card .jp-form {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-
-/* Title card: compact — just enough padding for the header block */
-.jobposting-page .jp-form-title-card {
-  padding-bottom: 24px;
-}
-
-/* Buttons card: compact — no top border needed, buttons are already styled */
-.jobposting-page .jp-form-buttons-card {
-  padding-top: 20px;
-  padding-bottom: 20px;
-}
-/* ============================================================
-   LAYOUT FIX — jobposting-layout-fix.css
-   Import LAST, after all other jobposting CSS files.
-   Fixes: empty right-side space, unequal columns, inputs
-   not stretching. Zero design changes.
-   ============================================================ */
-
-/* ── Form wrapper: full width, no centering constraints ── */
+/* ===== LAYOUT FIX — page-level form (not used anymore but kept for safety) ===== */
 .jobposting-page .jp-form {
   width: 100%;
   box-sizing: border-box;
 }
 
-/* ── Section cards: full width, no max-width cap ── */
-.jobposting-page .jp-form-section-card {
-  width: 100%;
-  max-width: 100%;
-  box-sizing: border-box;
-}
-
-/* ── Grid row: strict 2 equal columns, full width ── */
 .jobposting-page .jp-row {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1075,14 +877,12 @@
   box-sizing: border-box;
 }
 
-/* ── Every field wrapper fills its grid cell completely ── */
 .jobposting-page .jp-field {
   width: 100%;
-  min-width: 0;          /* prevents grid blowout from long content */
+  min-width: 0;
   box-sizing: border-box;
 }
 
-/* ── All inputs, selects, textareas fill their field wrapper ── */
 .jobposting-page .jp-field input,
 .jobposting-page .jp-field select,
 .jobposting-page .jp-field textarea {
@@ -1090,14 +890,12 @@
   box-sizing: border-box;
 }
 
-/* ── Full-width fields span both columns ── */
 .jobposting-page .jp-full {
   grid-column: span 2;
   width: 100%;
   box-sizing: border-box;
 }
 
-/* ── Mobile: collapse to single column ── */
 @media (max-width: 600px) {
   .jobposting-page .jp-row {
     grid-template-columns: 1fr;
@@ -1106,4 +904,36 @@
   .jobposting-page .jp-full {
     grid-column: span 1;
   }
+
+  .jp-search {
+    width: 140px;
+  }
+
+  .jobposting-page .header-right {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+.jp-modal-content {
+  overflow: visible;   /* ❗ remove scroll */
+  max-height: none;
+  padding-right: 0;
+}
+
+.jp-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.jp-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.jp-modal::-webkit-scrollbar-thumb {
+  background: rgba(26, 61, 34, 0.2);
+  border-radius: 20px;
+}
+
+.jp-modal::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 61, 34, 0.35);
 }
