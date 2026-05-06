@@ -19,7 +19,8 @@ exports.getMyWorkercard = async (req, res) => {
   try {
     // ✅ Get only logged-in user's profile
     const profile = await worker.findOne({ worker: req.user._id });
-
+    console.log(req.user);
+    console.log(req.user._id);
     // ✅ If not found → new user
     if (!profile) {
       return res.status(404).json({
