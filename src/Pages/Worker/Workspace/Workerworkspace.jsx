@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
+import { socket } from "../../../socket";
 import Sidebar1 from "../Sidebar";
 import "./Workerworkspace.css";
 
@@ -143,22 +144,87 @@ function WorkspaceCard({ ws, onClick }) {
 function ChatTab({ ws }) {
   const [msgs, setMsgs] = useState([]);
   const [input, setInput] = useState("");
+  const [menuOpenMsgId, setMenuOpenMsgId] = useState(null);
   const bottomRef = useRef(null);
+  const loggedInUserId = localStorage.getItem("userId");
 
+  // Step 9: Auto-scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs]);
 
+  // Step 3 & 4: Join room and load old messages
+  useEffect(() => {
+    if (!ws?._id) return;
+
+    // Join workspace room
+    socket.emit("join_workspace", ws._id);
+
+    // Load old messages
+    const fetchMessages = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/messages/${ws._id}`, {
+          withCredentials: true,
+        });
+        setMsgs(res.data.messages || []);
+      } catch (err) {
+        console.error("Failed to load messages:", err);
+      }
+    };
+
+    fetchMessages();
+  }, [ws?._id]);
+
+  // Step 7: Listen for receive_message (Real-time update)
+  useEffect(() => {
+    const handleReceiveMessage = (newMessage) => {
+      setMsgs((prev) => [...prev, newMessage]);
+    };
+
+    socket.on("receive_message", handleReceiveMessage);
+
+    return () => {
+      socket.off("receive_message", handleReceiveMessage);
+    };
+  }, []);
+
+  // Step 6: Send real-time message
   const send = () => {
     const text = input.trim();
-    if (!text) return;
-    const now = new Date();
-    const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-    setMsgs((p) => [...p, { id: Date.now(), from: "me", text, time }]);
+    if (!text || !ws?._id || !loggedInUserId) return;
+
+    const messageData = {
+      workspaceId: ws._id,
+      senderId: loggedInUserId,
+      text: text,
+    };
+
+    socket.emit("send_message", messageData);
     setInput("");
   };
 
-  const providerName     = ws.provider?.name || "Provider";
+  const handleDelete = async (msgId) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/messages/${msgId}`, {
+        withCredentials: true,
+      });
+      setMsgs((prev) => prev.filter((m) => m._id !== msgId));
+      setMenuOpenMsgId(null);
+    } catch (err) {
+      console.error("Failed to delete message:", err);
+    }
+  };
+
+  // Close menu on outside click
+  useEffect(() => {
+    const handleGlobalClick = () => setMenuOpenMsgId(null);
+    if (menuOpenMsgId) {
+      window.addEventListener("click", handleGlobalClick);
+    }
+    return () => window.removeEventListener("click", handleGlobalClick);
+  }, [menuOpenMsgId]);
+
+  const providerName = ws.provider?.name || "Provider";
   const providerInitials = getInitials(providerName);
 
   return (
@@ -177,14 +243,47 @@ function ChatTab({ ws }) {
             <p>No messages yet. Start the conversation!</p>
           </div>
         )}
-        {msgs.map((m) => (
-          <div key={m.id} className={`ff-bubble-wrap ${m.from === "me" ? "ff-me" : "ff-them"}`}>
-            <div className={`ff-bubble ${m.from === "me" ? "ff-bubble-out" : "ff-bubble-in"}`}>
-              {m.text}
-              <span className="ff-time">{m.time}</span>
+        {Array.isArray(msgs) && msgs.map((m) => {
+          // Step 8: Message UI Logic
+          const isMe = m.sender?._id === loggedInUserId || m.sender === loggedInUserId;
+          const time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
+          
+          return (
+            <div key={m._id || Math.random()} className={`ff-bubble-wrap ${isMe ? "ff-me" : "ff-them"}`}>
+              <div className={`ff-bubble ${isMe ? "ff-bubble-out" : "ff-bubble-in"}`}>
+                {m.text}
+                <span className="ff-time">{time}</span>
+
+                {isMe && (
+                  <div className="ff-msg-actions">
+                    <button 
+                      className="ff-msg-arrow" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMenuOpenMsgId(menuOpenMsgId === m._id ? null : m._id);
+                      }}
+                    >
+                      <svg viewBox="0 0 19 20" width="19" height="20">
+                        <path fill="currentColor" d="m3.8 6.7 5.7 5.7 5.7-5.7 1.6 1.6-7.3 7.2-7.3-7.2 1.6-1.6z"></path>
+                      </svg>
+                    </button>
+                    
+                    {menuOpenMsgId === m._id && (
+                      <div className="ff-msg-menu">
+                        <button 
+                          className="ff-msg-menu-item ff-delete-opt"
+                          onClick={() => handleDelete(m._id)}
+                        >
+                          Delete Message
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
         <div ref={bottomRef} />
       </div>
       <div className="ff-chat-input-row">
@@ -440,8 +539,14 @@ export default function Workerworkspace() {
       console.log(res.data);
 
       const raw = res.data?.workspaces || [];
-
       setWorkspaces(raw);
+
+      // Persistence: Auto-reopen saved workspace
+      const savedId = localStorage.getItem("selectedWorkspaceId");
+      if (savedId) {
+        const found = raw.find((w) => w._id === savedId);
+        if (found) setSelected(found);
+      }
     } catch (err) {
       console.error("Failed to load workspaces:", err);
       setError("Failed to load workspaces. Please try again.");
@@ -468,7 +573,13 @@ export default function Workerworkspace() {
       <Sidebar1 />
       <div className="ff-workspace-root">
         {selected ? (
-          <OpenWorkspace ws={selected} onBack={() => setSelected(null)} />
+          <OpenWorkspace
+            ws={selected}
+            onBack={() => {
+              setSelected(null);
+              localStorage.removeItem("selectedWorkspaceId");
+            }}
+          />
         ) : (
           <div className="ff-grid-view">
 
@@ -527,7 +638,14 @@ export default function Workerworkspace() {
 
               {/* Workspace cards */}
               {!loading && !error && filtered.map((ws) => (
-                <WorkspaceCard key={ws._id} ws={ws} onClick={setSelected} />
+                <WorkspaceCard
+                  key={ws._id}
+                  ws={ws}
+                  onClick={(workspace) => {
+                    setSelected(workspace);
+                    localStorage.setItem("selectedWorkspaceId", workspace._id);
+                  }}
+                />
               ))}
 
             </div>
