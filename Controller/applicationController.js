@@ -1,6 +1,7 @@
 ﻿const Application = require('../models/ApplicationModel');
 const Job = require('../models/jobposting');
 const workerapplication = require('../models/Workerposting');
+const Workspace = require('../models/Workspace');
 
 
 // ─────────────────────────────────────────────
@@ -364,6 +365,35 @@ exports.updateApplicationStatus = async (req, res) => {
 
     application.status = status;
     await application.save();
+
+    // ✅ CREATE WORKSPACE AFTER ACCEPT
+    if (status === "accepted") {
+
+        // check existing workspace
+        const existingWorkspace =
+        await Workspace.findOne({
+            application: application._id
+        });
+
+        // prevent duplicate workspace
+        if (!existingWorkspace) {
+
+            await Workspace.create({
+
+              application: application._id,
+
+              job: application.job,
+
+              worker: application.worker,
+
+              provider: application.provider
+
+            });
+
+        }
+
+      }
+
 
     return res.status(200).json(application);
 
