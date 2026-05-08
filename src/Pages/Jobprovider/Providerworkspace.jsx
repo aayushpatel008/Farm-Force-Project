@@ -1,0 +1,554 @@
+import { useState, useRef, useEffect, useCallback } from "react";
+import axios from "axios";
+import Sidebar from './sidebar';
+import "./Providerworkspace.css";
+
+const TABS = ["Chat", "Worker Details", "Tasks", "Attendance", "Payments", "Work Updates"];
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const getInitials = (name = "") =>
+  name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2) || "??";
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "—";
+  try {
+    return new Date(dateStr).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
+const getStatusClass = (status = "") => {
+  const s = status.toLowerCase();
+  if (s === "active")    return "wsc-status-badge--active";
+  if (s === "completed") return "wsc-status-badge--completed";
+  if (s === "paused")    return "wsc-status-badge--paused";
+  return "wsc-status-badge--active";
+};
+
+function Avatar({ initials, size = 36 }) {
+  return (
+    <div className="ff-avatar" style={{ width: size, height: size, fontSize: size * 0.38 }}>
+      {initials}
+    </div>
+  );
+}
+
+// ─── Skeleton Card ────────────────────────────────────────────────────────────
+function CardSkeleton() {
+  return (
+    <div className="wsc-card wsc-card--skeleton">
+      <div className="wsc-card__identity">
+        <div className="skel skel--line skel--md" style={{ marginBottom: 6 }} />
+        <div className="skel skel--line skel--lg" />
+      </div>
+      <div className="wsc-card__details">
+        <div className="skel skel--line skel--sm" />
+        <div className="skel skel--line skel--sm" />
+      </div>
+      <div className="wsc-card__divider" />
+      <div className="wsc-card__chips">
+        <div className="skel skel--pill" />
+        <div className="skel skel--pill" />
+      </div>
+      <div className="wsc-card__footer">
+        <div className="skel skel--pill" />
+        <div className="skel skel--pill" style={{ width: 120 }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Workspace Card ───────────────────────────────────────────────────────────
+function WorkspaceCard({ ws, onClick }) {
+  const workerName = `${ws.worker?.firstName || ""} ${ws.worker?.lastName || ""}`.trim() || "—";
+
+  const chips = [
+    ws.job?.jobCategory,
+    ws.job?.employmentType,
+    ws.job?.payType ? `Per ${ws.job.payType}` : null,
+  ].filter(Boolean);
+
+  const statusClass = getStatusClass(ws.status);
+
+  return (
+    <div className="wsc-card" onClick={() => onClick(ws)}>
+
+      {/* IDENTITY */}
+      <div className="wsc-card__identity">
+        <p className="wsc-card__farm">{workerName}</p>
+        <h3 className="wsc-card__title">{ws.job?.title || "—"}</h3>
+      </div>
+
+      {/* DETAILS */}
+      <div className="wsc-card__details">
+        <div className="wsc-card__detail-row">
+          <span className="wsc-card__detail-item">
+            <span className="wsc-card__detail-icon">📍</span>
+            {ws.job?.location || "—"}
+          </span>
+          <span className="wsc-card__detail-item">
+            <span className="wsc-card__detail-icon">💰</span>
+            {ws.job?.salary ? `₹${ws.job.salary}` : "—"}
+            {ws.job?.payType ? ` / ${ws.job.payType}` : ""}
+          </span>
+        </div>
+        <div className="wsc-card__detail-row">
+          <span className="wsc-card__detail-item">
+            <span className="wsc-card__detail-icon">📅</span>
+            {formatDate(ws.job?.startDate)} → {formatDate(ws.job?.endDate)}
+          </span>
+        </div>
+      </div>
+
+      {/* DIVIDER */}
+      <div className="wsc-card__divider" />
+
+      {/* CHIPS */}
+      <div className="wsc-card__chips">
+        {chips.slice(0, 3).map((chip, i) => (
+          <span key={i} className="wsc-card__chip-tag">{chip}</span>
+        ))}
+      </div>
+
+      {/* FOOTER */}
+      <div className="wsc-card__footer" onClick={(e) => e.stopPropagation()}>
+        <span className={`wsc-status-badge wsc-status-badge--pill ${statusClass}`}>
+          {ws.status || "Active"}
+        </span>
+        <div className="wsc-card__actions">
+          <button
+            className="wsc-btn wsc-btn--primary"
+            onClick={(e) => { e.stopPropagation(); onClick(ws); }}
+          >
+            Open Workspace
+          </button>
+          <button className="wsc-btn wsc-btn--ghost">💬</button>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+// ─── Chat Tab ─────────────────────────────────────────────────────────────────
+function ChatTab({ ws }) {
+  const [msgs, setMsgs] = useState([]);
+  const [input, setInput] = useState("");
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs]);
+
+  const send = () => {
+    const text = input.trim();
+    if (!text) return;
+    const now = new Date();
+    const time = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    setMsgs((p) => [...p, { id: Date.now(), from: "me", text, time }]);
+    setInput("");
+  };
+
+  const workerName     = `${ws.worker?.firstName || ""} ${ws.worker?.lastName || ""}`.trim() || "Worker";
+  const workerInitials = getInitials(workerName);
+
+  return (
+    <div className="ff-chat">
+      <div className="ff-chat-header">
+        <Avatar initials={workerInitials} size={38} />
+        <div>
+          <div className="ff-chat-name">{workerName}</div>
+          <div className="ff-chat-role">{ws.worker?.jobTitle || "Farm Worker"}</div>
+        </div>
+        <div className="ff-online-dot" />
+      </div>
+      <div className="ff-chat-messages">
+        {msgs.length === 0 && (
+          <div className="ff-chat-empty">
+            <p>No messages yet. Start the conversation!</p>
+          </div>
+        )}
+        {msgs.map((m) => (
+          <div key={m.id} className={`ff-bubble-wrap ${m.from === "me" ? "ff-me" : "ff-them"}`}>
+            <div className={`ff-bubble ${m.from === "me" ? "ff-bubble-out" : "ff-bubble-in"}`}>
+              {m.text}
+              <span className="ff-time">{m.time}</span>
+            </div>
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+      <div className="ff-chat-input-row">
+        <button className="ff-attach-btn" title="Attach">📎</button>
+        <input
+          className="ff-chat-input"
+          placeholder="Type a message..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && send()}
+        />
+        <button className="ff-send-btn" onClick={send}>➤</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tasks Tab ────────────────────────────────────────────────────────────────
+function TasksTab({ ws }) {
+  const [tasks, setTasks] = useState(ws.tasks || []);
+
+  const toggle = (id) =>
+    setTasks((p) => p.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
+
+  const done = tasks.filter((t) => t.done).length;
+
+  if (tasks.length === 0) {
+    return (
+      <div className="ff-placeholder-tab">
+        <div className="ff-placeholder-icon">✅</div>
+        <h3>No Tasks Yet</h3>
+        <p>Tasks assigned to this workspace will appear here.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="ff-tasks">
+      <div className="ff-tasks-header">
+        <span className="ff-tasks-progress">{done}/{tasks.length} completed</span>
+        <div className="ff-progress-bar">
+          <div className="ff-progress-fill" style={{ width: `${(done / tasks.length) * 100}%` }} />
+        </div>
+      </div>
+      <ul className="ff-task-list">
+        {tasks.map((t) => (
+          <li
+            key={t.id}
+            className={`ff-task-item ${t.done ? "ff-task-done" : ""}`}
+            onClick={() => toggle(t.id)}
+          >
+            <div className={`ff-task-check ${t.done ? "ff-task-check-done" : ""}`}>
+              {t.done && "✓"}
+            </div>
+            <span>{t.label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+// ─── Placeholder Tab ──────────────────────────────────────────────────────────
+function PlaceholderTab({ label }) {
+  return (
+    <div className="ff-placeholder-tab">
+      <div className="ff-placeholder-icon">📋</div>
+      <h3>{label}</h3>
+      <p>This section is available after full integration.</p>
+    </div>
+  );
+}
+
+// ─── Worker Details Tab ───────────────────────────────────────────────────────
+function WorkerDetailsTab({ ws }) {
+  const w = ws.worker || {};
+  const fullName = `${w.firstName || ""} ${w.lastName || ""}`.trim() || "—";
+
+  return (
+    <div className="ff-job-details">
+      <div className="ff-detail-row">
+        <span>Full Name</span>
+        <strong>{fullName}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Email</span>
+        <strong>{w.email || "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Phone</span>
+        <strong>{w.phone || "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Gender</span>
+        <strong>{w.gender || "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Nationality</span>
+        <strong>{w.nationality || "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Experience</span>
+        <strong>{w.experience ? `${w.experience} yrs` : "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Employment Type</span>
+        <strong>{w.employmentType || "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Job Duration</span>
+        <strong>{w.jobDuration || "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Salary Range</span>
+        <strong>{w.salaryRange || "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Available From</span>
+        <strong>{formatDate(w.availableFrom)}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Emergency Contact</span>
+        <strong>{w.emergencyContact || "—"}</strong>
+      </div>
+      <div className="ff-detail-row">
+        <span>Location</span>
+        <strong>{w.location || "—"}</strong>
+      </div>
+      {w.description && (
+        <div className="ff-detail-row ff-detail-row--full">
+          <span>Description</span>
+          <p className="ff-detail-desc">{w.description}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Open Workspace View ──────────────────────────────────────────────────────
+function OpenWorkspace({ ws, onBack }) {
+  const [activeTab, setActiveTab] = useState("Chat");
+
+  const workerName     = `${ws.worker?.firstName || ""} ${ws.worker?.lastName || ""}`.trim() || "Worker";
+  const workerInitials = getInitials(workerName);
+  const jobTitle       = ws.job?.title || "—";
+  const statusClass    = getStatusClass(ws.status);
+
+  const renderTab = () => {
+    switch (activeTab) {
+      case "Chat":           return <ChatTab ws={ws} />;
+      case "Worker Details": return <WorkerDetailsTab ws={ws} />;
+      case "Tasks":          return <TasksTab ws={ws} />;
+      default:               return <PlaceholderTab label={activeTab} />;
+    }
+  };
+
+  return (
+    <div className="ff-open-workspace">
+      <button className="ff-back-btn" onClick={onBack}>
+        ← Back to Workspaces
+      </button>
+
+      <div className="ff-workspace-split">
+
+        {/* LEFT: Info sidebar */}
+        <aside className="ff-info-sidebar">
+
+          <div className="ff-info-card">
+            <div className="ff-info-card-title">Worker Information</div>
+            <div className="ff-provider-row">
+              <Avatar initials={workerInitials} size={44} />
+              <div>
+                <div className="ff-provider-name">{workerName}</div>
+                <div className="ff-provider-role">{ws.worker?.jobTitle || "Farm Worker"}</div>
+              </div>
+            </div>
+            {ws.worker?.phone && (
+              <div className="ff-info-row">
+                <span>Phone</span>
+                <strong>{ws.worker.phone}</strong>
+              </div>
+            )}
+          </div>
+
+          <div className="ff-info-card">
+            <div className="ff-info-card-title">Worker Details</div>
+            <div className="ff-info-row"><span>Employment Type</span><strong>{ws.worker?.employmentType || "—"}</strong></div>
+            <div className="ff-info-row"><span>Experience</span><strong>{ws.worker?.experience ? `${ws.worker.experience} yrs` : "—"}</strong></div>
+            <div className="ff-info-row"><span>Job Duration</span><strong>{ws.worker?.jobDuration || "—"}</strong></div>
+          </div>
+
+          <div className="ff-info-card">
+            <div className="ff-info-card-title">Salary Range</div>
+            <div className="ff-wage-big">{ws.worker?.salaryRange || "—"}</div>
+          </div>
+
+          <div className="ff-info-card">
+            <div className="ff-info-card-title">Availability</div>
+            <div className="ff-info-row"><span>Date of Birth</span><strong>{formatDate(ws.worker?.dateOfBirth)}</strong></div>
+            <div className="ff-info-row"><span>Available From</span><strong>{formatDate(ws.worker?.availableFrom)}</strong></div>
+            <div className="ff-info-row"><span>Member Since</span><strong>{formatDate(ws.worker?.createdAt)}</strong></div>
+          </div>
+
+          <div className="ff-info-card">
+            <div className="ff-info-card-title">Location</div>
+            <div className="ff-location-text">📍 {ws.worker?.location || "—"}</div>
+          </div>
+
+          <div className="ff-info-card">
+            <div className="ff-info-card-title">Status</div>
+            <span className={`wsc-status-badge wsc-status-badge--pill ${statusClass}`}>
+              {ws.status || "Active"}
+            </span>
+          </div>
+
+        </aside>
+
+        {/* RIGHT: Content area */}
+        <div className="ff-content-area">
+
+          {/* Hero banner */}
+          <div className="ff-workspace-hero ff-workspace-hero--text">
+            <div className="ff-workspace-hero-overlay">
+              <h2>{jobTitle}</h2>
+              <p>{workerName}</p>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="ff-tabs-bar">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                className={`ff-tab-btn ${activeTab === t ? "ff-tab-active" : ""}`}
+                onClick={() => setActiveTab(t)}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab Content */}
+          <div className="ff-tab-content">{renderTab()}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+export default function Providerworkspace() {
+  const [workspaces, setWorkspaces] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+  const [search, setSearch]         = useState("");
+  const [selected, setSelected]     = useState(null);
+
+  const fetchWorkspaces = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await axios.get("http://localhost:5000/api/workspace/provider", {
+        withCredentials: true,
+      });
+      console.log(res.data);
+
+      const raw = res.data?.workspaces || [];
+
+      setWorkspaces(raw);
+    } catch (err) {
+      console.error("Failed to load workspaces:", err);
+      setError("Failed to load workspaces. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchWorkspaces();
+  }, [fetchWorkspaces]);
+
+  const filtered = workspaces.filter((ws) => {
+    const q = search.toLowerCase();
+    const workerName = `${ws.worker?.firstName || ""} ${ws.worker?.lastName || ""}`.toLowerCase();
+    return (
+      !q ||
+      ws.job?.title?.toLowerCase().includes(q) ||
+      workerName.includes(q)
+    );
+  });
+
+  return (
+    <>
+      <Sidebar/>
+      <div className="ff-workspace-root">
+        {selected ? (
+          <OpenWorkspace ws={selected} onBack={() => setSelected(null)} />
+        ) : (
+          <div className="ff-grid-view">
+
+            {/* Header */}
+            <div className="ff-grid-header">
+              <div className="ff-header-text">
+                <h1 className="ff-main-title">My Workspaces</h1>
+                <p className="ff-main-sub">All your active jobs and worker collaborations</p>
+              </div>
+              <div className="ff-header-actions">
+                <div className="ff-search-wrap">
+                  <span className="ff-search-icon">🔍</span>
+                  <input
+                    className="ff-search"
+                    placeholder="Search workspaces..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                  />
+                </div>
+                <button className="ff-notif-btn" title="Notifications">
+                  🔔
+                  <span className="ff-notif-dot" />
+                </button>
+              </div>
+            </div>
+
+            {/* Cards Grid */}
+            <div className="wsc-grid">
+
+              {/* Loading skeletons */}
+              {loading && [1, 2, 3].map((i) => <CardSkeleton key={i} />)}
+
+              {/* Error state */}
+              {!loading && error && (
+                <div className="ff-empty ff-empty--error">
+                  <div className="ff-placeholder-icon">⚠️</div>
+                  <p className="ff-empty-title">{error}</p>
+                  <button className="wsc-btn wsc-btn--primary" onClick={fetchWorkspaces}>
+                    Retry
+                  </button>
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!loading && !error && filtered.length === 0 && (
+                <div className="ff-empty">
+                  <div className="ff-placeholder-icon">🌱</div>
+                  <p className="ff-empty-title">
+                    {search ? "No workspaces match your search." : "No active workspaces"}
+                  </p>
+                  {search && (
+                    <p className="ff-empty-sub">Try a different search term.</p>
+                  )}
+                </div>
+              )}
+
+              {/* Workspace cards */}
+              {!loading && !error && filtered.map((ws) => (
+                <WorkspaceCard key={ws._id} ws={ws} onClick={setSelected} />
+              ))}
+
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}

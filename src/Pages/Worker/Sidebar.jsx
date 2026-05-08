@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaHome, FaBriefcase, FaCalendarCheck, FaFileAlt, FaUsers, FaClipboardList } from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
+import { FaUsersCog } from "react-icons/fa";
 
 
 
@@ -61,6 +62,11 @@ const Sidebar1 = () => {
         <Link to="/Worker/Application/ApplicationWorker" className='Dashboard'>
           <FaBriefcase className="sidebar-icon" />
           <span className='text'>My Applications</span>
+        </Link>
+
+        <Link to="/Worker/Workspace/Workerworkspace" className='Dashboard'>
+          <FaUsersCog className="sidebar-icon" />
+          <span className='text'>Workspace</span>
         </Link>
 
         <button className='logout' onClick={handleLogoutClick}>

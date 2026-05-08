@@ -1,3 +1,5 @@
+// Complete Jobposting.jsx - Full Component Code with Header + Filter Row + Compact Cards
+
 import Sidebar from './sidebar';
 import "./jobposting.css";
 import React, { useState, useEffect, useRef } from 'react';
@@ -190,31 +192,40 @@ const ThreeDotMenu = ({ onEdit, onDelete }) => {
 };
 
 /* ─────────────────────────────────────────
-   JOB CARD
+   COMPACT JOB CARD - Reference Layout
 ───────────────────────────────────────── */
 const JobCard = ({ job, onDelete, onView, onEdit }) => {
   const icon = getJobIcon(job.title);
   const type = formatType(job.employmentType, job.duration);
-  const postedDate = formatPostedDate(job.createdAt);
-  const startDate = formatDate(job.deadline);
   const status = job.status || "open";
   const wage = job.salary || "N/A";
   const location = job.city && job.state ? `${job.city}, ${job.state}` : job.city || job.state || "N/A";
 
+  // Truncate description to 2 lines
+  const truncatedDesc = job.description 
+    ? job.description.length > 100 
+      ? `${job.description.substring(0, 100)}...` 
+      : job.description
+    : "";
+
   return (
     <div className="job-card" onClick={() => onView(job)} style={{ cursor: "pointer" }}>
-      <div className="job-card-top">
-        <div className="job-card-title-row">
+      {/* Header: Title + Apply Button */}
+      <div className="job-card-header">
+        <div className="job-card-header-left">
           <div className="job-icon-wrap">{icon}</div>
-          <div className="job-card-title">
-            <strong>{job.title}</strong>
-            <span>{type}</span>
-          </div>
+          <h3 className="job-card-title">{job.title}</h3>
         </div>
-        <div className="jp-card-top-right">
-          <span className={`status ${status}`}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </span>
+        <div className="job-card-header-right">
+          <button 
+            className="btn-apply" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onView(job);
+            }}
+          >
+            Apply
+          </button>
           <ThreeDotMenu
             onEdit={() => onEdit(job)}
             onDelete={() => onDelete(job._id)}
@@ -222,19 +233,53 @@ const JobCard = ({ job, onDelete, onView, onEdit }) => {
         </div>
       </div>
 
-      <div className="job-card-meta">
-        <div className="meta-item"><i className="fas fa-map-marker-alt"></i> {location}</div>
-        <div className="meta-item"><i className="fas fa-dollar-sign"></i> {wage}</div>
-        <div className="meta-item"><i className="fas fa-calendar-plus"></i> {postedDate}</div>
-        <div className="meta-item"><i className="fas fa-play-circle"></i> {startDate}</div>
+      {/* Meta Row: Location + Status (inline) */}
+      <div className="job-card-meta-row">
+        <span className="meta-location">
+          <i className="fas fa-map-marker-alt"></i> {location}
+        </span>
+        <span className={`meta-status status-badge status-${status}`}>
+          <span className="status-dot"></span>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </span>
       </div>
 
-      <div className="job-card-divider"></div>
+      {/* Description (max 2 lines) */}
+      {truncatedDesc && (
+        <p className="job-card-description">{truncatedDesc}</p>
+      )}
 
+      {/* Info Strip: Salary • Duration • Category */}
+      <div className="job-card-info-strip">
+        <span className="info-item">
+          <i className="fas fa-rupee-sign"></i> {wage}
+        </span>
+        <span className="info-separator">•</span>
+        <span className="info-item">
+          <i className="fas fa-clock"></i> {job.duration || "Flexible"}
+        </span>
+        <span className="info-separator">•</span>
+        <span className="info-item">
+          <i className="fas fa-tag"></i> {job.jobCategory || "General"}
+        </span>
+      </div>
+
+      {/* Footer: Applicants + Close Button */}
       <div className="job-card-footer">
         <div className="applicant-count">
-          <div className="count-bubble">{job.workersNeeded}</div> Applicants
+          <div className="count-bubble">{job.workersNeeded || 0}</div>
+          <span>applicants</span>
         </div>
+        <button 
+          className="btn-close"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(job._id);
+          }}
+          title="Close job posting"
+        >
+          <i className="fas fa-times"></i>
+        </button>
       </div>
     </div>
   );
@@ -248,6 +293,7 @@ const Jobposting = () => {
   const [loadingJobs, setLoadingJobs] = useState(true);
   const [selectedJob, setSelectedJob] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilter, setActiveFilter] = useState('all');
 
   // Create modal state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -338,7 +384,7 @@ const Jobposting = () => {
     try {
       await axios.post("http://localhost:5000/api/jobpost", payload, {
         withCredentials: true,
-      });
+      });                         
       toast.success("Job Published Successfully");
       setFormData({
         title: "",
@@ -440,8 +486,18 @@ const Jobposting = () => {
     setSelectedJob(null);
   };
 
-  // Filtered jobs based on search query
+  // Filtered jobs based on search query and active filter
   const filteredJobs = jobPostings.filter((job) => {
+    // Apply filter tabs
+    if (activeFilter === 'active') {
+      if (job.status !== 'open') return false;
+    }
+    if (activeFilter === 'high') {
+      const salaryNum = parseInt(job.salary?.replace(/[^0-9]/g, '') || '0');
+      if (salaryNum < 600) return false;
+    }
+    
+    // Apply search query
     const q = searchQuery.toLowerCase();
     if (!q) return true;
     return (
@@ -901,45 +957,77 @@ const Jobposting = () => {
       )}
 
       <div className="jobposting-page">
-
-        {/* ── PAGE HEADER ── */}
-        <div className="header-box">
-          <div className="header-left">
-            <h1>Job Provider</h1>
-            <p>Manage and add jobs</p>
-          </div>
-          <div className="header-right">
-            <div className="badge-pill">
-              <i className="fas fa-circle" style={{ fontSize: "8px" }}></i>{" "}
-              {activeListings} Active Listings
+        {/* HEADER SECTION - REFERENCE LAYOUT */}
+        <div className="jp-header">
+          {/* Left Section - Brand Block */}
+          <div className="jp-header-left">
+            <div className="jp-brand">
+              <div className="jp-brand-icon">🌾</div>
+              <h1 className="jp-brand-title">Job Provider</h1>
             </div>
-            <input
-              type="text"
-              className="jp-search"
-              placeholder="Search jobs..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+            <p className="jp-brand-subtitle">Manage and add jobs</p>
+          </div>
+
+          {/* Right Section - Actions Row */}
+          <div className="jp-header-right">
+            {/* Stats Pills */}
+            <div className="jp-stats-group">
+              <div className="jp-stat-pill">
+                <span className="jp-stat-value">{jobPostings.length}</span>
+                <span className="jp-stat-label">total jobs</span>
+              </div>
+              <div className="jp-stat-pill">
+                <span className="jp-stat-value">{totalApplicants}</span>
+                <span className="jp-stat-label">applicants</span>
+              </div>
+            </div>
+
+            {/* Search Input */}
+            <div className="jp-search-wrapper">
+              <i className="fas fa-search"></i>
+              <input
+                type="text"
+                className="jp-header-search"
+                placeholder="Search jobs, location, skill..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+
+            {/* Primary Button */}
             <button
-              className="jp-btn dark jp-new-job-btn"
+              className="jp-primary-btn"
               onClick={() => setIsCreateModalOpen(true)}
             >
-              <i className="fas fa-plus"></i> New Job
+              <i className="fas fa-plus"></i>✚ Post Job
             </button>
           </div>
         </div>
 
-        {/* ── JOB POSTINGS LIST ── */}
-        <div className="job-postings-section">
-          <div className="job-postings-header">
-            <h2 className="page-title">Your Job Postings</h2>
-            <div className="job-stats">
-              <div className="stat-item">👥 <strong>{totalApplicants} applicants</strong></div>
-              <div className="stat-item">👁 <strong>168 views</strong></div>
-              <div className="stat-item">📷 <strong>6 with photo</strong></div>
-            </div>
-          </div>
+        {/* FILTER ROW - Below Header */}
+        <div className="jp-filter-row">
+          <button 
+            className={`jp-filter-tab ${activeFilter === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveFilter('all')}
+          >
+            All Jobs
+          </button>
+          <button 
+            className={`jp-filter-tab ${activeFilter === 'active' ? 'active' : ''}`}
+            onClick={() => setActiveFilter('active')}
+          >
+            Actively Hiring
+          </button>
+          <button 
+            className={`jp-filter-tab ${activeFilter === 'high' ? 'active' : ''}`}
+            onClick={() => setActiveFilter('high')}
+          >
+            High Wage {">"} ₹600/day
+          </button>
+        </div>
 
+        {/* JOB POSTINGS LIST */}
+        <div className="job-postings-section">
           <div className="job-cards-grid">
             {loadingJobs ? (
               <p style={{ color: "var(--jp-green-muted)", fontSize: "14px" }}>
@@ -947,10 +1035,10 @@ const Jobposting = () => {
               </p>
             ) : filteredJobs.length === 0 ? (
               <p style={{ color: "var(--jp-green-muted)", fontSize: "14px" }}>
-                {searchQuery ? "No jobs match your search." : "No job postings yet. Click '+ New Job' to create one!"}
+                {searchQuery ? "No jobs match your search." : "No job postings yet. Click 'Post Job' to create one!"}
               </p>
             ) : (
-              filteredJobs.slice(0, 4).map((job) => (
+              filteredJobs.map((job) => (
                 <JobCard
                   key={job._id}
                   job={job}
@@ -962,7 +1050,6 @@ const Jobposting = () => {
             )}
           </div>
         </div>
-
       </div>
     </>
   );

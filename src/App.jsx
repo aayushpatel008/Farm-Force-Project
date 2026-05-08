@@ -16,19 +16,21 @@ import { useState } from 'react'
 /* ---------- Pages ---------- */
 import Login from "./Pages/Login/Login";
 import FarmForceSignup from "./Pages/Signup/Signup";
-import  WorkerHome from "./Pages/Worker/worker";
+import WorkerHome from "./Pages/Worker/worker";
 
 /* ---------- Job Provider Pages ---------- */
 import JobpDashboard from "./Pages/Jobprovider/jobpDashboard";
 import Jobposting from './Pages/Jobprovider/jobposting';
 import Attendance from "./Pages/Jobprovider/attendance";
 import BrowseWorkers from "./Pages/Jobprovider/Browse";
+import Providerworkspace from "./Pages/Jobprovider/Providerworkspace";
 // Worker
 import WorkerProfile from "./Pages/Worker/Profile/profile";
 import WorkerAttendance from "./Pages/Worker/Attendance/Attendance";
 import Browsejob from "./Pages/Worker/Browse/BrowseWorker";
 import ApplicationWorker from "./Pages/Worker/Application/ApplicationWorker";
 import Applicationprovider from "./Pages/Jobprovider/Applicationprovider";
+import WorkerWorkspace from "./Pages/Worker/Workspace/Workerworkspace"
 
 
 function App() {
@@ -36,56 +38,58 @@ function App() {
 
   return (
     <>
-    {/* Tostify Notification */}
-    <ToastContainer
-         position="top-right"
-          autoClose={7000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          pauseOnHover
-          theme="colored"
+      {/* Tostify Notification */}
+      <ToastContainer
+        position="top-right"
+        autoClose={7000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnHover
+        theme="colored"
       />
 
       {/* Routes */}
-    <Routes>
-      {/* Home Page */}
-      <Route path ="/" 
-      element={
-         <>
-        <Navbar/>
-        <Hero/>
-        <Features/>
-        <HowItWorks/>
-        <Benefits/>
-        <Footer/>
-        </>
-        }
-       
+      <Routes>
+        {/* Home Page */}
+        <Route path="/"
+          element={
+            <>
+              <Navbar />
+              <Hero />
+              <Features />
+              <HowItWorks />
+              <Benefits />
+              <Footer />
+            </>
+          }
+
         />
         {/* Signup */}
-        <Route  path="/Signup"
-        element={<FarmForceSignup/>}
+        <Route path="/Signup"
+          element={<FarmForceSignup />}
         />
 
-        
-   
+
+
         {/* Login*/}
-        <Route path='/Login' element={<Login />}/>
-        <Route path="/worker" element={<WorkerHome/>} />
+        <Route path='/Login' element={<Login />} />
+        <Route path="/worker" element={<WorkerHome />} />
         <Route path="/jobprovider/jobpDashboard" element={<JobpDashboard />} />
-        <Route path="/jobprovider/jobposting" element={<Jobposting/>}/>
-        <Route path="/jobprovider/Applicationprovider" element={<Applicationprovider/>}/>
-        <Route path="/jobprovider/Browse" element={<BrowseWorkers/>}/>
-        <Route path='/jobprovider/attendance' element={<Attendance/>}/>
-        <Route path='/Worker/Profile/profile' element={<WorkerProfile/>}/>
-        <Route path='/Worker/Attendance/Attendance' element={<WorkerAttendance/>}/>
-        <Route path="Worker/Browse/BrowseWorker" element={<Browsejob/>}/>
-        <Route path="Worker/Application/ApplicationWorker" element={<ApplicationWorker/>}/>
+        <Route path="/jobprovider/jobposting" element={<Jobposting />} />
+        <Route path="/jobprovider/Applicationprovider" element={<Applicationprovider />} />
+        <Route path="/jobprovider/Browse" element={<BrowseWorkers />} />
+        <Route path='/jobprovider/attendance' element={<Attendance />} />
+        <Route path="/jobprovider/workspace"element={<Providerworkspace />}/>
+        <Route path='/Worker/Profile/profile' element={<WorkerProfile />} />
+        <Route path='/Worker/Attendance/Attendance' element={<WorkerAttendance />} />
+        <Route path="Worker/Browse/BrowseWorker" element={<Browsejob />} />
+        <Route path="Worker/Application/ApplicationWorker" element={<ApplicationWorker />} />
+        <Route path="Worker/Workspace/Workerworkspace" element={<WorkerWorkspace />} />
 
 
-    </Routes>
-    
+      </Routes>
+
     </>
   )
 }
