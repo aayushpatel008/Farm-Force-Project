@@ -704,10 +704,10 @@ const jobpDashboard = () => {
               Your harvest season is approaching. We've found <strong>12 new qualified workers</strong> for your fruit picking positions.
             </div>
             <div className="greeting-cta-row">
-              <button className="greeting-btn-primary">
+              <button className="greeting-btn-primary" onClick={() => navigate("/jobprovider/Browse")}>
                 Browse New Worker <FaArrowRight />
               </button>
-              <button className="greeting-btn-secondary">
+              <button className="greeting-btn-secondary" onClick={() => navigate("/jobprovider/jobposting")}>
                 My Applications
               </button>
             </div>

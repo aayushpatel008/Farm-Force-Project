@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Sidebar1 from "./Sidebar";
 import "./worker.css";
@@ -607,6 +608,8 @@ function JobSkeleton() {
 // ─────────────────────────────────────────────────────────────
 
 export default function WorkerHome() {
+  const navigate = useNavigate();
+
   // Jobs state
   const [jobPostings, setJobPostings] = useState([]);
   const [loadingJobs, setLoadingJobs] = useState(true);
@@ -680,13 +683,13 @@ export default function WorkerHome() {
               </div>
               <p className="hero__greeting">Welcome back, Aayush🌾</p>
               <div className="hero__btns">
-                <button className="hero__cta-primary">
+                <button className="hero__cta-primary" onClick={() => navigate("/Worker/Browse/BrowseWorker")}>
                   Browse New Jobs
                   <span className="hero__cta-arrow">
                     <svg viewBox="0 0 12 12"><polyline points="2,6 10,6 7,3"/><polyline points="7,9 10,6"/></svg>
                   </span>
                 </button>
-                <button className="hero__cta-secondary">My Applications</button>
+                <button className="hero__cta-secondary" onClick={() => navigate("/Worker/Profile/profile")}>My Applications</button>
               </div>
             </div>
           </div>
