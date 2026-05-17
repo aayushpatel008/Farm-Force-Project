@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 import { socket } from "../../socket";
 import Sidebar from './sidebar';
+import PaymentsTab from './components/PaymentsTab';
 import "./Providerworkspace.css";
 
 const TABS = ["Chat", "Worker Details", "Tasks", "Attendance", "Payments", "Work Updates"];
@@ -438,6 +439,7 @@ function OpenWorkspace({ ws, onBack }) {
       case "Chat":           return <ChatTab ws={ws} />;
       case "Worker Details": return <WorkerDetailsTab ws={ws} />;
       case "Tasks":          return <TasksTab ws={ws} />;
+      case "Payments":       return <PaymentsTab ws={ws} />;
       default:               return <PlaceholderTab label={activeTab} />;
     }
   };

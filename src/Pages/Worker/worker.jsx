@@ -29,14 +29,14 @@ const getApplicantInitials = (firstName = "", lastName = "") =>
 
 const getTag = (category = "", title = "") => {
   const src = (category || title).toLowerCase();
-  if (src.includes("harvest"))  return { label: "Harvesting",  color: "green"  };
-  if (src.includes("plant"))    return { label: "Planting",    color: "teal"   };
-  if (src.includes("irrigat"))  return { label: "Irrigation",  color: "orange" };
-  if (src.includes("spray"))    return { label: "Spraying",    color: "blue"   };
-  if (src.includes("weed"))     return { label: "Weeding",     color: "red"    };
-  if (src.includes("sort"))     return { label: "Sorting",     color: "purple" };
-  if (src.includes("tractor"))  return { label: "Machinery",   color: "orange" };
-  if (src.includes("driver"))   return { label: "Transport",   color: "blue"   };
+  if (src.includes("harvest")) return { label: "Harvesting", color: "green" };
+  if (src.includes("plant")) return { label: "Planting", color: "teal" };
+  if (src.includes("irrigat")) return { label: "Irrigation", color: "orange" };
+  if (src.includes("spray")) return { label: "Spraying", color: "blue" };
+  if (src.includes("weed")) return { label: "Weeding", color: "red" };
+  if (src.includes("sort")) return { label: "Sorting", color: "purple" };
+  if (src.includes("tractor")) return { label: "Machinery", color: "orange" };
+  if (src.includes("driver")) return { label: "Transport", color: "blue" };
   return { label: category || "General", color: "green" };
 };
 
@@ -51,12 +51,12 @@ const parseSkills = (skills) => {
 // ─────────────────────────────────────────────────────────────
 
 const fallbackJobs = [
-  { _id:"fb1", title:"Harvesting – Wheat Field", farmName:"Green Valley Farms", city:"Nashik", state:"Maharashtra", experienceRequired:"No experience required", jobCategory:"Harvesting", salary:"₹500", payType:"Per Day", duration:"2 Days", employmentType:"Full-day", startDate:null, endDate:null, deadline:null, farmAddress:"Survey No. 45, Green Valley Road", workersNeeded:8, description:"Seasonal harvesting work on wheat fields. Tasks include manual cutting, bundling, and loading. Tools and gloves will be provided.", status:"open" },
-  { _id:"fb2", title:"Planting – Paddy Field", farmName:"Sunrise Agro Farms", city:"Kolhapur", state:"Maharashtra", experienceRequired:"Beginner-friendly", jobCategory:"Planting", salary:"₹450", payType:"Per Day", duration:"3 Days", employmentType:"Part-time", startDate:null, endDate:null, deadline:null, farmAddress:"Plot 12, Sunrise Road, Hatkanangle", workersNeeded:12, description:"Help with rice seedling transplantation in flooded paddy fields. Training provided on-site.", status:"open" },
-  { _id:"fb3", title:"Irrigation – Sugarcane", farmName:"Bhumi Farm Co.", city:"Solapur", state:"Maharashtra", experienceRequired:"1 yr preferred", jobCategory:"Irrigation", salary:"₹550", payType:"Per Day", duration:"1 Day", employmentType:"Full-day", startDate:null, endDate:null, deadline:null, farmAddress:"Village Borgaon, Tal. Barshi", workersNeeded:4, description:"Operate irrigation channels and pumps across sugarcane sections. Knowledge of drip irrigation is a plus.", status:"open" },
-  { _id:"fb4", title:"Spraying – Cotton Farm", farmName:"AgroTech Fields", city:"Akola", state:"Maharashtra", experienceRequired:"Experience required", jobCategory:"Spraying", salary:"₹600", payType:"Per Day", duration:"2 Days", employmentType:"Part-time", startDate:null, endDate:null, deadline:null, farmAddress:"Field Block D, AgroTech Complex", workersNeeded:6, description:"Apply pesticides and fertilizers using backpack sprayers. Safety gear mandatory and provided.", status:"open" },
-  { _id:"fb5", title:"Weeding – Vegetable Farm", farmName:"Fresh Root Farms", city:"Pune", state:"Maharashtra", experienceRequired:"No experience required", jobCategory:"Weeding", salary:"₹400", payType:"Per Day", duration:"4 Days", employmentType:"Full-day", startDate:null, endDate:null, deadline:null, farmAddress:"Gat No. 88, Urse Road, Maval", workersNeeded:10, description:"Manual weeding between vegetable rows. Light physical work, suitable for all ages.", status:"open" },
-  { _id:"fb6", title:"Sorting – Fruit Orchard", farmName:"Golden Harvest Ltd", city:"Satara", state:"Maharashtra", experienceRequired:"Beginner-friendly", jobCategory:"Sorting", salary:"₹480", payType:"Per Day", duration:"2 Days", employmentType:"Part-time", startDate:null, endDate:null, deadline:null, farmAddress:"Orchard Zone B, Panchgani-Mahabaleshwar Road", workersNeeded:7, description:"Sort and grade freshly picked fruits by size, color, and quality. Clean indoor/shed environment.", status:"open" },
+  { _id: "fb1", title: "Harvesting – Wheat Field", farmName: "Green Valley Farms", city: "Nashik", state: "Maharashtra", experienceRequired: "No experience required", jobCategory: "Harvesting", salary: "₹500", payType: "Per Day", duration: "2 Days", employmentType: "Full-day", startDate: null, endDate: null, deadline: null, farmAddress: "Survey No. 45, Green Valley Road", workersNeeded: 8, description: "Seasonal harvesting work on wheat fields. Tasks include manual cutting, bundling, and loading. Tools and gloves will be provided.", status: "open" },
+  { _id: "fb2", title: "Planting – Paddy Field", farmName: "Sunrise Agro Farms", city: "Kolhapur", state: "Maharashtra", experienceRequired: "Beginner-friendly", jobCategory: "Planting", salary: "₹450", payType: "Per Day", duration: "3 Days", employmentType: "Part-time", startDate: null, endDate: null, deadline: null, farmAddress: "Plot 12, Sunrise Road, Hatkanangle", workersNeeded: 12, description: "Help with rice seedling transplantation in flooded paddy fields. Training provided on-site.", status: "open" },
+  { _id: "fb3", title: "Irrigation – Sugarcane", farmName: "Bhumi Farm Co.", city: "Solapur", state: "Maharashtra", experienceRequired: "1 yr preferred", jobCategory: "Irrigation", salary: "₹550", payType: "Per Day", duration: "1 Day", employmentType: "Full-day", startDate: null, endDate: null, deadline: null, farmAddress: "Village Borgaon, Tal. Barshi", workersNeeded: 4, description: "Operate irrigation channels and pumps across sugarcane sections. Knowledge of drip irrigation is a plus.", status: "open" },
+  { _id: "fb4", title: "Spraying – Cotton Farm", farmName: "AgroTech Fields", city: "Akola", state: "Maharashtra", experienceRequired: "Experience required", jobCategory: "Spraying", salary: "₹600", payType: "Per Day", duration: "2 Days", employmentType: "Part-time", startDate: null, endDate: null, deadline: null, farmAddress: "Field Block D, AgroTech Complex", workersNeeded: 6, description: "Apply pesticides and fertilizers using backpack sprayers. Safety gear mandatory and provided.", status: "open" },
+  { _id: "fb5", title: "Weeding – Vegetable Farm", farmName: "Fresh Root Farms", city: "Pune", state: "Maharashtra", experienceRequired: "No experience required", jobCategory: "Weeding", salary: "₹400", payType: "Per Day", duration: "4 Days", employmentType: "Full-day", startDate: null, endDate: null, deadline: null, farmAddress: "Gat No. 88, Urse Road, Maval", workersNeeded: 10, description: "Manual weeding between vegetable rows. Light physical work, suitable for all ages.", status: "open" },
+  { _id: "fb6", title: "Sorting – Fruit Orchard", farmName: "Golden Harvest Ltd", city: "Satara", state: "Maharashtra", experienceRequired: "Beginner-friendly", jobCategory: "Sorting", salary: "₹480", payType: "Per Day", duration: "2 Days", employmentType: "Part-time", startDate: null, endDate: null, deadline: null, farmAddress: "Orchard Zone B, Panchgani-Mahabaleshwar Road", workersNeeded: 7, description: "Sort and grade freshly picked fruits by size, color, and quality. Clean indoor/shed environment.", status: "open" },
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -64,9 +64,9 @@ const fallbackJobs = [
 // ─────────────────────────────────────────────────────────────
 
 const stats = [
-  { title:"Active Job Applications", value:"5", sub:"↑ +2 applied today", color:"green", icon:<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg> },
-  { title:"Ongoing Work", value:"2", sub:"↑ +1 started today", color:"teal", icon:<svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg> },
-  { title:"Total Earnings", value:"₹6,500", sub:"↑ +₹850 today", color:"gold", icon:<svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> },
+  { title: "Active Job Applications", value: "5", sub: "↑ +2 applied today", color: "green", icon: <svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /></svg> },
+  { title: "Ongoing Work", value: "2", sub: "↑ +1 started today", color: "teal", icon: <svg viewBox="0 0 24 24"><path d="M3 12h4l3 8 4-16 3 8h4" /></svg> },
+  { title: "Total Earnings", value: "₹6,500", sub: "↑ +₹850 today", color: "gold", icon: <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg> },
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -74,9 +74,9 @@ const stats = [
 // ─────────────────────────────────────────────────────────────
 
 function JobCard({ job, onClick }) {
-  const tag          = getTag(job.jobCategory, job.title);
-  const initials     = getInitials(job.farmName);
-  const avatarColor  = getAvatarColor(job.farmName);
+  const tag = getTag(job.jobCategory, job.title);
+  const initials = getInitials(job.farmName);
+  const avatarColor = getAvatarColor(job.farmName);
   const locationText = [job.city, job.state].filter(Boolean).join(", ") || job.farmAddress || "Location N/A";
 
   // build a "skills-like" chip list from tag + employmentType
@@ -136,8 +136,8 @@ function JobCard({ job, onClick }) {
 
 function JobDetailModal({ job, onClose }) {
   if (!job) return null;
-  const tag         = getTag(job.jobCategory, job.title);
-  const initials    = getInitials(job.farmName);
+  const tag = getTag(job.jobCategory, job.title);
+  const initials = getInitials(job.farmName);
   const avatarColor = getAvatarColor(job.farmName);
   const locationText = [job.city, job.state].filter(Boolean).join(", ") || job.farmAddress || "—";
 
@@ -307,8 +307,8 @@ function JobDetailModal({ job, onClose }) {
 
 function ApplicantCard({ applicant, onView, openDotMenu, setOpenDotMenu, dotMenuRef }) {
   const { firstName, lastName, jobTitle, location, experienceRequired, createdAt, skills, email } = applicant;
-  const fullName    = `${firstName || ""} ${lastName || ""}`.trim() || "Unknown";
-  const initials    = getApplicantInitials(firstName, lastName);
+  const fullName = `${firstName || ""} ${lastName || ""}`.trim() || "Unknown";
+  const initials = getApplicantInitials(firstName, lastName);
   const avatarColor = getAvatarColor(firstName + lastName);
   const parsedSkills = parseSkills(skills);
   const isOpen = openDotMenu === applicant._id;
@@ -401,9 +401,9 @@ function ApplicantModal({ applicant, onClose }) {
     description,
   } = applicant;
 
-  const fullName     = `${firstName || ""} ${lastName || ""}`.trim() || "Unknown";
-  const initials     = getApplicantInitials(firstName, lastName);
-  const avatarColor  = getAvatarColor(firstName + lastName);
+  const fullName = `${firstName || ""} ${lastName || ""}`.trim() || "Unknown";
+  const initials = getApplicantInitials(firstName, lastName);
+  const avatarColor = getAvatarColor(firstName + lastName);
   const parsedSkills = parseSkills(skills);
 
   return (
@@ -616,7 +616,7 @@ export default function WorkerHome() {
   const [selectedJob, setSelectedJob] = useState(null);
 
   // Applicants state
-  const [applicants,        setApplicants]        = useState([]);
+  const [applicants, setApplicants] = useState([]);
   const [loadingApplicants, setLoadingApplicants] = useState(true);
   const [selectedApplicant, setSelectedApplicant] = useState(null);
 
@@ -686,7 +686,7 @@ export default function WorkerHome() {
                 <button className="hero__cta-primary" onClick={() => navigate("/Worker/Browse/BrowseWorker")}>
                   Browse New Jobs
                   <span className="hero__cta-arrow">
-                    <svg viewBox="0 0 12 12"><polyline points="2,6 10,6 7,3"/><polyline points="7,9 10,6"/></svg>
+                    <svg viewBox="0 0 12 12"><polyline points="2,6 10,6 7,3" /><polyline points="7,9 10,6" /></svg>
                   </span>
                 </button>
                 <button className="hero__cta-secondary" onClick={() => navigate("/Worker/Profile/profile")}>My Applications</button>
@@ -721,7 +721,7 @@ export default function WorkerHome() {
             </div>
             <div className="wra-header__right">
               <span>View All</span>
-              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,8 12,8 9,5"/><polyline points="9,11 12,8"/></svg>
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,8 12,8 9,5" /><polyline points="9,11 12,8" /></svg>
             </div>
           </div>
 
@@ -754,7 +754,7 @@ export default function WorkerHome() {
             </div>
             <div className="wra-header__right">
               <span>View All</span>
-              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,8 12,8 9,5"/><polyline points="9,11 12,8"/></svg>
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4,8 12,8 9,5" /><polyline points="9,11 12,8" /></svg>
             </div>
           </div>
 
@@ -769,10 +769,10 @@ export default function WorkerHome() {
             <div className="wra-empty">
               <div className="wra-empty__icon">
                 <svg viewBox="0 0 24 24">
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                  <circle cx="9" cy="7" r="4"/>
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </div>
               <p className="wra-empty__title">No applicants yet</p>

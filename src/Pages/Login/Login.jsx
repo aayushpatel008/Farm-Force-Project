@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./Login.css";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from 'react-toastify';
 
@@ -9,60 +9,60 @@ import { toast } from 'react-toastify';
 
 
 function Login() {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-// Post Request For the server
+  // Post Request For the server
   async function handleSubmit(e) {
     e.preventDefault();
-    try{
-          const res = await axios.post(
+    try {
+      const res = await axios.post(
         "http://localhost:5000/api/auth/login", // ← also fix endpoint
-          { email, password },
-          {
+        { email, password },
+        {
           withCredentials: true,
           headers: {
             "Content-Type": "application/json"
           }
         }
-        
+
       );
       console.log("LOGIN DATA:", res.data);
 
-        // ✅ STORE USER ID HERE
+      // ✅ STORE USER ID HERE
       localStorage.setItem("userId", res.data._id);
 
-    // Optional: store role if needed
+      // Optional: store role if needed
       localStorage.setItem("role", res.data.role);
 
       localStorage.setItem("name", res.data.name);
- 
-      if(res.data.role=="worker"){
-        navigate("/worker",{state:{name:res.data.name}})
-        
+
+      if (res.data.role == "worker") {
+        navigate("/worker", { state: { name: res.data.name } })
+
       }
       else {
         navigate("/jobprovider/jobpDashboard")
       }
     }
-    catch(error){
+    catch (error) {
       if (error.response?.status === 400) {
-            toast.error("Invalid email or password");
+        toast.error("Invalid email or password");
       }
       else if (!error.response) {
-         toast.error("Invalid email or password");
+        toast.error("Invalid email or password");
       }
 
     }
-  
+
 
   }
 
   return (
     <div className="ff-form-page">
       <div className="ff-brand">
-      <h1>FarmForce</h1>
-        </div>
+        <h1>FarmForce</h1>
+      </div>
       <div className="ff-form-card">
         <h2>Welcome to Farmforce</h2>
         <p className="ff-subtitle">Enter your email and password to access your account</p>
