@@ -1,3 +1,14 @@
+const path = require("path");
+const envPath = path.resolve(__dirname, ".env");
+
+require("dotenv").config({
+  path: envPath,
+  override: true // Force overwrite if old variables are stuck in memory
+});
+
+console.log("CURRENT BACKEND ROOT:", __dirname);
+console.log("ENV KEY:", process.env.RAZORPAY_KEY_ID);
+console.log("ENV SECRET:", process.env.RAZORPAY_SECRET);
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -24,6 +35,7 @@ const applicationCancelRoutes = require('./Routes/applicationCancelRoutes'); // 
 const workspaceRoutes =
 require("./Routes/workspaceRoutes");
 const messageRoutes = require("./Routes/messageRoutes");
+const paymentRoutes = require("./Routes/paymentRoutes"); // ✅ NEW: Razorpay Payment Routes
 
 // 🔥 NEW: Application Routes IMPORT
 
@@ -83,6 +95,9 @@ app.use(
 );
 
 app.use("/api/messages", messageRoutes);
+
+// ✅ PAYMENT ROUTES
+app.use("/api/payment", paymentRoutes);
 
 // ─────────────────────────────────────────────
 // SOCKET.IO EVENTS

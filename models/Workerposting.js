@@ -8,6 +8,10 @@ const workerApplicationSchema = new mongoose.Schema({
     required: true,
     unique: true // ✅ IMPORTANT (prevents multiple profiles)
   },
+  profileCompleted: {
+    type: Boolean,
+    default: false
+  },
   // ── Personal Details ──
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },

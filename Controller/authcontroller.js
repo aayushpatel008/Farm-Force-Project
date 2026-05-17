@@ -80,7 +80,8 @@ exports.login = async (req, res) => {
             message: "Login successful",
             _id: user._id,
             role: user.role,
-            name: user.name
+            name: user.name,
+            profileCompleted: user.profileCompleted
         });
 
     } catch (error) {

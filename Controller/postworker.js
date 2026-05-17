@@ -41,6 +41,7 @@ exports.Creatapplication = async (req, res) => {
         {
           // overwrite with new data (edit profile)
           worker: req.user._id,
+          profileCompleted: true,
 
           firstName,
           lastName,
@@ -72,6 +73,7 @@ exports.Creatapplication = async (req, res) => {
       // ✅ OLD LOGIC: First time → CREATE
       newapplication = await WorkerApplication.create({
         worker: req.user._id,
+        profileCompleted: true,
 
         firstName,
         lastName,
