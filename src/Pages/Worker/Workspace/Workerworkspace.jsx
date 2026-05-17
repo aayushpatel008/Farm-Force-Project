@@ -3,6 +3,7 @@ import axios from "axios";
 import { socket } from "../../../socket";
 import Sidebar1 from "../Sidebar";
 import "./Workerworkspace.css";
+import WorkerPaymentsTab from "./components/WorkerPaymentsTab";
 
 const TABS = ["Chat", "Job Details", "Payments"];
 
@@ -383,6 +384,7 @@ function OpenWorkspace({ ws, onBack }) {
     switch (activeTab) {
       case "Chat":        return <ChatTab ws={ws} />;
       case "Job Details": return <JobDetailsTab ws={ws} />;
+      case "Payments":    return <WorkerPaymentsTab workspaceId={ws._id} />;
       default:            return <PlaceholderTab label={activeTab} />;
     }
   };
