@@ -4,7 +4,7 @@ import { socket } from "../../../socket";
 import Sidebar1 from "../Sidebar";
 import "./Workerworkspace.css";
 
-const TABS = ["Chat", "Job Details", "Tasks", "Attendance", "Payments", "Work Updates"];
+const TABS = ["Chat", "Job Details", "Payments"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -301,50 +301,6 @@ function ChatTab({ ws }) {
   );
 }
 
-// ─── Tasks Tab ────────────────────────────────────────────────────────────────
-function TasksTab({ ws }) {
-  const [tasks, setTasks] = useState(ws.tasks || []);
-
-  const toggle = (id) =>
-    setTasks((p) => p.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));
-
-  const done = tasks.filter((t) => t.done).length;
-
-  if (tasks.length === 0) {
-    return (
-      <div className="ff-placeholder-tab">
-        <div className="ff-placeholder-icon">✅</div>
-        <h3>No Tasks Yet</h3>
-        <p>Tasks assigned to this workspace will appear here.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="ff-tasks">
-      <div className="ff-tasks-header">
-        <span className="ff-tasks-progress">{done}/{tasks.length} completed</span>
-        <div className="ff-progress-bar">
-          <div className="ff-progress-fill" style={{ width: `${(done / tasks.length) * 100}%` }} />
-        </div>
-      </div>
-      <ul className="ff-task-list">
-        {tasks.map((t) => (
-          <li
-            key={t.id}
-            className={`ff-task-item ${t.done ? "ff-task-done" : ""}`}
-            onClick={() => toggle(t.id)}
-          >
-            <div className={`ff-task-check ${t.done ? "ff-task-check-done" : ""}`}>
-              {t.done && "✓"}
-            </div>
-            <span>{t.label}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 // ─── Placeholder Tab ──────────────────────────────────────────────────────────
 function PlaceholderTab({ label }) {
@@ -427,7 +383,6 @@ function OpenWorkspace({ ws, onBack }) {
     switch (activeTab) {
       case "Chat":        return <ChatTab ws={ws} />;
       case "Job Details": return <JobDetailsTab ws={ws} />;
-      case "Tasks":       return <TasksTab ws={ws} />;
       default:            return <PlaceholderTab label={activeTab} />;
     }
   };

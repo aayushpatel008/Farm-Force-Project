@@ -772,48 +772,6 @@
 .ff-send-btn:active { transform: scale(.92); }
 
 /* ══════════════════════════════════════════════════════════════
-   TASKS TAB
-══════════════════════════════════════════════════════════════ */
-.ff-tasks { padding: 1.25rem 1.1rem; }
-
-.ff-tasks-header { margin-bottom: 1.1rem; }
-
-.ff-tasks-progress {
-  font-size: .8rem;
-  font-weight: 600;
-  color: #7a967a;
-  display: block;
-  margin-bottom: .4rem;
-}
-
-.ff-progress-bar {
-  width: 100%;
-  height: 6px;
-  background: var(--g100);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
-.ff-progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--g400), var(--g300));
-  border-radius: 99px;
-  transition: width .5s ease;
-}
-
-.ff-task-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: .6rem;
-}
-
-.ff-task-item {
-  display: flex;
-  align-items: center;
-  gap: .8rem;
   padding: .7rem .9rem;
   background: var(--g50);
   border-radius: 12px;

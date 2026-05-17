@@ -665,9 +665,7 @@ const jobpDashboard = () => {
 
             {/* ── Footer ── */}
             <div className="modal-footer">
-              <button className="btn-light" onClick={() => setViewApplicant(null)}>Close</button>
               <button className="btn-light">💬 Message</button>
-              <button className="btn-view">📅 Interview</button>
             </div>
           </div>
         </div>
@@ -776,22 +774,6 @@ const jobpDashboard = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button
-                        className="icon-btn"
-                        title="Edit"
-                        onClick={() => !isStatic && handleEdit(job)}
-                        disabled={isStatic}
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className={`icon-btn ${isPaused ? "icon-btn-paused" : ""}`}
-                        title={isPaused ? "Already paused" : "Pause"}
-                        disabled={isPausing || isPaused || isStatic}
-                        onClick={() => !isStatic && handlePause(jobId)}
-                      >
-                        {isPausing ? "…" : <FaPause />}
-                      </button>
                       <button
                         className="icon-btn"
                         title="View"
