@@ -102,17 +102,25 @@ exports.getWorkspacePayments = async (req, res) => {
 
     const totalPaid = payments
       .filter(p => p.status === "paid")
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((a, p) => a + p.amount, 0);
 
     const pendingAmount = payments
       .filter(p => p.status === "pending")
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((a, p) => a + p.amount, 0);
+
+    const transactions = payments.length;
+
+    const lastPayment = payments.find(
+      p => p.status === "paid"
+    ) || null;
 
     res.status(200).json({
       success: true,
       payments,
       totalPaid,
-      pendingAmount
+      pendingAmount,
+      transactions,
+      lastPayment
     });
   } catch (error) {
     console.error("Error fetching workspace payments:", error);
