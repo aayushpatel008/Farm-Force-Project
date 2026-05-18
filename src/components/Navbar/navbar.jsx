@@ -9,7 +9,7 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Logo */}
         <a href="#home" className="navbar-logo">
-          FarmForce
+          Farm<span className="logo-accent">Force</span>
         </a>
 
         {/* Navigation links */}
@@ -18,7 +18,7 @@ const Navbar = () => {
           <a href="#features" className="nav-link">Features</a>
           <a href="#how-it-works" className="nav-link">How It Works</a>
           <a href="#Benefits" id="benefits" className="nav-link">Benefits</a>
-          <a href="#cta" className="nav-link">Get Started</a>
+          <Link to="/Signup" className="nav-link">Get Started</Link>
         </div>
 
         {/* Auth Buttons */}

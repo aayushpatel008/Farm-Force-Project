@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import { FaHome, FaBriefcase, FaCalendarCheck, FaFileAlt, FaUsers } from "react-icons/fa";
+import { FaHome, FaBriefcase, FaFileAlt, FaUsers } from "react-icons/fa";
 import { FaBars } from "react-icons/fa";
 import { FiLogOut } from "react-icons/fi";
 import { FaUsersCog } from "react-icons/fa";
@@ -50,10 +50,6 @@ const Sidebar = () => {
         <Link to="/jobprovider/jobposting" className='Dashboard'>
           <FaFileAlt className="sidebar-icon" />
           <span className='text'>Job Posting</span>
-        </Link>
-        <Link to="/jobprovider/attendance" className='Dashboard'>
-          <FaCalendarCheck className="sidebar-icon" />
-          <span className='text'>Attendance</span>
         </Link>
         <Link to="/jobprovider/Browse" className='Dashboard'>
           <FaUsers className="sidebar-icon" />

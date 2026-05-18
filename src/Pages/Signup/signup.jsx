@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import './signup.css';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from 'react-toastify';
 
 
 const FarmForceSignup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -93,6 +94,10 @@ const FarmForceSignup = () => {
 
           // ✅ SHOW SUCCESS UI
           setIsSubmitted(true);
+
+          setTimeout(() => {
+            navigate("/Login");
+          }, 2000);
 
 
         } catch (error) {

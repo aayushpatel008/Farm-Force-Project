@@ -1,8 +1,10 @@
 import React from 'react';
 import './Hero.css';
 import { FaArrowRight, FaUsers, FaMapMarkerAlt, FaBriefcase } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section id="hero" className="hero-section">
       {/* Top rule */}
@@ -28,11 +30,11 @@ const Hero = () => {
           </p>
           
           <div className="hero-buttons">
-            <button className="btn-primary">
+            <button className="btn-primary" onClick={() => navigate('/Signup')}>
               Find Farm Work
               <FaArrowRight className="btn-icon" />
             </button>
-            <button className="btn-secondary">
+            <button className="btn-secondary" onClick={() => navigate('/Signup')}>
               Hire Talent
             </button>
           </div>

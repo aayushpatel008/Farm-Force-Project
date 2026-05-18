@@ -1,13 +1,13 @@
-/* FarmForce Signup Styles */
+/* ==========================================================================
+   Premium Dark Green Glassmorphic Signup — FarmForce Luxury Style
+   ========================================================================== */
+
 :root {
-  --primary-green: #4CAF50;
-  --dark-green: #2E7D32;
-  --light-green: #E8F5E9;
-  --error-red: #f44336;
-  --light-gray: #f5f5f5;
-  --border-gray: #ddd;
-  --text-dark: #333;
-  --text-light: #666;
+  --primary-green: #4caf58; /* Premium agriculture green accent */
+  --dark-green: #2e7d32;
+  --error-red: #ef4444;
+  --text-white: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.65);
 }
 
 * {
@@ -17,8 +17,9 @@
 }
 
 body {
-  background-color: #f9f9f9;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0a1a0c;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* Main Container */
@@ -27,18 +28,57 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  padding: 20px;
-  background: linear-gradient(135deg, #f5f9f5 0%, #e8f5e9 100%);
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #0a1a0c 0%, #102114 50%, #142a16 100%);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Signup Card */
+/* Background grid effect for premium SaaS feel */
+.signup-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(76, 175, 88, 0.15) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Subtle glow blob */
+.signup-container::after {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(76, 175, 88, 0.15) 0%, transparent 70%);
+  top: -100px;
+  right: -100px;
+  pointer-events: none;
+  filter: blur(50px);
+}
+
+/* Signup Card - Glassmorphism */
 .signup-card {
-  background: white;
-  border-radius: 12px;
-  padding: 40px;
+  background: rgba(10, 26, 12, 0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(76, 175, 88, 0.15);
+  border-bottom: 1.5px solid rgba(76, 175, 88, 0.35);
+  border-radius: 24px;
+  padding: 44px;
   width: 100%;
-  max-width: 450px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  max-width: 480px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.45),
+              inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  z-index: 10;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.signup-card:hover {
+  border-color: rgba(76, 175, 88, 0.25);
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5),
+              0 0 30px rgba(76, 175, 88, 0.08);
 }
 
 /* Logo */
@@ -46,64 +86,72 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  gap: 10px;
 }
 
 .logo i {
-  font-size: 32px;
+  font-size: 28px;
   color: var(--primary-green);
-  margin-right: 10px;
+  filter: drop-shadow(0 0 8px rgba(76, 175, 88, 0.6));
 }
 
 .logo h1 {
-  font-size: 28px;
-  color: var(--dark-green);
-  font-weight: 700;
+  font-size: 26px;
+  color: var(--text-white);
+  font-weight: 800;
+  letter-spacing: -0.5px;
 }
 
 /* Headings */
 h2 {
   text-align: center;
-  color: var(--text-dark);
-  margin-bottom: 8px;
-  font-size: 24px;
+  color: var(--text-white);
+  margin-bottom: 6px;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
 }
 
 .subtitle {
   text-align: center;
-  color: var(--text-light);
-  margin-bottom: 25px;
-  font-size: 15px;
+  color: var(--text-muted);
+  margin-bottom: 30px;
+  font-size: 14px;
 }
 
 /* Role Selection */
 .role-selection {
-  margin-bottom: 25px;
+  margin-bottom: 24px;
 }
 
 .role-selection label {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-weight: 600;
-  color: var(--text-dark);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13.5px;
+  letter-spacing: 0.2px;
 }
 
 .role-options {
   display: flex;
-  gap: 15px;
+  gap: 16px;
 }
 
 .role-option {
   flex: 1;
-  border: 2px solid var(--border-gray);
-  border-radius: 8px;
-  padding: 15px;
+  background: rgba(10, 26, 12, 0.25);
+  border: 1.5px solid rgba(76, 175, 88, 0.15);
+  border-radius: 14px;
+  padding: 18px 12px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 8px;
 }
 
 .role-option input {
@@ -111,155 +159,187 @@ h2 {
 }
 
 .role-option i {
-  font-size: 24px;
-  color: var(--text-light);
-  margin-bottom: 8px;
+  font-size: 22px;
+  color: rgba(255, 255, 255, 0.4);
+  transition: all 0.3s ease;
 }
 
 .role-option span {
+  font-size: 14px;
   font-weight: 600;
-  color: var(--text-light);
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
+}
+
+.role-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(76, 175, 88, 0.35);
+  transform: translateY(-2px);
 }
 
 .role-option.selected {
   border-color: var(--primary-green);
-  background-color: var(--light-green);
+  background: rgba(76, 175, 88, 0.12);
+  box-shadow: 0 0 15px rgba(76, 175, 88, 0.2);
 }
 
-.role-option.selected i,
+.role-option.selected i {
+  color: var(--primary-green);
+  filter: drop-shadow(0 0 5px rgba(76, 175, 88, 0.5));
+}
+
 .role-option.selected span {
-  color: var(--dark-green);
+  color: var(--text-white);
 }
 
 /* Form Groups */
 .form-group {
-  margin-bottom: 20px;
+  margin-bottom: 22px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: var(--text-dark);
-  font-size: 14px;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 13.5px;
 }
 
 .form-group input {
   width: 100%;
-  padding: 12px 15px;
-  border: 2px solid var(--border-gray);
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 0.3s;
-  background-color: white;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  font-size: 15px;
+  color: var(--text-white);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+}
+
+.form-group input::placeholder {
+  color: rgba(255, 255, 255, 0.28);
 }
 
 .form-group input:focus {
-  outline: none;
+  background: rgba(255, 255, 255, 0.07);
   border-color: var(--primary-green);
+  box-shadow: 0 0 14px rgba(76, 175, 88, 0.22);
 }
 
 .form-group input.error {
   border-color: var(--error-red);
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.15);
 }
 
 .error-message {
-  color: var(--error-red);
-  font-size: 13px;
-  margin-top: 5px;
+  color: #ff5252;
+  font-size: 12.5px;
+  margin-top: 6px;
   display: block;
+  font-weight: 500;
 }
 
-/* Terms */
+/* Terms and Conditions Group */
 .terms-group {
   display: flex;
   align-items: flex-start;
-  margin: 25px 0;
+  margin: 26px 0;
+  gap: 10px;
 }
 
-.terms-group input {
-  margin-right: 10px;
-  margin-top: 3px;
+.terms-group input[type="checkbox"] {
+  accent-color: var(--primary-green);
+  width: 17px;
+  height: 17px;
+  border-radius: 4px;
+  margin-top: 2px;
+  cursor: pointer;
 }
 
 .terms-group label {
-  font-size: 14px;
-  color: var(--text-light);
-  line-height: 1.4;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.45;
+  cursor: pointer;
+  user-select: none;
 }
 
 /* Submit Button */
 .submit-btn {
   width: 100%;
-  padding: 14px;
-  background-color: var(--primary-green);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  padding: 13px 20px;
+  background: linear-gradient(135deg, #4caf58 0%, #2e7d32 100%);
+  color: var(--text-white);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
-  margin-bottom: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 22px;
+  box-shadow: 0 4px 20px rgba(76, 175, 88, 0.25);
 }
 
 .submit-btn:hover {
-  background-color: var(--dark-green);
+  background: linear-gradient(135deg, #5cbd68 0%, #388e3c 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(76, 175, 88, 0.45);
+}
+
+.submit-btn:active {
+  transform: translateY(0);
 }
 
 /* Login Link */
 .login-link {
   text-align: center;
-  font-size: 14px;
-  color: var(--text-light);
+  font-size: 13.5px;
+  color: var(--text-muted);
 }
 
 .login-link a {
   color: var(--primary-green);
   font-weight: 600;
   text-decoration: none;
+  transition: all 0.2s ease;
 }
 
 .login-link a:hover {
+  text-shadow: 0 0 10px rgba(76, 175, 88, 0.4);
   text-decoration: underline;
 }
 
-/* Success Message */
+/* Success Message State */
 .success-message {
   text-align: center;
-  padding: 30px 0;
+  padding: 30px 10px;
+  animation: fadeInTip 0.3s ease-out;
 }
 
 .success-message i {
-  font-size: 48px;
+  font-size: 54px;
   color: var(--primary-green);
-  margin-bottom: 15px;
+  margin-bottom: 18px;
+  filter: drop-shadow(0 0 15px rgba(76, 175, 88, 0.6));
 }
 
 .success-message h3 {
-  color: var(--dark-green);
-  margin-bottom: 10px;
+  color: var(--text-white);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
 .success-message p {
-  color: var(--text-light);
+  color: var(--text-muted);
   font-size: 15px;
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-  .signup-card {
-    padding: 30px 25px;
-  }
-  
-  .role-options {
-    flex-direction: column;
-  }
+  line-height: 1.5;
 }
 
 .required {
-  color: #e53935;
-  margin-left: 3px;
+  color: #ff5252;
+  margin-left: 4px;
   font-weight: bold;
 }
 
@@ -267,42 +347,49 @@ h2 {
   position: relative;
 }
 
-/* Info icon next to Password label */
+/* Info Icon */
 .info-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 6px;
+  margin-left: 8px;
   font-size: 14px;
-  color: #888;
-  cursor: default;
+  color: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
   vertical-align: middle;
-  user-select: none;
+  transition: all 0.2s ease;
 }
 
 .info-icon:hover {
-  color: #4CAF50;
+  color: var(--primary-green);
 }
 
-/* Tooltip box */
+/* ==========================================================================
+   Redesigned Password Tooltip Box
+   ========================================================================== */
+
 .password-tooltip-box {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
   width: 100%;
-  background: #111;
-  color: #fff;
-  border-radius: 8px;
-  padding: 12px 14px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  background: rgba(10, 26, 12, 0.98); /* Dark green/black glass style */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1.5px solid rgba(76, 175, 88, 0.45);
+  color: var(--text-white);
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.65), 
+              0 0 20px rgba(76, 175, 88, 0.15);
   z-index: 100;
-  animation: fadeInTip 0.18s ease;
+  animation: fadeInTip 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes fadeInTip {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-8px);
   }
   to {
     opacity: 1;
@@ -312,22 +399,21 @@ h2 {
 
 .tooltip-title {
   font-size: 12px;
-  font-weight: 600;
-  color: #aaa;
-  margin-bottom: 8px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
 }
 
-/* Each rule row */
 .tooltip-rule {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 13px;
-  color: #bbb;
-  margin-bottom: 5px;
-  transition: color 0.2s;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 8px;
+  transition: all 0.25s ease;
 }
 
 .tooltip-rule:last-child {
@@ -336,18 +422,40 @@ h2 {
 
 .rule-icon {
   width: 16px;
+  height: 16px;
   text-align: center;
   font-size: 12px;
   flex-shrink: 0;
-  color: #666;
-  transition: color 0.2s;
+  color: rgba(255, 255, 255, 0.2);
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Satisfied rule */
+/* Satisfied/Valid Rules State */
 .tooltip-rule.rule-ok {
-  color: #81c784;
+  color: #a5d6a7; /* Soft readable light green */
+  font-weight: 500;
 }
 
 .tooltip-rule.rule-ok .rule-icon {
-  color: #66bb6a;
+  color: var(--primary-green);
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(76, 175, 88, 0.7);
+}
+
+/* Responsive Styles */
+@media (max-width: 576px) {
+  .signup-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+  .role-options {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .signup-container {
+    padding: 20px 10px;
+  }
 }

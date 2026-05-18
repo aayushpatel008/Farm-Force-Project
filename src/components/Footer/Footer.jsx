@@ -39,8 +39,8 @@ const Footer = () => {
             <h4>Contact Us</h4>
             <div className="contact-items">
               <span><FaEnvelope className="icon" /> support@farmforce.com</span>
-              <span><FaPhone className="icon" /> +1 (555) 123-4567</span>
-              <span><FaMapMarkerAlt className="icon" /> Agricultural Hub, CA</span>
+              <span><FaPhone className="icon" /> +91 98765 43210</span>
+              <span><FaMapMarkerAlt className="icon" /> Shubh complex, Kalol, Gujarat, India</span>
             </div>
           </div>
         </div>

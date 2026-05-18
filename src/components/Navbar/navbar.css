@@ -1,183 +1,171 @@
-/* AgriHire Navbar - Browser Style */
+/* ==========================================================================
+   Premium Dark Green Glassmorphic Navbar — FarmForce Luxury Style
+   ========================================================================== */
+
 .navbar {
-  background: #ffffff; /* exact soft grey tone */
-  color: #243424;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  position: sticky;
+  background: rgba(13, 27, 13, 0.78); /* Deep luxury dark green with transparency */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  position: fixed;
   top: 0;
-  z-index: 999;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   padding: 0;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.08); /* subtle divider */
-}
-
-
-/* Browser URL bar */
-.browser-bar {
-  background: #2a2a2a;
-  padding: 8px 16px;
-  border-bottom: 1px solid #333;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
-}
-
-.connection-status {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.connection-dot {
-  width: 8px;
-  height: 8px;
-  background: #ff3b30;
-  border-radius: 50%;
-  animation: pulse 2s infinite;
-}
-
-.connection-text {
-  color: #ff3b30;
-  font-weight: 500;
-}
-
-.connection-url {
-  color: #888;
-  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
-  font-size: 12px;
-  flex: 1;
+  border-bottom: 1px solid rgba(76, 175, 88, 0.18);
+  box-shadow: 0 10px 30px rgba(6, 12, 6, 0.4), 
+              inset 0 -1px 0 rgba(76, 175, 88, 0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-container {
-  padding: 26px 80px;
+  padding: 18px 80px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;          /* FULL WIDTH */
-  max-width: 1400px;   /* more breathing space */
+  width: 100%;
+  max-width: 1440px;
   margin: 0 auto;
 }
 
-
-/* Logo */
+/* ── Logo ── */
 .navbar-logo {
-  font-size: 32px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 28px;
   font-weight: 800;
-  color: #2f6f3e;   /* deep agriculture green */
-  letter-spacing: 0.5px;
+  color: #ffffff;
+  letter-spacing: -0.5px;
   text-decoration: none;
   display: flex;
-  margin-right: 40px;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 20px rgba(76, 175, 88, 0.25);
 }
 
-.logo-text {
-  background: linear-gradient(135deg, #4CAF50, #2E7D32);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.navbar-logo .logo-accent {
+  color: #4caf58; /* Premium vivid agriculture green */
+  position: relative;
 }
 
-/* Navigation Links */
+.navbar-logo:hover {
+  transform: scale(1.02);
+  text-shadow: 0 0 25px rgba(76, 175, 88, 0.45);
+}
+
+/* ── Navigation Links ── */
 .nav-links {
   display: flex;
-  gap: 40px;
+  gap: 36px;
   align-items: center;
 }
 
 .nav-link {
-  color: #111827; 
+  color: rgba(255, 255, 255, 0.88); 
   text-decoration: none;
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 500;
-  padding: 8px 0;
+  padding: 6px 0;
   position: relative;
-  transition: color 0.2s ease;
+  transition: all 0.25s ease;
+  letter-spacing: 0.2px;
 }
 
 .nav-link:hover {
-  color: #4CAF50;
+  color: #4caf58;
 }
 
 .nav-link::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: 50%;
   width: 0;
   height: 2px;
-  background: #4CAF50;
-  transition: width 0.3s ease;
+  background: #4caf58;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px rgba(76, 175, 88, 0.8);
 }
 
 .nav-link:hover::after {
   width: 100%;
 }
 
-/* Auth Buttons */
+/* ── Auth Buttons ── */
 .auth-buttons {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 16px;
 }
 
 .login-btn, .signup-btn {
   padding: 10px 24px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   font-family: inherit;
 }
 
 .login-btn {
   background: transparent;
-  color: #4CAF50;
-  border: 1.5px solid #4CAF50;
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
 }
 
 .login-btn:hover {
-  background: rgba(76, 175, 80, 0.1);
-  transform: translateY(-1px);
+  background: rgba(76, 175, 88, 0.08);
+  border-color: #4caf58;
+  color: #4caf58;
+  text-shadow: 0 0 10px rgba(76, 175, 88, 0.3);
 }
 
 .signup-btn {
-  background: #4CAF50;
-  color: white;
-  border: 1.5px solid #4CAF50;
+  background: linear-gradient(135deg, #4caf58 0%, #388e3c 100%);
+  color: #ffffff;
+  border: 1.5px solid transparent;
+  box-shadow: 0 4px 15px rgba(76, 175, 88, 0.2);
 }
 
 .signup-btn:hover {
-  background: #388E3C;
-  border-color: #388E3C;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  background: linear-gradient(135deg, #5cbd68 0%, #45a049 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(76, 175, 88, 0.45);
 }
 
-/* Animation for connection dot */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+.signup-btn:active {
+  transform: translateY(0);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ── Responsive ── */
+@media (max-width: 991px) {
+  .navbar-container {
+    padding: 16px 40px;
+  }
   .nav-links {
-    gap: 20px;
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 14px 20px;
   }
   
-  .navbar-container {
-    padding: 16px 20px;
+  .nav-links {
+    display: none; /* Can be updated if responsive burger is implemented, maintaining clean layout */
+  }
+  
+  .navbar-logo {
+    font-size: 24px;
   }
   
   .login-btn, .signup-btn {
-    padding: 8px 16px;
+    padding: 8px 18px;
     font-size: 13px;
+    border-radius: 6px;
   }
 }
